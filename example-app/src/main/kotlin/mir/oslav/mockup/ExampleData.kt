@@ -12,7 +12,8 @@ data class Article constructor(
     val id: Int,
     val title: String,
     val content: String,
-    val contentExtra: String?
+    val contentExtra: String?,
+    val user: User?,
 ) {
 
 }

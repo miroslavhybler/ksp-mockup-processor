@@ -6,8 +6,12 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSValueParameter
 import mir.oslav.mockup.annotations.Mockup
+import mir.oslav.mockup.processor.generation.CodeWriter
+import mir.oslav.mockup.processor.generation.DebugFileWriter
+import mir.oslav.mockup.processor.data.MockupClass
+import mir.oslav.mockup.processor.generation.MockupObjectWriter
+import mir.oslav.mockup.processor.generation.plusAssign
 import java.io.OutputStream
 import kotlin.jvm.Throws
 import kotlin.reflect.KClass
@@ -22,49 +26,52 @@ class MockupProcessor constructor(
     private val environment: SymbolProcessorEnvironment,
 ) : SymbolProcessor {
 
+    private val mockupClassesList: ArrayList<MockupClass> = ArrayList()
+
     private lateinit var fileWriter: CodeWriter
     private lateinit var debugFileWriter: DebugFileWriter
-    private val visitor: MockupVisitor = MockupVisitor(environment = environment)
+
+    private val visitor: MockupVisitor = MockupVisitor(
+        environment = environment,
+        outputList = mockupClassesList
+    )
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val mockedClasses = resolver.findAnnotations(Mockup::class)
         val debugFile: OutputStream
         try {
-            debugFile = generateOutputFile(mockedClasses, "DebugFile.kt")
+            debugFile = generateOutputFile(classes = mockedClasses, filename = "DebugFile.kt")
         } catch (ignored: FileAlreadyExistsException) {
             return mockedClasses
         }
 
+
+        MockupObjectWriter(
+            outputStream = generateOutputFile(mockedClasses, filename = "Mockup.kt")
+        ).generateContent()
+
         debugFileWriter = DebugFileWriter(outputStream = debugFile)
 
+        mockupClassesList.clear()
         mockedClasses.forEach { classDeclaration ->
             visitor.visitClassDeclaration(
                 classDeclaration = classDeclaration,
                 data = Unit
             )
-            val parameters = classDeclaration.primaryConstructor?.parameters ?: emptyList()
+        }
 
-            //TODO log informations about it
-            debugFileWriter.writeCoommented(code = buildString {
+        mockupClassesList.forEach { mockupClass ->
+            debugFileWriter += "\t//\t${mockupClass.name}\n\n"
 
-                appendLine("\t//\t${classDeclaration}")
-                appendLine()
+            mockupClass.imports.forEach { classPath ->
+                debugFileWriter += "\t//\t${classPath}\n"
+            }
 
-                parameters.forEach { p: KSValueParameter ->
-                    val resolvedType = p.type.resolve()
-                    appendLine("\t//\t${p.name?.getShortName()} ${resolvedType} ${p.parent} ${resolvedType.isMarkedNullable}")
-                }
-                appendLine()
-            })
+            debugFileWriter += "\n"
 
-
-            debugFileWriter.writeCoommented(code = buildString {
-                appendLine("\t//\t${classDeclaration}")
-                classDeclaration.getAllProperties().forEach { property ->
-                    appendLine()
-                    appendLine("\t//\t${property.simpleName.getShortName()} ${property.type}")
-                }
-            })
+            mockupClass.members.forEach { member ->
+                debugFileWriter += "\t//\t${member.name}\n"
+            }
         }
 
         return mockedClasses
@@ -99,10 +106,4 @@ class MockupProcessor constructor(
             fileName = filename
         )
     }
-
-
-    private fun generateMockupsObject() {
-        
-    }
-
 }

@@ -1,4 +1,4 @@
-package mir.oslav.mockup.processor
+package mir.oslav.mockup.processor.generation
 
 import java.io.OutputStream
 
@@ -9,4 +9,8 @@ import java.io.OutputStream
  */
 operator fun OutputStream.plusAssign(other: String) {
     this.write(other.toByteArray())
+}
+
+operator fun DebugFileWriter.plusAssign(other:String) {
+    this.write(code= other)
 }

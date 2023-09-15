@@ -1,4 +1,4 @@
-package mir.oslav.mockup.processor
+package mir.oslav.mockup.processor.generation
 
 import java.io.OutputStream
 
@@ -8,11 +8,12 @@ import java.io.OutputStream
  * created on 15.09.2023
  */
 class DebugFileWriter constructor(
-    private val outputStream: OutputStream
+    outputStream: OutputStream
+) : FileCodeWriter(
+    outputStream = outputStream
 ) {
 
-
-    fun writeCoommented(code: String) {
+    fun write(code: String) {
         outputStream += code
     }
 

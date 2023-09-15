@@ -1,5 +1,6 @@
-package mir.oslav.mockup.processor
+package mir.oslav.mockup.processor.generation
 
+import mir.oslav.mockup.processor.MockupConstants
 import java.io.OutputStream
 
 
@@ -8,8 +9,11 @@ import java.io.OutputStream
  * @author Miroslav Hýbler <br>
  * created on 15.09.2023
  */
-class CodeWriter constructor(private val outputStream: OutputStream) {
-
+class CodeWriter constructor(
+    outputStream: OutputStream
+) : FileCodeWriter(
+    outputStream = outputStream
+) {
 
 
     fun writeFileHeaders() {
@@ -17,14 +21,6 @@ class CodeWriter constructor(private val outputStream: OutputStream) {
         outputStream += "package mir.oslav.mockup\n"
         outputStream += "\n"
     }
-
-    fun writeImports(imports: List<String>) {
-        imports.forEach { import ->
-            outputStream += "import $import\n"
-        }
-        outputStream += "\n"
-    }
-
 
 
     fun writeCode(code: String) {
