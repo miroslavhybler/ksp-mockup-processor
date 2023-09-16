@@ -12,20 +12,8 @@ data class MockupClassMember constructor(
     val name: String,
     val type: KSType,
     val isNullable: Boolean,
-    val contextType: ContextType
+    val isMutable: Boolean
 ) {
-
-
-    /**
-     * @since 1.0.0
-     */
-    sealed class ContextType private constructor() {
-
-        object Text: ContextType()
-
-
-        sealed class Number constructor(): ContextType()
-    }
 
 
 }

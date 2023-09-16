@@ -18,10 +18,10 @@ open class MockupObjectWriter constructor(
         outputStream += "\n\n"
         outputStream += "package mir.oslav.mockup"
         outputStream += "\n\n"
-        outputStream += "/**\n" +
-                " * All generated data are accessed via extension properties on Mockup object.\n" +
-                " * @since 1.0.0" +
-                " */\n"
+        outputStream += "/**\n"
+        outputStream += " * All generated data are accessed via extension properties on Mockup object.\n"
+        outputStream += " * @since 1.0.0\n"
+        outputStream += " */\n"
 
         outputStream += "public object Mockup {}"
     }

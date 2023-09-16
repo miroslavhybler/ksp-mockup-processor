@@ -17,6 +17,6 @@ data class MockupClass constructor(
     val name: String,
     val type: KSType,
     val dataCount: Int,
-    val isDataClass:Boolean
+    val isDataClass: Boolean,
 ) {
 }

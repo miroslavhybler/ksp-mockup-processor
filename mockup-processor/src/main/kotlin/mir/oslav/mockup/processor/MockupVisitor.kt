@@ -1,6 +1,5 @@
 package mir.oslav.mockup.processor
 
-import androidx.annotation.IntRange
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -38,7 +37,8 @@ class MockupVisitor constructor(
             outImportsList = outImportsList
         )
 
-        //TODO resolve @Mockup annotation
+        //TODO resolve @IgnoreOnMockup annotations on members
+
 
         val annotationData = visitMockupAnnotation(classDeclaration = classDeclaration)
 
@@ -49,7 +49,7 @@ class MockupVisitor constructor(
             imports = outImportsList.sortedDescending(),
             type = classDeclaration.asType(typeArguments = emptyList()),
             dataCount = annotationData.count,
-            isDataClass = annotationData.isDataClass
+            isDataClass = annotationData.isDataClass,
         )
 
         outputList.add(mockupClass)
@@ -76,12 +76,11 @@ class MockupVisitor constructor(
                 append(declaration.simpleName.getShortName())
             }
 
-            val contextType = resolveContextType(memberName = name, memberType = type)
             val mockupClassMember = MockupClassMember(
                 name = name,
                 type = type,
                 isNullable = isNullable,
-                contextType = contextType
+                isMutable = property.isMutable
             )
 
             if (!outImportsList.contains(importText)) {
@@ -90,18 +89,6 @@ class MockupVisitor constructor(
 
             outMembersList.add(mockupClassMember)
         }
-    }
-
-
-    /**
-     *
-     */
-    private fun resolveContextType(
-        memberName: String,
-        memberType: KSType
-    ): MockupClassMember.ContextType {
-        //TODO
-        return MockupClassMember.ContextType.Text
     }
 
 

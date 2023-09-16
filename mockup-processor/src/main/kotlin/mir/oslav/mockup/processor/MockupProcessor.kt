@@ -6,13 +6,21 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSType
 import mir.oslav.mockup.annotations.Mockup
 import mir.oslav.mockup.processor.data.MockupClass
+import mir.oslav.mockup.processor.data.MockupClassMember
 import mir.oslav.mockup.processor.generation.AbstractMockupDataProviderWriter
 import mir.oslav.mockup.processor.generation.MockupDataProviderWriter
 import mir.oslav.mockup.processor.generation.MockupObjectWriter
+import mir.oslav.mockup.processor.generation.isDouble
+import mir.oslav.mockup.processor.generation.isFloat
+import mir.oslav.mockup.processor.generation.isInt
+import mir.oslav.mockup.processor.generation.isLong
+import mir.oslav.mockup.processor.generation.isShort
 import java.io.OutputStream
 import kotlin.jvm.Throws
+import kotlin.random.Random
 import kotlin.reflect.KClass
 
 
@@ -36,15 +44,19 @@ class MockupProcessor constructor(
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val mockupClassDeclarations = resolver.findAnnotations(Mockup::class)
-        val debugFile: OutputStream
         try {
-            debugFile =
-                generateOutputFile(classes = mockupClassDeclarations, filename = "DebugFile.kt")
+            AbstractMockupDataProviderWriter(
+                outputStream = generateOutputFile(
+                    classes = mockupClassDeclarations,
+                    filename = "MockupDataProvider.kt"
+                )
+            ).generateContent()
         } catch (ignored: FileAlreadyExistsException) {
             return mockupClassDeclarations
         }
 
 
+        //TODO write data providers as public properties of Mockup object
         MockupObjectWriter(
             outputStream = generateOutputFile(
                 mockupClassDeclarations,
@@ -52,12 +64,6 @@ class MockupProcessor constructor(
             )
         ).generateContent()
 
-        AbstractMockupDataProviderWriter(
-            outputStream = generateOutputFile(
-                classes = mockupClassDeclarations,
-                filename = "MockupDataProvider.kt"
-            )
-        ).generateContent()
 
         mockupClassesList.clear()
 
@@ -179,7 +185,8 @@ class MockupProcessor constructor(
             outputText += "\t\t$type(\n"
 
             clazz.members.forEach { member ->
-                outputText += "\t\t\t${member.name} = \"TODO\",\n"
+                val memberValue = generateDataValueForMember(member = member)
+                outputText += "\t\t\t${member.name} = $memberValue,\n"
             }
 
             outputText += "\t\t),\n"
@@ -194,7 +201,7 @@ class MockupProcessor constructor(
     /**
      * @since 1.0.0
      */
-    //TODO val/var check as cannot put value into val
+    //TODO generate data for paramentr
     private fun generateMockupDataContentForClass(
         classDeclaration: KSClassDeclaration,
         clazz: MockupClass
@@ -208,9 +215,12 @@ class MockupProcessor constructor(
         for (i in 0 until clazz.dataCount) {
             outputText += "\t\t$type().apply {\n"
 
-            clazz.members.forEach { member ->
-                outputText += "\t\t\t${member.name} = \"TODO\"\n"
-            }
+            clazz.members
+                .filter(MockupClassMember::isMutable)
+                .forEach { member ->
+                    val memberValue = generateDataValueForMember(member = member)
+                    outputText += "\t\t\t${member.name} = $memberValue\n"
+                }
 
             outputText += "\t\t},\n"
         }
@@ -218,5 +228,21 @@ class MockupProcessor constructor(
         //  outputText = outputText.removeSuffix(suffix = ",\n")
         outputText += ")"
         return outputText
+    }
+
+
+    /**
+     * @since 1.0.0
+     */
+    //TODO suggest value by given member name
+    private fun generateDataValueForMember(member: MockupClassMember): String {
+        val type = member.type
+        return when {
+            type.isShort -> "${Random.nextInt(from = 0, until = 255)}"
+            type.isInt || type.isLong -> "${Random.nextInt()}"
+            type.isFloat -> "${Random.nextFloat()}"
+            type.isDouble -> "${Random.nextDouble()}"
+            else -> "\"${member.name}\""
+        }
     }
 }
