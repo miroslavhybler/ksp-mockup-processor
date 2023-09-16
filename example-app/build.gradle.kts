@@ -44,7 +44,7 @@ android {
             kotlin.srcDirs.add(File("build/generated/ksp/debug/kotlin"))
         }
         sourceSets.release {
-            kotlin.srcDirs.add(File( "build/generated/ksp/release/kotlin"))
+            kotlin.srcDirs.add(File("build/generated/ksp/release/kotlin"))
         }
     }
     buildFeatures {

@@ -3,7 +3,7 @@ package mir.oslav.mockup.processor
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSVisitorVoid
 import mir.oslav.mockup.processor.data.MockupClassMember
 import mir.oslav.mockup.processor.data.MockupClass
@@ -40,29 +40,12 @@ class MockupVisitor constructor(
         val mockupClass = MockupClass(
             name = classDeclaration.simpleName.getShortName(),
             members = outMembersList,
-            imports = outImportsList.sortedDescending()
+            imports = outImportsList.sortedDescending(),
+            type = classDeclaration.asType(typeArguments = emptyList())
         )
 
         outputList.add(mockupClass)
 
-    }
-
-
-    /**
-     * @since 1.0.0
-     */
-    private fun visitPrimaryConstructor(
-        classDeclaration: KSClassDeclaration,
-        primaryConstructor: KSFunctionDeclaration,
-        membersOutputList: ArrayList<MockupClassMember>
-    ) {
-        primaryConstructor.parameters.forEach { parameter ->
-            val name = parameter.name?.getShortName() ?: return@forEach
-            val type = parameter.type.resolve()
-            val isNullable = type.isMarkedNullable
-            val mockupClassMember = MockupClassMember(name = name, type = type, isNullable = isNullable)
-            membersOutputList.add(mockupClassMember)
-        }
     }
 
 
@@ -85,7 +68,13 @@ class MockupVisitor constructor(
                 append(declaration.simpleName.getShortName())
             }
 
-            val mockupClassMember = MockupClassMember(name = name, type = type, isNullable = isNullable)
+            val contextType = resolveContextType(memberName = name, memberType = type)
+            val mockupClassMember = MockupClassMember(
+                name = name,
+                type = type,
+                isNullable = isNullable,
+                contextType = contextType
+            )
 
             if (!outImportsList.contains(importText)) {
                 outImportsList.add(importText)
@@ -95,4 +84,15 @@ class MockupVisitor constructor(
         }
     }
 
+
+    /**
+     *
+     */
+    private fun resolveContextType(
+        memberName: String,
+        memberType: KSType
+    ): MockupClassMember.ContextType {
+        //TODO
+        return MockupClassMember.ContextType.Text
+    }
 }

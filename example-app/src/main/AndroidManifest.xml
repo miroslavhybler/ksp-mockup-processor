@@ -13,7 +13,7 @@
         android:theme="@style/Theme.Kspmockup"
         tools:targetApi="31">
         <activity
-            android:name="mir.oslav.mockup.MainActivity"
+            android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Kspmockup">
             <intent-filter>

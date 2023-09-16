@@ -1,4 +1,4 @@
-package mir.oslav.mockup
+package mir.oslav.mockup.example
 
 import mir.oslav.mockup.annotations.Mockup
 
@@ -17,8 +17,6 @@ data class Article constructor(
 ) {
 
 }
-
-
 
 @Mockup
 class User constructor() {

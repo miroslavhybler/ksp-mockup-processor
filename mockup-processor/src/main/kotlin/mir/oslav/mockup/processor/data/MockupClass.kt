@@ -1,5 +1,7 @@
 package mir.oslav.mockup.processor.data
 
+import com.google.devtools.ksp.symbol.KSType
+
 
 /**
  * @param members
@@ -13,5 +15,7 @@ data class MockupClass constructor(
     val members: List<MockupClassMember>,
     val imports: List<String>,
     val name: String,
+    val type: KSType
 ) {
+
 }

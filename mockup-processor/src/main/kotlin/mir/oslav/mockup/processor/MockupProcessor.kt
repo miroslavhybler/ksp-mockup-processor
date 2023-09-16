@@ -7,11 +7,10 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import mir.oslav.mockup.annotations.Mockup
-import mir.oslav.mockup.processor.generation.CodeWriter
-import mir.oslav.mockup.processor.generation.DebugFileWriter
 import mir.oslav.mockup.processor.data.MockupClass
+import mir.oslav.mockup.processor.generation.AbstractMockupDataProviderWriter
+import mir.oslav.mockup.processor.generation.MockupDataProviderWriter
 import mir.oslav.mockup.processor.generation.MockupObjectWriter
-import mir.oslav.mockup.processor.generation.plusAssign
 import java.io.OutputStream
 import kotlin.jvm.Throws
 import kotlin.reflect.KClass
@@ -28,8 +27,7 @@ class MockupProcessor constructor(
 
     private val mockupClassesList: ArrayList<MockupClass> = ArrayList()
 
-    private lateinit var fileWriter: CodeWriter
-    private lateinit var debugFileWriter: DebugFileWriter
+    private val dataProvidersGenerator: MockupDataProviderWriter = MockupDataProviderWriter()
 
     private val visitor: MockupVisitor = MockupVisitor(
         environment = environment,
@@ -37,44 +35,75 @@ class MockupProcessor constructor(
     )
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val mockedClasses = resolver.findAnnotations(Mockup::class)
+        val mockupClassDeclarations = resolver.findAnnotations(Mockup::class)
         val debugFile: OutputStream
         try {
-            debugFile = generateOutputFile(classes = mockedClasses, filename = "DebugFile.kt")
+            debugFile =
+                generateOutputFile(classes = mockupClassDeclarations, filename = "DebugFile.kt")
         } catch (ignored: FileAlreadyExistsException) {
-            return mockedClasses
+            return mockupClassDeclarations
         }
 
 
         MockupObjectWriter(
-            outputStream = generateOutputFile(mockedClasses, filename = "Mockup.kt")
+            outputStream = generateOutputFile(
+                mockupClassDeclarations,
+                filename = "Mockup.kt"
+            )
         ).generateContent()
 
-        debugFileWriter = DebugFileWriter(outputStream = debugFile)
+        AbstractMockupDataProviderWriter(
+            outputStream = generateOutputFile(
+                classes = mockupClassDeclarations,
+                filename = "MockupDataProvider.kt"
+            )
+        ).generateContent()
 
         mockupClassesList.clear()
-        mockedClasses.forEach { classDeclaration ->
+
+        mockupClassDeclarations.forEach { classDeclaration ->
             visitor.visitClassDeclaration(
                 classDeclaration = classDeclaration,
                 data = Unit
             )
         }
 
-        mockupClassesList.forEach { mockupClass ->
-            debugFileWriter += "\t//\t${mockupClass.name}\n\n"
+        generateMockupedData(mockupClasses = mockupClassesList)
+        generateMockupDataProviders(
+            mockupClasses = mockupClassesList,
+            classesDeclarations = mockupClassDeclarations
+        )
 
-            mockupClass.imports.forEach { classPath ->
-                debugFileWriter += "\t//\t${classPath}\n"
-            }
 
-            debugFileWriter += "\n"
+        return mockupClassDeclarations
+    }
 
-            mockupClass.members.forEach { member ->
-                debugFileWriter += "\t//\t${member.name}\n"
-            }
+
+    /**
+     * @since 1.0.0
+     */
+    private fun generateMockupedData(mockupClasses: List<MockupClass>) {
+
+    }
+
+
+    /**
+     * @since 1.0.0
+     */
+    private fun generateMockupDataProviders(
+        classesDeclarations: List<KSClassDeclaration>,
+        mockupClasses: List<MockupClass>
+    ) {
+        mockupClasses.forEach { mockupClass ->
+            dataProvidersGenerator.generateContent(
+                outputStream = generateOutputFile(
+                    classes = classesDeclarations,
+                    filename = "${mockupClass.name}MockupProvider.kt",
+                    packageName = "mir.oslav.mockup.providers"
+                ),
+                clazz = mockupClass
+            )
         }
-
-        return mockedClasses
     }
 
 
@@ -95,14 +124,15 @@ class MockupProcessor constructor(
     @Throws(FileAlreadyExistsException::class)
     private fun generateOutputFile(
         classes: List<KSClassDeclaration>,
-        filename: String
+        filename: String,
+        packageName: String = "mir.oslav.mockup"
     ): OutputStream {
         return environment.codeGenerator.createNewFile(
             dependencies = Dependencies(
                 aggregating = false,
                 sources = classes.mapNotNull { it.containingFile }.toTypedArray()
             ),
-            packageName = "mir.oslav.mockup",
+            packageName = packageName,
             fileName = filename
         )
     }

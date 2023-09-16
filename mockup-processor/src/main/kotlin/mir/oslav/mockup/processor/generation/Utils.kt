@@ -10,7 +10,3 @@ import java.io.OutputStream
 operator fun OutputStream.plusAssign(other: String) {
     this.write(other.toByteArray())
 }
-
-operator fun DebugFileWriter.plusAssign(other:String) {
-    this.write(code= other)
-}

@@ -1,7 +1,6 @@
 package mir.oslav.mockup.processor.generation
 
 import mir.oslav.mockup.processor.MockupConstants
-import mir.oslav.mockup.processor.data.CodeText
 import java.io.OutputStream
 
 
@@ -9,26 +8,20 @@ import java.io.OutputStream
  * @author Miroslav Hýbler <br>
  * created on 15.09.2023
  */
-class MockupObjectWriter constructor(
-    outputStream: OutputStream
-) : FileCodeWriter(
-    outputStream = outputStream
+open class MockupObjectWriter constructor(
+    protected val outputStream: OutputStream
 ) {
 
 
     fun generateContent() {
         outputStream += MockupConstants.generatedFileHeader
         outputStream += "\n\n"
-
-        writePackage()
-
+        outputStream += "package mir.oslav.mockup"
         outputStream += "\n\n"
-
-
         outputStream += "/**\n" +
-                " * \"All generated data are accessed via extension properties on Mockup object.\n" +
+                " * All generated data are accessed via extension properties on Mockup object.\n" +
+                " * @since 1.0.0" +
                 " */\n"
-
 
         outputStream += "public object Mockup {}"
     }
