@@ -16,7 +16,8 @@ class MockupDataProviderWriter constructor(
 
     fun generateContent(
         outputStream: OutputStream,
-        clazz: MockupClass
+        clazz: MockupClass,
+        generatedValuesContent: String
     ) {
         val name = clazz.name
         val declaration = clazz.type.declaration
@@ -31,7 +32,9 @@ class MockupDataProviderWriter constructor(
         outputStream += "/**\n"
         outputStream += " * @since 1.0.0\n"
         outputStream += "*/\n"
-        outputStream += "internal class ${name}MockupProvider constructor(): MockupDataProvider<$type>() {\n"
+        outputStream += "internal class ${name}MockupProvider constructor(): MockupDataProvider<$type>(\n"
+        outputStream += "\tvalues = $generatedValuesContent\n"
+        outputStream += ") {\n"
         outputStream += "}"
     }
 

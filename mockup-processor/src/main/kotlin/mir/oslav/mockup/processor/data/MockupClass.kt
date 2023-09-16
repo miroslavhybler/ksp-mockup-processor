@@ -15,7 +15,8 @@ data class MockupClass constructor(
     val members: List<MockupClassMember>,
     val imports: List<String>,
     val name: String,
-    val type: KSType
+    val type: KSType,
+    val dataCount: Int,
+    val isDataClass:Boolean
 ) {
-
 }

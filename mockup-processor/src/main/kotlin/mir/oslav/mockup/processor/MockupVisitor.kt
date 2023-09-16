@@ -1,10 +1,12 @@
 package mir.oslav.mockup.processor
 
+import androidx.annotation.IntRange
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSVisitorVoid
+import mir.oslav.mockup.processor.data.MockupAnnotationData
 import mir.oslav.mockup.processor.data.MockupClassMember
 import mir.oslav.mockup.processor.data.MockupClass
 
@@ -26,7 +28,6 @@ class MockupVisitor constructor(
      * @since 1.0.0
      */
     override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
-        val primaryConstructor = classDeclaration.primaryConstructor
         val outMembersList: ArrayList<MockupClassMember> = ArrayList()
         val outImportsList: ArrayList<String> = ArrayList()
 
@@ -37,11 +38,18 @@ class MockupVisitor constructor(
             outImportsList = outImportsList
         )
 
+        //TODO resolve @Mockup annotation
+
+        val annotationData = visitMockupAnnotation(classDeclaration = classDeclaration)
+
         val mockupClass = MockupClass(
-            name = classDeclaration.simpleName.getShortName(),
+            name = annotationData.name.takeIf(String::isNotBlank)
+                ?: classDeclaration.simpleName.getShortName(),
             members = outMembersList,
             imports = outImportsList.sortedDescending(),
-            type = classDeclaration.asType(typeArguments = emptyList())
+            type = classDeclaration.asType(typeArguments = emptyList()),
+            dataCount = annotationData.count,
+            isDataClass = annotationData.isDataClass
         )
 
         outputList.add(mockupClass)
@@ -94,5 +102,40 @@ class MockupVisitor constructor(
     ): MockupClassMember.ContextType {
         //TODO
         return MockupClassMember.ContextType.Text
+    }
+
+
+    private fun visitMockupAnnotation(classDeclaration: KSClassDeclaration): MockupAnnotationData {
+        val annotation = classDeclaration.annotations.find { ksAnnotation ->
+            val declaration = ksAnnotation.annotationType.resolve().declaration
+            val qualifiedName = declaration.qualifiedName?.asString()
+            qualifiedName == "mir.oslav.mockup.annotations.Mockup"
+        } ?: return MockupAnnotationData(
+            count = 10,
+            isDataClass = true,
+            name = "",
+            enableNullValues = false
+        )
+
+        var count = 10
+        var enableNullValues = false
+        var name = ""
+        var isDataClass = true
+
+        annotation.arguments.forEach { argument ->
+            when (argument.name?.getShortName()) {
+                "count" -> count = argument.value as Int
+                "enableNullValues" -> enableNullValues = argument.value as Boolean
+                "name" -> name = argument.value as String
+                "isDataClass" -> isDataClass = argument.value as Boolean
+            }
+        }
+
+        return MockupAnnotationData(
+            count = count,
+            isDataClass = isDataClass,
+            name = name,
+            enableNullValues = enableNullValues
+        )
     }
 }

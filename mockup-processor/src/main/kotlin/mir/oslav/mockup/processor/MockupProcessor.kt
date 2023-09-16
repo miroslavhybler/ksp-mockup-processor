@@ -94,14 +94,38 @@ class MockupProcessor constructor(
         classesDeclarations: List<KSClassDeclaration>,
         mockupClasses: List<MockupClass>
     ) {
-        mockupClasses.forEach { mockupClass ->
+
+        val size1 = classesDeclarations.size
+        val size2 = mockupClasses.size
+        require(
+            value = size1 == size2,
+            lazyMessage = {
+                "Declarations list and classes list having different sizes ($size1!=$size2). This is " +
+                        "probably some weird bug, report issue please."
+            }
+        )
+
+        mockupClasses.forEachIndexed { index, mockupClass ->
+            val declaration = classesDeclarations[index]
+            val mockupDataGeneratedContent: String = if (mockupClass.isDataClass) {
+                generateMockupDataContentForDataClass(
+                    clazz = mockupClass,
+                    classDeclaration = declaration
+                )
+            } else {
+                generateMockupDataContentForClass(
+                    clazz = mockupClass,
+                    classDeclaration = declaration
+                )
+            }
             dataProvidersGenerator.generateContent(
                 outputStream = generateOutputFile(
                     classes = classesDeclarations,
                     filename = "${mockupClass.name}MockupProvider.kt",
                     packageName = "mir.oslav.mockup.providers"
                 ),
-                clazz = mockupClass
+                clazz = mockupClass,
+                generatedValuesContent = mockupDataGeneratedContent
             )
         }
     }
@@ -135,5 +159,64 @@ class MockupProcessor constructor(
             packageName = packageName,
             fileName = filename
         )
+    }
+
+
+    /**
+     * @since 1.0.0
+     */
+    private fun generateMockupDataContentForDataClass(
+        classDeclaration: KSClassDeclaration,
+        clazz: MockupClass
+    ): String {
+        val name = clazz.name
+        val declaration = clazz.type.declaration
+        val type = declaration.simpleName.getShortName()
+
+        var outputText: String = "listOf(\n"
+
+        for (i in 0 until clazz.dataCount) {
+            outputText += "\t\t$type(\n"
+
+            clazz.members.forEach { member ->
+                outputText += "\t\t\t${member.name} = \"TODO\",\n"
+            }
+
+            outputText += "\t\t),\n"
+        }
+
+        //  outputText = outputText.removeSuffix(suffix = ",\n")
+        outputText += ")"
+        return outputText
+    }
+
+
+    /**
+     * @since 1.0.0
+     */
+    //TODO val/var check as cannot put value into val
+    private fun generateMockupDataContentForClass(
+        classDeclaration: KSClassDeclaration,
+        clazz: MockupClass
+    ): String {
+        val name = clazz.name
+        val declaration = clazz.type.declaration
+        val type = declaration.simpleName.getShortName()
+
+        var outputText: String = "listOf(\n"
+
+        for (i in 0 until clazz.dataCount) {
+            outputText += "\t\t$type().apply {\n"
+
+            clazz.members.forEach { member ->
+                outputText += "\t\t\t${member.name} = \"TODO\"\n"
+            }
+
+            outputText += "\t\t},\n"
+        }
+
+        //  outputText = outputText.removeSuffix(suffix = ",\n")
+        outputText += ")"
+        return outputText
     }
 }
