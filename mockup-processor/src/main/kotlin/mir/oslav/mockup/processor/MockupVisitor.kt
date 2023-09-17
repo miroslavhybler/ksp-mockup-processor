@@ -48,8 +48,8 @@ class MockupVisitor constructor(
             members = outMembersList,
             imports = outImportsList.sortedDescending(),
             type = classDeclaration.asType(typeArguments = emptyList()),
-            dataCount = annotationData.count,
-            isDataClass = annotationData.isDataClass,
+            data = annotationData,
+            declaration = classDeclaration
         )
 
         outputList.add(mockupClass)

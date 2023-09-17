@@ -23,6 +23,7 @@ class MockupDataProviderWriter constructor(
         val declaration = clazz.type.declaration
         val type = declaration.simpleName.getShortName()
         val providerClassName = "${name}MockupProvider"
+        val writtenImports = ArrayList<String>()
 
         outputStream += MockupConstants.generatedFileHeader
         outputStream += "\n\n"
@@ -30,6 +31,18 @@ class MockupDataProviderWriter constructor(
         outputStream += "\n\n"
         outputStream += "import mir.oslav.mockup.MockupDataProvider\n"
         outputStream += "import ${declaration.packageName.asString()}.${declaration.simpleName.getShortName()}\n"
+
+        clazz.members.forEach { member ->
+            val packageName = member.packageName
+            val className = member.type.declaration.simpleName.getShortName()
+
+            val import = "${packageName}.${className}"
+            if (!writtenImports.contains(import)) {
+                outputStream += "import $import\n"
+                writtenImports.add(import)
+            }
+        }
+
         outputStream += "\n"
 
         outputStream += "/**\n"

@@ -1,5 +1,6 @@
 package mir.oslav.mockup.processor.data
 
+import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 
 
@@ -16,7 +17,13 @@ data class MockupClass constructor(
     val imports: List<String>,
     val name: String,
     val type: KSType,
-    val dataCount: Int,
-    val isDataClass: Boolean,
+    val data: MockupAnnotationData,
+    val declaration: KSClassDeclaration
 ) {
+
+    /**
+     * @since 1.0.0
+     */
+    val packageName: String get() = type.declaration.packageName.asString()
+
 }

@@ -15,5 +15,9 @@ data class MockupClassMember constructor(
     val isMutable: Boolean
 ) {
 
+    /**
+     * @since 1.0.0
+     */
+    val packageName: String get() = type.declaration.packageName.asString()
 
 }

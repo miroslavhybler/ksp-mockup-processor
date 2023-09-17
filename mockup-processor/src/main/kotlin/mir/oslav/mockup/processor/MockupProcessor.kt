@@ -6,19 +6,21 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSType
 import mir.oslav.mockup.annotations.Mockup
 import mir.oslav.mockup.processor.data.MockupClass
 import mir.oslav.mockup.processor.data.MockupClassMember
 import mir.oslav.mockup.processor.generation.AbstractMockupDataProviderWriter
 import mir.oslav.mockup.processor.generation.MockupDataProviderWriter
 import mir.oslav.mockup.processor.generation.MockupObjectWriter
+import mir.oslav.mockup.processor.generation.isBoolean
 import mir.oslav.mockup.processor.generation.isDouble
 import mir.oslav.mockup.processor.generation.isFloat
 import mir.oslav.mockup.processor.generation.isInt
 import mir.oslav.mockup.processor.generation.isLong
 import mir.oslav.mockup.processor.generation.isShort
+import mir.oslav.mockup.processor.generation.isString
 import java.io.OutputStream
+import java.lang.NullPointerException
 import kotlin.jvm.Throws
 import kotlin.random.Random
 import kotlin.reflect.KClass
@@ -111,18 +113,13 @@ class MockupProcessor constructor(
             }
         )
 
+        var contentCode: String = ""
+
         mockupClasses.forEachIndexed { index, mockupClass ->
-            val declaration = classesDeclarations[index]
-            val mockupDataGeneratedContent: String = if (mockupClass.isDataClass) {
-                generateMockupDataContentForDataClass(
-                    clazz = mockupClass,
-                    classDeclaration = declaration
-                )
+            val mockupDataGeneratedContent: String = if (mockupClass.data.isDataClass) {
+                generateMockupDataContentForDataClass(mockupClass = mockupClass)
             } else {
-                generateMockupDataContentForClass(
-                    clazz = mockupClass,
-                    classDeclaration = declaration
-                )
+                generateMockupDataContentForClass(mockupClass = mockupClass)
             }
             dataProvidersGenerator.generateContent(
                 outputStream = generateOutputFile(
@@ -172,24 +169,62 @@ class MockupProcessor constructor(
      * @since 1.0.0
      */
     private fun generateMockupDataContentForDataClass(
-        classDeclaration: KSClassDeclaration,
-        clazz: MockupClass
+        mockupClass: MockupClass,
     ): String {
-        val name = clazz.name
-        val declaration = clazz.type.declaration
+        var outputText: String = "listOf(\n"
+
+        for (i in 0 until mockupClass.data.count) {
+            outputText += generateDataClassItemCode(mockupClass = mockupClass)
+            outputText += ",\n"
+        }
+        outputText += ")"
+
+        return outputText
+    }
+
+
+    /**
+     * @since 1.0.0
+     */
+    private fun generateDataClassItemCode(mockupClass: MockupClass): String {
+        var outputText = ""
+        val declaration = mockupClass.type.declaration
+        val type = declaration.simpleName.getShortName()
+
+        outputText += "\t\t$type(\n"
+
+        mockupClass.members.forEach { member ->
+            var memberValue = generateSimpleDataValueForMember(member = member)
+
+            if (memberValue == null && !mockupClass.data.enableNullValues) {
+                memberValue = generateMockupDataValueForMember(
+                    member = member,
+                    mockupClasses = mockupClassesList,
+                )
+            }
+
+            outputText += "\t\t\t${member.name} = $memberValue,\n"
+        }
+        outputText += "\t\t)"
+        return outputText
+    }
+
+
+    /**
+     * @since 1.0.0
+     */
+    //TODO \t
+    private fun generateMockupDataContentForClass(
+        mockupClass: MockupClass,
+    ): String {
+        val declaration = mockupClass.type.declaration
         val type = declaration.simpleName.getShortName()
 
         var outputText: String = "listOf(\n"
 
-        for (i in 0 until clazz.dataCount) {
-            outputText += "\t\t$type(\n"
-
-            clazz.members.forEach { member ->
-                val memberValue = generateDataValueForMember(member = member)
-                outputText += "\t\t\t${member.name} = $memberValue,\n"
-            }
-
-            outputText += "\t\t),\n"
+        for (i in 0 until mockupClass.data.count) {
+            outputText += generateClassItemCode(mockupClass = mockupClass)
+            outputText += ",\n"
         }
 
         //  outputText = outputText.removeSuffix(suffix = ",\n")
@@ -198,35 +233,20 @@ class MockupProcessor constructor(
     }
 
 
-    /**
-     * @since 1.0.0
-     */
-    //TODO generate data for paramentr
-    private fun generateMockupDataContentForClass(
-        classDeclaration: KSClassDeclaration,
-        clazz: MockupClass
-    ): String {
-        val name = clazz.name
-        val declaration = clazz.type.declaration
+    private fun generateClassItemCode(mockupClass: MockupClass): String {
+        val declaration = mockupClass.type.declaration
         val type = declaration.simpleName.getShortName()
 
-        var outputText: String = "listOf(\n"
+        var outputText = "\t\t$type().apply {\n"
 
-        for (i in 0 until clazz.dataCount) {
-            outputText += "\t\t$type().apply {\n"
+        mockupClass.members
+            .filter(MockupClassMember::isMutable)
+            .forEach { member ->
+                val memberValue = generateSimpleDataValueForMember(member = member)
+                outputText += "\t\t\t${member.name} = $memberValue\n"
+            }
 
-            clazz.members
-                .filter(MockupClassMember::isMutable)
-                .forEach { member ->
-                    val memberValue = generateDataValueForMember(member = member)
-                    outputText += "\t\t\t${member.name} = $memberValue\n"
-                }
-
-            outputText += "\t\t},\n"
-        }
-
-        //  outputText = outputText.removeSuffix(suffix = ",\n")
-        outputText += ")"
+        outputText += "\t\t}"
         return outputText
     }
 
@@ -235,14 +255,47 @@ class MockupProcessor constructor(
      * @since 1.0.0
      */
     //TODO suggest value by given member name
-    private fun generateDataValueForMember(member: MockupClassMember): String {
+    private fun generateSimpleDataValueForMember(member: MockupClassMember): String? {
         val type = member.type
         return when {
             type.isShort -> "${Random.nextInt(from = 0, until = 255)}"
             type.isInt || type.isLong -> "${Random.nextInt()}"
             type.isFloat -> "${Random.nextFloat()}"
             type.isDouble -> "${Random.nextDouble()}"
-            else -> "\"${member.name}\""
+            type.isBoolean -> "${Random.nextBoolean()}"
+            type.isString -> "\"TODO\""
+            else -> null
         }
+    }
+
+
+    /**
+     * @throws NullPointerException
+     * @since 1.0.0
+     */
+    private fun generateMockupDataValueForMember(
+        member: MockupClassMember,
+        mockupClasses: List<MockupClass>,
+    ): String {
+
+        val declaration = member.type.declaration
+        val memberClassName = declaration.simpleName.getShortName()
+        val memberClassPackageName = declaration.packageName.asString()
+
+        val memberClass = mockupClasses.find { mockupClass ->
+            mockupClass.name == memberClassName
+                    && mockupClass.packageName == memberClassPackageName
+        } ?: throw NullPointerException(
+            "Cannot generate mockup data for non annotated class ${memberClassName}. Make sure to " +
+                    "annotate class with @Mockup annotation!"
+        )
+
+        val memberContent = if (memberClass.data.isDataClass) {
+            generateDataClassItemCode(mockupClass = memberClass)
+        } else {
+            generateClassItemCode(mockupClass = memberClass)
+        }
+
+        return memberContent
     }
 }

@@ -51,5 +51,18 @@ val KSType.isDouble: Boolean
 /**
  * @since 1.0.0
  */
+val KSType.isBoolean: Boolean
+    get() = declaration.qualifiedName?.asString() == "kotlin.Boolean"
+
+
+/**
+ * @since 1.0.0
+ */
+val KSType.isString: Boolean
+    get() = declaration.qualifiedName?.asString() == "kotlin.String"
+
+/**
+ * @since 1.0.0
+ */
 val KSType.isList: Boolean
     get() = declaration.qualifiedName?.asString() == " kotlin.collections.List"
