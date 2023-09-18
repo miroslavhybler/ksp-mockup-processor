@@ -10,7 +10,7 @@ import java.io.OutputStream
  * @author Miroslav Hýbler <br>
  * created on 16.09.2023
  */
-class MockupDataProviderWriter constructor(
+class MockupDataProviderGenerator constructor(
 
 ) {
 
@@ -18,7 +18,7 @@ class MockupDataProviderWriter constructor(
         outputStream: OutputStream,
         clazz: MockupClass,
         generatedValuesContent: String
-    ) {
+    ): String {
         val name = clazz.name
         val declaration = clazz.type.declaration
         val type = declaration.simpleName.getShortName()
@@ -46,16 +46,19 @@ class MockupDataProviderWriter constructor(
         outputStream += "\n"
 
         outputStream += "/**\n"
-        outputStream += " * Holds the generated mockup data for $name class. Single item can be accessed by [${providerClassName}.singe] \n"
-        outputStream += " * and multiple items with [${providerClassName}.list].\n"
+        outputStream += " * Holds the generated mockup data for $name class.\n"
+        outputStream += " * Single item can be accessed by [${providerClassName}.singe] \n"
+        outputStream += " * Multiple items with [${providerClassName}.list].\n"
         outputStream += " * @since 1.0.0\n"
         outputStream += " */\n"
 
 
-        outputStream += "internal class $providerClassName constructor(): MockupDataProvider<$type>(\n"
+        outputStream += "public class $providerClassName internal constructor(): MockupDataProvider<$type>(\n"
         outputStream += "\tvalues = $generatedValuesContent\n"
         outputStream += ") {\n"
         outputStream += "}"
+
+        return providerClassName
     }
 
 }

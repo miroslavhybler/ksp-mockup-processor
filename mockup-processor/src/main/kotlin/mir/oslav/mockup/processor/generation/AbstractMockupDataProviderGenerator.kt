@@ -9,7 +9,7 @@ import java.io.OutputStream
  * @author Miroslav Hýbler <br>
  * created on 16.09.2023
  */
-class AbstractMockupDataProviderWriter constructor(
+class AbstractMockupDataProviderGenerator constructor(
     private val outputStream: OutputStream
 ) {
 

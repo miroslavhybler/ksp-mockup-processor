@@ -9,13 +9,16 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import mir.oslav.mockup.annotations.Mockup
 import mir.oslav.mockup.processor.data.MockupClass
 import mir.oslav.mockup.processor.data.MockupClassMember
-import mir.oslav.mockup.processor.generation.AbstractMockupDataProviderWriter
-import mir.oslav.mockup.processor.generation.MockupDataProviderWriter
-import mir.oslav.mockup.processor.generation.MockupObjectWriter
+import mir.oslav.mockup.processor.data.MockupObjectMember
+import mir.oslav.mockup.processor.generation.AbstractMockupDataProviderGenerator
+import mir.oslav.mockup.processor.generation.MockupDataProviderGenerator
+import mir.oslav.mockup.processor.generation.MockupObjectGenerator
+import mir.oslav.mockup.processor.generation.isArray
 import mir.oslav.mockup.processor.generation.isBoolean
 import mir.oslav.mockup.processor.generation.isDouble
 import mir.oslav.mockup.processor.generation.isFloat
 import mir.oslav.mockup.processor.generation.isInt
+import mir.oslav.mockup.processor.generation.isList
 import mir.oslav.mockup.processor.generation.isLong
 import mir.oslav.mockup.processor.generation.isShort
 import mir.oslav.mockup.processor.generation.isString
@@ -37,7 +40,7 @@ class MockupProcessor constructor(
 
     private val mockupClassesList: ArrayList<MockupClass> = ArrayList()
 
-    private val dataProvidersGenerator: MockupDataProviderWriter = MockupDataProviderWriter()
+    private val dataProvidersGenerator: MockupDataProviderGenerator = MockupDataProviderGenerator()
 
     private val visitor: MockupVisitor = MockupVisitor(
         environment = environment,
@@ -47,7 +50,7 @@ class MockupProcessor constructor(
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val mockupClassDeclarations = resolver.findAnnotations(Mockup::class)
         try {
-            AbstractMockupDataProviderWriter(
+            AbstractMockupDataProviderGenerator(
                 outputStream = generateOutputFile(
                     classes = mockupClassDeclarations,
                     filename = "MockupDataProvider.kt"
@@ -56,15 +59,6 @@ class MockupProcessor constructor(
         } catch (ignored: FileAlreadyExistsException) {
             return mockupClassDeclarations
         }
-
-
-        //TODO write data providers as public properties of Mockup object
-        MockupObjectWriter(
-            outputStream = generateOutputFile(
-                mockupClassDeclarations,
-                filename = "Mockup.kt"
-            )
-        ).generateContent()
 
 
         mockupClassesList.clear()
@@ -77,10 +71,18 @@ class MockupProcessor constructor(
         }
 
         generateMockupedData(mockupClasses = mockupClassesList)
-        generateMockupDataProviders(
+        val providers = generateMockupDataProviders(
             mockupClasses = mockupClassesList,
             classesDeclarations = mockupClassDeclarations
         )
+
+        //TODO write data providers as public properties of Mockup object or extensions
+        MockupObjectGenerator(
+            outputStream = generateOutputFile(
+                mockupClassDeclarations,
+                filename = "Mockup.kt"
+            )
+        ).generateContent(providers = providers)
 
 
         return mockupClassDeclarations
@@ -101,8 +103,9 @@ class MockupProcessor constructor(
     private fun generateMockupDataProviders(
         classesDeclarations: List<KSClassDeclaration>,
         mockupClasses: List<MockupClass>
-    ) {
+    ): ArrayList<MockupObjectMember> {
 
+        val outputNamesList = ArrayList<MockupObjectMember>()
         val size1 = classesDeclarations.size
         val size2 = mockupClasses.size
         require(
@@ -113,15 +116,13 @@ class MockupProcessor constructor(
             }
         )
 
-        var contentCode: String = ""
-
         mockupClasses.forEachIndexed { index, mockupClass ->
             val mockupDataGeneratedContent: String = if (mockupClass.data.isDataClass) {
                 generateMockupDataContentForDataClass(mockupClass = mockupClass)
             } else {
                 generateMockupDataContentForClass(mockupClass = mockupClass)
             }
-            dataProvidersGenerator.generateContent(
+            val dataProviderClazzName = dataProvidersGenerator.generateContent(
                 outputStream = generateOutputFile(
                     classes = classesDeclarations,
                     filename = "${mockupClass.name}MockupProvider.kt",
@@ -130,7 +131,16 @@ class MockupProcessor constructor(
                 clazz = mockupClass,
                 generatedValuesContent = mockupDataGeneratedContent
             )
+            outputNamesList.add(
+                MockupObjectMember(
+                    providerClassName = dataProviderClazzName,
+                    providerClassPackage = "mir.oslav.mockup.providers",
+                    itemClassName = mockupClass.name
+                )
+            )
         }
+
+        return outputNamesList
     }
 
 
@@ -255,15 +265,21 @@ class MockupProcessor constructor(
      * @since 1.0.0
      */
     //TODO suggest value by given member name
+    //Todo lists &  arrays
     private fun generateSimpleDataValueForMember(member: MockupClassMember): String? {
         val type = member.type
         return when {
+            //Simple types
             type.isShort -> "${Random.nextInt(from = 0, until = 255)}"
             type.isInt || type.isLong -> "${Random.nextInt()}"
             type.isFloat -> "${Random.nextFloat()}"
             type.isDouble -> "${Random.nextDouble()}"
             type.isBoolean -> "${Random.nextBoolean()}"
             type.isString -> "\"TODO\""
+
+            //Collection types
+            type.isList -> "listOf()"
+            type.isArray -> "arrayOf()"
             else -> null
         }
     }

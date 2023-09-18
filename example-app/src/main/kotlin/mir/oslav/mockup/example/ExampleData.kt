@@ -15,6 +15,8 @@ data class Article constructor(
     val contentExtra: String?,
     val author: User,
     val category: Category,
+    val tags: List<String>,
+    val isSpecialEdition: Boolean
 ) {
 
 }
@@ -39,5 +41,10 @@ class User constructor() {
     var lastName: String = "Doe"
     var dateOfBirth: String = "01-01-1970"
 
+    var description: String = ""
+
     var rank: UserRank? = null
+
+
+    val fullName: String get() = "$firstName $lastName"
 }
