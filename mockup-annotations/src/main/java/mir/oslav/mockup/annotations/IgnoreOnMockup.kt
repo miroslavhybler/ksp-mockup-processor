@@ -10,5 +10,5 @@ package mir.oslav.mockup.annotations
 @Target(AnnotationTarget.PROPERTY, AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.SOURCE)
 @MustBeDocumented
-public annotation class IgnoreOnMockup {
+internal annotation class IgnoreOnMockup {
 }

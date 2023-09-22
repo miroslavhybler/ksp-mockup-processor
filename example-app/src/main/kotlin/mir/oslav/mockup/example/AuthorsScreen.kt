@@ -58,9 +58,9 @@ fun AuthorsScreen(
         content = { paddingValues ->
             LazyColumn(
                 content = {
-                    itemsIndexed(items = Mockup.user.list) { index, user ->
-                        AuthorItem(user = user)
-                    }
+//                    itemsIndexed(items = Mockup.user.list) { index, user ->
+//                        AuthorItem(user = user)
+//                    }
                 },
                 contentPadding = paddingValues,
                 modifier = Modifier.fillMaxSize()

@@ -15,9 +15,12 @@ data class Article constructor(
     val contentExtra: String?,
     val author: User,
     val category: Category,
-    val tags: List<String>,
+      val tags: List<String>,
     val isSpecialEdition: Boolean
 ) {
+
+  //  var isNew: Boolean = true
+ //   val isPremium: Boolean = false
 
 }
 

@@ -1,7 +1,7 @@
 package mir.oslav.mockup.processor.generation
 
 import mir.oslav.mockup.processor.MockupConstants
-import mir.oslav.mockup.processor.data.MockupClass
+import mir.oslav.mockup.processor.data.MockupType
 import java.io.OutputStream
 
 
@@ -16,7 +16,7 @@ class MockupDataProviderGenerator constructor(
 
     fun generateContent(
         outputStream: OutputStream,
-        clazz: MockupClass,
+        clazz: MockupType.Mocked,
         generatedValuesContent: String
     ): String {
         val name = clazz.name
@@ -25,26 +25,23 @@ class MockupDataProviderGenerator constructor(
         val providerClassName = "${name}MockupProvider"
         val writtenImports = ArrayList<String>()
 
+        //Header, package name and import of base class
         outputStream += MockupConstants.generatedFileHeader
         outputStream += "\n\n"
         outputStream += "package mir.oslav.mockup.providers"
         outputStream += "\n\n"
         outputStream += "import mir.oslav.mockup.MockupDataProvider\n"
-        outputStream += "import ${declaration.packageName.asString()}.${declaration.simpleName.getShortName()}\n"
 
-        clazz.members.forEach { member ->
-            val packageName = member.packageName
-            val className = member.type.declaration.simpleName.getShortName()
-
-            val import = "${packageName}.${className}"
-            if (!writtenImports.contains(import)) {
-                outputStream += "import $import\n"
-                writtenImports.add(import)
+        //Used types imports
+        clazz.imports.sortedDescending().forEach { qualifiedName ->
+            if (!writtenImports.contains(qualifiedName)) {
+                outputStream += "import $qualifiedName\n"
+                writtenImports.add(qualifiedName)
             }
         }
 
+        //Javadoc
         outputStream += "\n"
-
         outputStream += "/**\n"
         outputStream += " * Holds the generated mockup data for $name class.\n"
         outputStream += " * Single item can be accessed by [${providerClassName}.singe] \n"
@@ -53,6 +50,7 @@ class MockupDataProviderGenerator constructor(
         outputStream += " */\n"
 
 
+        //Class definition
         outputStream += "public class $providerClassName internal constructor(): MockupDataProvider<$type>(\n"
         outputStream += "\tvalues = $generatedValuesContent\n"
         outputStream += ") {\n"

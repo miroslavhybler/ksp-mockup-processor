@@ -2,7 +2,8 @@ package mir.oslav.mockup.processor.data
 
 
 /**
- * @author Miroslav Hýbler (Peko Studio s.r.o)<br>
+ * @since 1.0.0
+ * @author Miroslav Hýbler <br>
  * created on 18.09.2023
  */
 data class MockupObjectMember constructor(

@@ -1,11 +1,15 @@
 package mir.oslav.mockup.processor.data
 
+import androidx.annotation.IntRange
+import kotlin.random.Random
+
 
 /**
  * @author Miroslav Hýbler <br>
  * created on 16.09.2023
  */
-val loremIpsum: String get() = """
+private val loremIpsum: String
+    get() = """
     Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Maecenas lorem. Nunc dapibus tortor vel mi dapibus sollicitudin. Maecenas lorem. Maecenas aliquet accumsan leo. Aenean id metus id velit ullamcorper pulvinar. Sed convallis magna eu sem. Maecenas sollicitudin. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat. Maecenas aliquet accumsan leo. Nullam dapibus fermentum ipsum. Fusce aliquam vestibulum ipsum. Nullam rhoncus aliquam metus. Maecenas ipsum velit, consectetuer eu lobortis ut, dictum at dui. Nulla pulvinar eleifend sem. Integer malesuada. Integer lacinia. Donec ipsum massa, ullamcorper in, auctor et, scelerisque sed, est. Nullam feugiat, turpis at pulvinar vulputate, erat libero tristique tellus, nec bibendum odio risus sit amet ante. Mauris metus.
 
     Duis viverra diam non justo. Etiam bibendum elit eget erat. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Etiam neque. Nulla non arcu lacinia neque faucibus fringilla. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Maecenas sollicitudin. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Nunc auctor. Proin pede metus, vulputate nec, fermentum fringilla, vehicula vitae, justo. Suspendisse sagittis ultrices augue. Mauris suscipit, ligula sit amet pharetra semper, nibh ante cursus purus, vel sagittis velit mauris vel metus.
@@ -28,3 +32,13 @@ val loremIpsum: String get() = """
 """.trimIndent()
 
 
+fun loremIpsum(
+    length: Int = Random.nextInt(from = 1, until = loremIpsum.length)
+): String {
+    val outRaw = if (loremIpsum.length < length) {
+        loremIpsum.substring(startIndex = 0, endIndex = length)
+    } else loremIpsum
+
+
+    return outRaw.replace("\n", "")
+}

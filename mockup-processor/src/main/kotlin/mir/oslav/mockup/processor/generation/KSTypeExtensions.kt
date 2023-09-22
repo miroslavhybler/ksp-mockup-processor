@@ -14,6 +14,7 @@ operator fun OutputStream.plusAssign(other: String) {
 
 
 /**
+ * True if this type is [Short] number, false otherwise
  * @since 1.0.0
  */
 val KSType.isShort: Boolean
@@ -21,6 +22,7 @@ val KSType.isShort: Boolean
 
 
 /**
+ * True if this type is [Int] number, false otherwise
  * @since 1.0.0
  */
 val KSType.isInt: Boolean
@@ -28,6 +30,7 @@ val KSType.isInt: Boolean
 
 
 /**
+ * True if this type is [Long] number, false otherwise
  * @since 1.0.0
  */
 val KSType.isLong: Boolean
@@ -35,6 +38,7 @@ val KSType.isLong: Boolean
 
 
 /**
+ * True if this type is [Float] number, false otherwise
  * @since 1.0.0
  */
 val KSType.isFloat: Boolean
@@ -42,6 +46,7 @@ val KSType.isFloat: Boolean
 
 
 /**
+ * True if this type is [Double] number, false otherwise
  * @since 1.0.0
  */
 val KSType.isDouble: Boolean
@@ -49,13 +54,18 @@ val KSType.isDouble: Boolean
 
 
 /**
+ * True if this type is [Boolean], false otherwise
  * @since 1.0.0
  */
 val KSType.isBoolean: Boolean
     get() = declaration.qualifiedName?.asString() == "kotlin.Boolean"
 
 
+val KSType.isByte: Boolean
+    get() = declaration.qualifiedName?.asString() == "kotlin.Byte"
+
 /**
+ * True if this type is [String], false otherwise
  * @since 1.0.0
  */
 val KSType.isString: Boolean
@@ -63,6 +73,7 @@ val KSType.isString: Boolean
 
 
 /**
+ * True if this type is [List], false otherwise
  * @since 1.0.0
  */
 val KSType.isList: Boolean
@@ -70,6 +81,7 @@ val KSType.isList: Boolean
 
 
 /**
+ * True if this type is [Array], false otherwise
  * @since 1.0.0
  */
 val KSType.isArray: Boolean
@@ -77,23 +89,23 @@ val KSType.isArray: Boolean
 
 
 /**
+ * True if this type is [ShortArray], false otherwise
  * @since 1.0.0
  */
 val KSType.isShortArray: Boolean
     get() = declaration.qualifiedName?.asString() == "kotlin.ShortArray"
 
 
-
-
 /**
+ * True if this type is [IntArray], false otherwise
  * @since 1.0.0
  */
 val KSType.isIntArray: Boolean
     get() = declaration.qualifiedName?.asString() == "kotlin.IntArray"
 
 
-
 /**
+ * True if this type is [LongArray], false otherwise
  * @since 1.0.0
  */
 val KSType.isLongArray: Boolean
@@ -101,6 +113,7 @@ val KSType.isLongArray: Boolean
 
 
 /**
+ * True if this type is [FloatArray], false otherwise
  * @since 1.0.0
  */
 val KSType.isFloatArray: Boolean
@@ -108,6 +121,7 @@ val KSType.isFloatArray: Boolean
 
 
 /**
+ * True if this type is [DoubleArray], false otherwise
  * @since 1.0.0
  */
 val KSType.isDoubleArray: Boolean
@@ -115,6 +129,7 @@ val KSType.isDoubleArray: Boolean
 
 
 /**
+ * True if this type is [CharArray], false otherwise
  * @since 1.0.0
  */
 val KSType.isCharArray: Boolean
@@ -122,6 +137,7 @@ val KSType.isCharArray: Boolean
 
 
 /**
+ * True if this type is [ByteArray], false otherwise
  * @since 1.0.0
  */
 val KSType.isByteArray: Boolean
@@ -129,7 +145,43 @@ val KSType.isByteArray: Boolean
 
 
 /**
+ * True if this type is [BooleanArray], false otherwise
  * @since 1.0.0
  */
 val KSType.isBooleanArray: Boolean
     get() = declaration.qualifiedName?.asString() == "kotlin.BooleanArray"
+
+
+/**
+ * @since 1.0.0
+ */
+val KSType.isSimpleType: Boolean
+    get() = this.isShort
+            || this.isInt
+            || this.isLong
+            || this.isFloat
+            || this.isDouble
+            || this.isBoolean
+            || this.isByte
+            || this.isString
+
+
+/**
+ * @since 1.0.0
+ */
+val KSType.isFixedArrayType: Boolean
+    get() = this.isShortArray
+            || this.isIntArray
+            || this.isLongArray
+            || this.isFloatArray
+            || this.isDoubleArray
+            || this.isBooleanArray
+            || this.isByteArray
+
+
+/**
+ * @since 1.0.0
+ */
+val KSType.isGenericCollectionType: Boolean
+    get() = this.isArray
+            || this.isList
