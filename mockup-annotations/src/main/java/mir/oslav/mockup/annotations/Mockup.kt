@@ -10,7 +10,6 @@ import androidx.annotation.IntRange
  * @param count Number of items generated, keep it low for better performance and less memory consumption
  * @param enableNullValues
  * @param name
- * @param isDataClass True if target class is "data class" in kotlin.
  * @since 1.0.0
  * @author Miroslav Hýbler <br>
  * created on 15.09.2023
@@ -23,7 +22,6 @@ public annotation class Mockup constructor(
     val count: Int = 10,
     val enableNullValues: Boolean = false,
     val name: String = "",
-    val isDataClass: Boolean = true
 ) {
 
 }

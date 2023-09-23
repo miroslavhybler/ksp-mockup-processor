@@ -19,9 +19,15 @@ data class Article constructor(
     val categories: List<Category>,
     val isSpecialEdition: Boolean,
     val headerImageUrl: String,
+    val gallery: List<GalleryPhoto>
 ) {
 
-    //TODO class for images gallery
+    @Mockup
+    data class GalleryPhoto constructor(
+        val imageUrl: String
+    ) {
+
+    }
 
 }
 
@@ -33,12 +39,13 @@ data class Category constructor(
     val color: Int
 ) {
 
-    fun getNameFormatted(): String {
-        return if (name.length > 11) name.substring(
-            startIndex = 0,
-            endIndex = 11
-        ) else name
-    }
+    val formattedName: String
+        get() {
+            return if (name.length > 11) name.substring(
+                startIndex = 0,
+                endIndex = 11
+            ) else name
+        }
 }
 
 @Mockup
@@ -48,7 +55,7 @@ data class UserRank constructor(
 )
 
 
-@Mockup(isDataClass = false)
+@Mockup
 class User constructor() {
     var firstName: String = "John"
     var lastName: String = "Doe"

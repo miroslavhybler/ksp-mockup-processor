@@ -31,8 +31,6 @@ import mir.oslav.mockup.processor.generation.isShort
 import mir.oslav.mockup.processor.generation.isShortArray
 import mir.oslav.mockup.processor.generation.isString
 import java.io.OutputStream
-import java.lang.NullPointerException
-import kotlin.jvm.Throws
 import kotlin.random.Random
 
 
@@ -152,7 +150,6 @@ class MockupProcessor constructor(
             }
         )
 
-        //TODO support class with both, primary constructor and params
         mockupClasses.forEachIndexed { index, mockupClass ->
             val mockupDataGeneratedContent: String = generateMockupDataListForProvider(
                 mockupClass = mockupClass
@@ -235,12 +232,9 @@ class MockupProcessor constructor(
         var outCode = "listOf(\n"
 
         for (i in 0 until mockupClass.data.count) {
-            val code = if (mockupClass.data.isDataClass) {
-                generateItemDataClassCode(mockupClass = mockupClass)
-            } else {
-                generateClassItemCode(mockupClass = mockupClass)
-            }
-            outCode += code
+            outCode += generateItemPrimaryConstructorCall(mockupClass = mockupClass)
+            outCode += generateItemApplyCall(mockupClass = mockupClass)
+
             outCode += ",\n"
         }
         outCode += ")"
@@ -287,9 +281,6 @@ class MockupProcessor constructor(
                 outputCode += propertyValue
             }
 
-            //TODO somehow solve with recursive
-            //TODO dont use generateMockupDataList, it's for data provider, not for the values
-            //TODO create another function for lists
             is MockupType.Collection -> {
                 outputCode += "listOf(\n"
                 val propertyValue = when (val elementType = type.elementType) {
@@ -318,8 +309,8 @@ class MockupProcessor constructor(
 
 
     /**
-     * Generates code for value of [property]
-     * @param property TODO docs
+     * Generates code for value of [property], e.g. <code>id = 123</code>
+     * @param property Single property of class
      * @return Generated code
      * @throws WrongTypeException
      * @since 1.0.0
@@ -370,14 +361,14 @@ class MockupProcessor constructor(
      * @return Genrated code
      * @throws NullPointerException
      * @since 1.0.0
-     * @see generateItemDataClassCode
+     * @see generateItemPrimaryConstructorCall
      * @see generateCodeForProperty
      */
     private fun generateCodeForMockuppedType(
         type: MockupType.MockUpped,
         mockupClasses: List<MockupType.MockUpped>,
     ): String {
-
+        var outCode = ""
         val declaration = type.type.declaration
         val memberClassName = declaration.simpleName.getShortName()
         val memberClassPackageName = declaration.packageName.asString()
@@ -390,19 +381,16 @@ class MockupProcessor constructor(
                     "annotate class with @Mockup annotation!"
         )
 
-        val memberContent = if (memberClass.data.isDataClass) {
-            generateItemDataClassCode(mockupClass = memberClass)
-        } else {
-            generateClassItemCode(mockupClass = memberClass)
-        }
+        outCode += generateItemPrimaryConstructorCall(mockupClass = memberClass)
+        outCode += generateItemApplyCall(mockupClass = memberClass)
 
-        return memberContent
+        return outCode
     }
 
 
     /**
-     * Generates single data item creation code using data class primary constructor call, this should be called
-     * only on data classes ([MockupType.MockUpped.isDataClass]), otherwise generated code would be invalid.
+     * Generates data item creation using its primary constructor. If [mockupClass] is data class or
+     * its having parameters in primary constructor, they will be generated to
      * Generated code should look like this:<br>
      * <code>
      *User(<br>
@@ -413,15 +401,21 @@ class MockupProcessor constructor(
      * @return Generated code
      * @since 1.0.0
      */
-    //TODO check if property is inside primary constructor
-    private fun generateItemDataClassCode(mockupClass: MockupType.MockUpped): String {
-        var outputText = ""
+    private fun generateItemPrimaryConstructorCall(mockupClass: MockupType.MockUpped): String {
         val declaration = mockupClass.type.declaration
         val type = declaration.simpleName.getShortName()
 
-        outputText += "\t\t$type(\n"
+        //List of class properties declared in primary constructor
+        val constructorProperties = mockupClass.properties
+            .filter(MockupType.Property::isInPrimaryConstructorProperty)
 
-        mockupClass.properties.forEach { property ->
+        if (constructorProperties.isEmpty()) {
+            return "\t\t$type()"
+        }
+
+        var outputText = ""
+        outputText += "\t\t$type(\n"
+        constructorProperties.forEach { property ->
             outputText += generateCodeForProperty(property = property)
             outputText += ",\n"
         }
@@ -431,10 +425,11 @@ class MockupProcessor constructor(
 
 
     /**
-     * Generates single data item creation code using empty primary constructor with [apply] scope
-     * function to fill mutable properties. Generated code should look like this:<br>
+     * If [mockupClass] has properties that are not declared inside primary constructor, additional
+     * code will be generated. Generated code consist of call apply extension function with assignment
+     * of class's properties.
      * <code>
-     *User().apply {<br>
+     *.apply {<br>
      * &emsp;id = 123<br>
      * &emsp;firstName = "John"<br>
      * &emsp;lastName = "Doe"<br>
@@ -443,41 +438,21 @@ class MockupProcessor constructor(
      * @since 1.0.0
      * @see generateCodeForSimpleType
      */
-    private fun generateClassItemCode(mockupClass: MockupType.MockUpped): String {
-        val declaration = mockupClass.type.declaration
-        val shortName = declaration.simpleName.getShortName()
-
-        var outputText = "\t\t$shortName().apply {\n"
-
-        mockupClass.properties
+    private fun generateItemApplyCall(mockupClass: MockupType.MockUpped): String {
+        val notConstructorParameters = mockupClass.properties
             .filter(MockupType.Property::isMutable)
-            .forEach { property ->
-                outputText += generateCodeForProperty(property = property)
-                outputText += "\n"
-            }
+            .filter(MockupType.Property::isNotInPrimaryConstructorProperty)
 
+        if (notConstructorParameters.isEmpty()) {
+            return ""
+        }
+
+        var outputText = ".apply {\n"
+        notConstructorParameters.forEach { property ->
+            outputText += generateCodeForProperty(property = property)
+            outputText += "\n"
+        }
         outputText += "\t\t}"
         return outputText
-    }
-
-
-    private fun generateColletionItemCode(
-        mockupClass: MockupType.MockUpped,
-    ): String {
-        var outCode = "listOf(\n"
-
-        for (i in 0 until mockupClass.data.count) {
-            val code = if (mockupClass.data.isDataClass) {
-                generateItemDataClassCode(mockupClass = mockupClass)
-            } else {
-                generateClassItemCode(mockupClass = mockupClass)
-            }
-            outCode += code
-            outCode += ",\n"
-        }
-        outCode += ")"
-
-        return outCode
-
     }
 }

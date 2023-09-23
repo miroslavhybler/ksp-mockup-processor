@@ -1,9 +1,10 @@
-package mir.oslav.mockup.example
+package mir.oslav.mockup.example.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import mir.oslav.mockup.Mockup
+import mir.oslav.mockup.example.Article
+import mir.oslav.mockup.example.Photo
+import mir.oslav.mockup.example.R
 
 
 /**
@@ -39,7 +44,8 @@ import mir.oslav.mockup.Mockup
 @Composable
 fun ArticlesScreen(
     navHostController: NavHostController,
-    articles: List<Article> = Mockup.article.list
+    articles: List<Article> = Mockup.article.list,
+    paddingValues: PaddingValues
 ) {
 
     Scaffold(
@@ -112,7 +118,7 @@ private fun ArticleItem(
             ) {
                 article.categories.forEach { category ->
                     Text(
-                        text = category.getNameFormatted(),
+                        text = category.formattedName,
                         style = MaterialTheme.typography.labelSmall,
                         modifier = Modifier
                             .padding(all = 2.dp)
@@ -153,6 +159,7 @@ private fun ArticleItem(
 private fun ArticleScreenPreview() {
     ArticlesScreen(
         navHostController = rememberNavController(),
-        articles = Mockup.article.list
+        articles = Mockup.article.list,
+        paddingValues = remember { PaddingValues() }
     )
 }

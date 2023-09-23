@@ -13,6 +13,5 @@ data class MockupAnnotationData constructor(
     val count: Int,
     val enableNullValues: Boolean,
     val name: String,
-    val isDataClass: Boolean
 ) {
 }

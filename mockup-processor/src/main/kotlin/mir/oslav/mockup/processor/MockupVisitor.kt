@@ -4,6 +4,7 @@ import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
+import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSVisitorVoid
@@ -13,7 +14,6 @@ import mir.oslav.mockup.processor.data.MockupType
 import mir.oslav.mockup.processor.generation.isFixedArrayType
 import mir.oslav.mockup.processor.generation.isGenericCollectionType
 import mir.oslav.mockup.processor.generation.isSimpleType
-import java.lang.NullPointerException
 
 
 /**
@@ -41,8 +41,7 @@ class MockupVisitor constructor(
 
 
         visitClass(
-            classDeclaration = classDeclaration,
-            outTypesList = outTypesList
+            classDeclaration = classDeclaration, outTypesList = outTypesList
         )
 
         //TODO resolve @IgnoreOnMockup annotations on members
@@ -68,8 +67,7 @@ class MockupVisitor constructor(
      * @since 1.0.0
      */
     fun extractImport(
-        classDeclaration: KSClassDeclaration,
-        outImportsList: ArrayList<String>
+        classDeclaration: KSClassDeclaration, outImportsList: ArrayList<String>
     ) {
         classDeclaration.qualifiedName?.asString()?.let(outImportsList::add)
     }
@@ -81,9 +79,10 @@ class MockupVisitor constructor(
      * @since 1.0.0
      */
     private fun visitClass(
-        classDeclaration: KSClassDeclaration,
-        outTypesList: ArrayList<MockupType.Property>
+        classDeclaration: KSClassDeclaration, outTypesList: ArrayList<MockupType.Property>
     ) {
+        val primaryConstructor = classDeclaration.primaryConstructor
+
         classDeclaration.getDeclaredProperties().forEach { property ->
             val name = property.simpleName.getShortName()
             val type = property.type.resolve()
@@ -98,7 +97,8 @@ class MockupVisitor constructor(
                 declaration = declaration,
                 outTypesList = outTypesList,
                 imports = imports,
-                property = property
+                property = property,
+                primaryConstructor = primaryConstructor
             )
         }
     }
@@ -120,8 +120,8 @@ class MockupVisitor constructor(
             val qualifiedName = declaration.qualifiedName?.asString()
             qualifiedName == "mir.oslav.mockup.annotations.Mockup"
         } ?: throw IllegalStateException(
-            "Class ${classDeclaration.simpleName.getShortName()} not annotated with @Mockup! " +
-                    "If your class is annotated please report an issue."
+            "Class ${classDeclaration.simpleName.getShortName()} is probably not annotated " +
+                    "with @Mockup! If your class is annotated please report an issue."
         )
 
         var count = 10
@@ -139,10 +139,7 @@ class MockupVisitor constructor(
         }
 
         return MockupAnnotationData(
-            count = count,
-            isDataClass = isDataClass,
-            name = name,
-            enableNullValues = enableNullValues
+            count = count, name = name, enableNullValues = enableNullValues
         )
     }
 
@@ -154,6 +151,7 @@ class MockupVisitor constructor(
         property: KSPropertyDeclaration,
         outTypesList: ArrayList<MockupType.Property>,
         imports: List<String>,
+        primaryConstructor: KSFunctionDeclaration?
     ) {
 
         val propertyType = resolveMockupType(
@@ -163,6 +161,18 @@ class MockupVisitor constructor(
             imports = imports
         )
 
+        val typeQualifiedName = type.declaration.qualifiedName
+        val propertyName = property.simpleName
+        val isInsidePrimaryConstructor = primaryConstructor?.parameters?.find { parameter ->
+            val parameterQualifiedName = parameter.type.resolve().declaration.qualifiedName
+
+            val constructorPropertyName = parameter.name
+
+            parameterQualifiedName == typeQualifiedName
+                    && propertyName == constructorPropertyName
+
+        } != null
+
         outTypesList.add(
             MockupType.Property(
                 resolvedType = propertyType,
@@ -171,7 +181,7 @@ class MockupVisitor constructor(
                 declaration = declaration,
                 imports = imports,
                 isMutable = property.isMutable,
-                isPrimaryConstructorProperty = false
+                isInPrimaryConstructorProperty = isInsidePrimaryConstructor
 
             )
         )
@@ -179,34 +189,25 @@ class MockupVisitor constructor(
 
 
     private fun resolveMockupType(
-        type: KSType,
-        name: String,
-        property: KSPropertyDeclaration,
-        imports: List<String>
+        type: KSType, name: String, property: KSPropertyDeclaration, imports: List<String>
     ): MockupType<*> {
         val declaration = type.declaration
-        val mockUpped = findMockedClass(type = type)
-
         return when {
-            mockUpped != null -> mockUpped
             type.isSimpleType -> {
                 MockupType.Simple(
-                    name = name,
-                    type = type,
-                    declaration = declaration
+                    name = name, type = type, declaration = declaration
                 )
             }
+
             type.isFixedArrayType -> {
                 MockupType.Simple(
-                    name = name,
-                    type = type,
-                    declaration = declaration
+                    name = name, type = type, declaration = declaration
                 )
             }
+
             type.isGenericCollectionType -> {
-                val itemType = property.type.element
-                    ?.typeArguments?.lastOrNull()
-                    ?.type?.resolve() ?: throw NullPointerException("")
+                val itemType = property.type.element?.typeArguments?.lastOrNull()?.type?.resolve()
+                    ?: throw NullPointerException("")
 
                 MockupType.Collection(
                     name = name,
@@ -221,9 +222,17 @@ class MockupVisitor constructor(
                     imports = imports
                 )
             }
-            else -> throw IllegalStateException()
-        }
 
+            else -> {
+                //TODO message, type is probably not annotated with @Mockup
+                val mockUpped = findMockedClass(type = type)
+                return mockUpped ?: throw IllegalStateException(
+                    "Unable to resolve type, class ${type.declaration.simpleName.getShortName()} " +
+                            "is probably not annotated with @Mockup! " +
+                            "If your class is annotated please report an issue."
+                )
+            }
+        }
     }
 
 
@@ -236,12 +245,9 @@ class MockupVisitor constructor(
 
         val outTypesList: ArrayList<MockupType.Property> = ArrayList()
 
-        //TODO fill outTypesList with property type
         visitClass(
-            classDeclaration = classDeclaration,
-            outTypesList = outTypesList
+            classDeclaration = classDeclaration, outTypesList = outTypesList
         )
-
 
         return MockupType.MockUpped(
             name = classDeclaration.simpleName.getShortName(),
@@ -251,19 +257,5 @@ class MockupVisitor constructor(
             imports = imports,
             properties = outTypesList
         )
-    }
-
-
-    /**
-     * @throws NullPointerException
-     */
-    private fun resolveGenericType(property: KSPropertyDeclaration): MockupType<*> {
-        val itemType = property.type.element
-            ?.typeArguments?.lastOrNull()
-            ?.type?.resolve() ?: throw NullPointerException("")
-
-        val name = itemType.declaration.simpleName.getShortName()
-
-        return TODO()
     }
 }

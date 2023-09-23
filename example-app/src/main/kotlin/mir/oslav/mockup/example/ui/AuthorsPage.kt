@@ -1,8 +1,8 @@
-package mir.oslav.mockup.example
+package mir.oslav.mockup.example.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import mir.oslav.mockup.Mockup
+import mir.oslav.mockup.example.Photo
+import mir.oslav.mockup.example.R
+import mir.oslav.mockup.example.User
 
 
 /**
@@ -42,7 +46,8 @@ import mir.oslav.mockup.Mockup
 //Mockup data can be used like that too, but it's not purpose
 fun AuthorsScreen(
     navHostController: NavHostController,
-    users: List<User> = Mockup.user.list
+    users: List<User> = Mockup.user.list,
+    paddingValues: PaddingValues,
 ) {
 
     Scaffold(
@@ -120,6 +125,7 @@ private fun AuthorsScreenPreview() {
     //Preview for screen using Mockup instead of @PreviewParameterProvider
     AuthorsScreen(
         navHostController = rememberNavController(),
-        users = Mockup.user.list
+        users = Mockup.user.list,
+        paddingValues = remember { PaddingValues() }
     )
 }

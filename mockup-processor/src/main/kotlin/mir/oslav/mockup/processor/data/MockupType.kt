@@ -4,9 +4,6 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import mir.oslav.mockup.annotations.Mockup
-import mir.oslav.mockup.processor.generation.isFixedArrayType
-import mir.oslav.mockup.processor.generation.isGenericCollectionType
-import mir.oslav.mockup.processor.generation.isSimpleType
 
 
 /**
@@ -14,7 +11,6 @@ import mir.oslav.mockup.processor.generation.isSimpleType
  * @author Miroslav Hýbler <br>
  * created on 21.09.2023
  */
-//TODO Fixed arrays
 sealed class MockupType<out D : KSDeclaration> private constructor(
     open val name: String,
     open val type: KSType,
@@ -39,9 +35,7 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
         name = name,
         type = type,
         declaration = declaration
-    ) {
-
-    }
+    )
 
 
     /**
@@ -61,7 +55,6 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
         declaration = declaration
     ) {
 
-        val isDataClass: Boolean get() = data.isDataClass
     }
 
 
@@ -113,7 +106,6 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
      * Represents property type
      * @since 1.0.0
      */
-    //TODO isPrimaryConstructorProperty
     data class Property constructor(
         override val name: String,
         override val type: KSType,
@@ -121,12 +113,17 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
         val imports: List<String>,
         val resolvedType: MockupType<*>,
         val isMutable: Boolean,
-        val isPrimaryConstructorProperty: Boolean
+        val isInPrimaryConstructorProperty: Boolean
 
     ) : MockupType<KSDeclaration>(
         name = name,
         type = type,
         declaration = declaration
-    )
+    ) {
+
+        val isNotInPrimaryConstructorProperty:Boolean
+            get() = !isInPrimaryConstructorProperty
+
+    }
 
 }
