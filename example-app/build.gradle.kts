@@ -72,9 +72,11 @@ android {
 
 dependencies {
 
+    /** Mockup plugin */
     implementation(project(":mockup-annotations"))
     ksp(project(":mockup-processor"))
 
+    /** Compose and material */
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
     implementation("androidx.activity:activity-compose:1.7.2")
@@ -84,6 +86,9 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.navigation:navigation-compose:2.7.2")
+
+    /** Koil library for images loading */
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
 
     testImplementation("junit:junit:4.13.2")

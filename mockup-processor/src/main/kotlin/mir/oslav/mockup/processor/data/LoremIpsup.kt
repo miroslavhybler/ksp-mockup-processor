@@ -32,10 +32,14 @@ private val loremIpsum: String
 """.trimIndent()
 
 
+/**
+ * @since 1.0.0
+ */
 fun loremIpsum(
-    length: Int = Random.nextInt(from = 1, until = loremIpsum.length)
+    maxLength: Int = loremIpsum.length
 ): String {
-    val outRaw = if (loremIpsum.length < length) {
+    val length: Int = Random.nextInt(from = 1, until = maxLength)
+    val outRaw = if (length < loremIpsum.length) {
         loremIpsum.substring(startIndex = 0, endIndex = length)
     } else loremIpsum
 

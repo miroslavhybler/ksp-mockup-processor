@@ -49,7 +49,7 @@ class MockupVisitor constructor(
 
         val annotationData = visitMockupAnnotation(classDeclaration = classDeclaration)
         val classType = classDeclaration.asType(typeArguments = emptyList())
-        val mockupClass = MockupType.Mocked(
+        val mockupClass = MockupType.MockUpped(
             name = annotationData.name.takeIf(String::isNotBlank)
                 ?: classDeclaration.simpleName.getShortName(),
             properties = outTypesList,
@@ -64,8 +64,12 @@ class MockupVisitor constructor(
     }
 
 
+    /**
+     * @since 1.0.0
+     */
     fun extractImport(
-        classDeclaration: KSClassDeclaration, outImportsList: ArrayList<String>
+        classDeclaration: KSClassDeclaration,
+        outImportsList: ArrayList<String>
     ) {
         classDeclaration.qualifiedName?.asString()?.let(outImportsList::add)
     }
@@ -166,8 +170,8 @@ class MockupVisitor constructor(
                 type = type,
                 declaration = declaration,
                 imports = imports,
-                isMutable = property.isMutable
-
+                isMutable = property.isMutable,
+                isPrimaryConstructorProperty = false
 
             )
         )
@@ -181,34 +185,28 @@ class MockupVisitor constructor(
         imports: List<String>
     ): MockupType<*> {
         val declaration = type.declaration
-        val mocked = findMockedClass(type = type)
+        val mockUpped = findMockedClass(type = type)
 
         return when {
-            mocked != null -> mocked
-
+            mockUpped != null -> mockUpped
             type.isSimpleType -> {
                 MockupType.Simple(
                     name = name,
                     type = type,
                     declaration = declaration
                 )
-
             }
-
             type.isFixedArrayType -> {
                 MockupType.Simple(
                     name = name,
                     type = type,
                     declaration = declaration
                 )
-
             }
-
             type.isGenericCollectionType -> {
                 val itemType = property.type.element
                     ?.typeArguments?.lastOrNull()
                     ?.type?.resolve() ?: throw NullPointerException("")
-
 
                 MockupType.Collection(
                     name = name,
@@ -223,7 +221,6 @@ class MockupVisitor constructor(
                     imports = imports
                 )
             }
-
             else -> throw IllegalStateException()
         }
 
@@ -232,7 +229,7 @@ class MockupVisitor constructor(
 
     private fun findMockedClass(
         type: KSType
-    ): MockupType.Mocked? {
+    ): MockupType.MockUpped? {
         val classDeclaration = allClassesDeclarations.find { mockupClass ->
             mockupClass.qualifiedName == type.declaration.qualifiedName
         } ?: return null
@@ -246,7 +243,7 @@ class MockupVisitor constructor(
         )
 
 
-        return MockupType.Mocked(
+        return MockupType.MockUpped(
             name = classDeclaration.simpleName.getShortName(),
             declaration = classDeclaration,
             data = visitMockupAnnotation(classDeclaration = classDeclaration),

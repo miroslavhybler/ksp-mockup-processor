@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -20,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
@@ -37,8 +39,10 @@ import mir.oslav.mockup.Mockup
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+//Mockup data can be used like that too, but it's not purpose
 fun AuthorsScreen(
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    users: List<User> = Mockup.user.list
 ) {
 
     Scaffold(
@@ -58,9 +62,9 @@ fun AuthorsScreen(
         content = { paddingValues ->
             LazyColumn(
                 content = {
-//                    itemsIndexed(items = Mockup.user.list) { index, user ->
-//                        AuthorItem(user = user)
-//                    }
+                    itemsIndexed(items = users) { index, user ->
+                        AuthorItem(user = user)
+                    }
                 },
                 contentPadding = paddingValues,
                 modifier = Modifier.fillMaxSize()
@@ -77,22 +81,32 @@ private fun AuthorItem(user: User) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
 
-        Spacer(modifier = Modifier.width(width = 10.dp))
+
+        Photo(
+            imageUrl = "https://cdn.pixabay.com/photo/2023/08/30/04/16/man-8222531_1280.jpg",
+            modifier = Modifier
+                .size(size = 56.dp)
+                .clip(shape = CircleShape)
+        )
+
+        Spacer(modifier = Modifier.width(width = 12.dp))
 
         Column(modifier = Modifier.weight(weight = 1f)) {
             Text(
                 text = user.fullName,
-                style = MaterialTheme.typography.titleSmall,
+                style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+            Spacer(modifier = Modifier.height(height = 4.dp))
             Text(
                 text = user.description,
                 style = MaterialTheme.typography.bodySmall,
-                maxLines = 3,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
         }
@@ -103,5 +117,9 @@ private fun AuthorItem(user: User) {
 @Composable
 @Preview
 private fun AuthorsScreenPreview() {
-    AuthorsScreen(navHostController = rememberNavController())
+    //Preview for screen using Mockup instead of @PreviewParameterProvider
+    AuthorsScreen(
+        navHostController = rememberNavController(),
+        users = Mockup.user.list
+    )
 }

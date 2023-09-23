@@ -16,7 +16,7 @@ class MockupDataProviderGenerator constructor(
 
     fun generateContent(
         outputStream: OutputStream,
-        clazz: MockupType.Mocked,
+        clazz: MockupType.MockUpped,
         generatedValuesContent: String
     ): String {
         val name = clazz.name

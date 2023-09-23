@@ -9,6 +9,11 @@ package mir.oslav.mockup.processor
 object MockupConstants {
 
 
+    /**
+     * TODO more info + link on issues
+     * File header comment attached on the top of every generated file
+     * @since 1.0.0
+     */
     const val generatedFileHeader: String = "" +
             "////////////////////////////////////////////////////////////////////////////////////////////////////\n" +
             "/////                                                                                               \n" +

@@ -1,5 +1,6 @@
 package mir.oslav.mockup.example
 
+import androidx.annotation.ColorInt
 import mir.oslav.mockup.annotations.Mockup
 
 
@@ -14,13 +15,13 @@ data class Article constructor(
     val content: String,
     val contentExtra: String?,
     val author: User,
-    val category: Category,
-      val tags: List<String>,
-    val isSpecialEdition: Boolean
+    val tags: List<String>,
+    val categories: List<Category>,
+    val isSpecialEdition: Boolean,
+    val headerImageUrl: String,
 ) {
 
-  //  var isNew: Boolean = true
- //   val isPremium: Boolean = false
+    //TODO class for images gallery
 
 }
 
@@ -28,7 +29,17 @@ data class Article constructor(
 data class Category constructor(
     val id: Int,
     val name: String,
-)
+    @ColorInt
+    val color: Int
+) {
+
+    fun getNameFormatted(): String {
+        return if (name.length > 11) name.substring(
+            startIndex = 0,
+            endIndex = 11
+        ) else name
+    }
+}
 
 @Mockup
 data class UserRank constructor(
@@ -39,13 +50,12 @@ data class UserRank constructor(
 
 @Mockup(isDataClass = false)
 class User constructor() {
-    val id: Int = 0
     var firstName: String = "John"
     var lastName: String = "Doe"
     var dateOfBirth: String = "01-01-1970"
 
     var description: String = ""
-
+    var imageUrl: String = ""
     var rank: UserRank? = null
 
 
