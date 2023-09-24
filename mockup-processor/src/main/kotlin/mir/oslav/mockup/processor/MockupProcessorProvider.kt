@@ -21,7 +21,19 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
 @AutoService(value = [SymbolProcessorProvider::class])
 public class MockupProcessorProvider constructor() : SymbolProcessorProvider {
 
+    /**
+     * In order to prevent ksp from <a href="https://kotlinlang.org/docs/ksp-multi-round.html#changes-to-getsymbolsannotatedwith">multiple round processing</a>
+     *  only one instance should be always returned.
+     * @since 1.0.0
+     */
+    private var processor: MockupProcessor? = null
+
+
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
-        return MockupProcessor(environment = environment)
+        if (processor == null) {
+            processor = MockupProcessor(environment = environment)
+        }
+
+        return processor ?: throw NullPointerException()
     }
 }

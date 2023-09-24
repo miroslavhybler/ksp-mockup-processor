@@ -1,4 +1,4 @@
-package mir.oslav.mockup.example.ui
+package mir.oslav.mockup.example.ui.article
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -24,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,8 +30,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import mir.oslav.mockup.Mockup
 import mir.oslav.mockup.example.Article
-import mir.oslav.mockup.example.Photo
-import mir.oslav.mockup.example.R
+import mir.oslav.mockup.example.ui.Photo
 
 
 /**
@@ -52,17 +49,9 @@ fun ArticlesScreen(
         topBar = {
             TopAppBar(
                 title = { Text(text = "Articles") },
-                navigationIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_back),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .clickable(onClick = navHostController::popBackStack)
-                    )
-                }
             )
         },
-        content = { paddingValues ->
+        content = { _ ->
             LazyColumn(
                 content = {
                     itemsIndexed(items = articles) { index, article ->
@@ -73,9 +62,9 @@ fun ArticlesScreen(
                     }
                 },
                 contentPadding = paddingValues,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
             )
-        }
+        },
     )
 
 }
@@ -93,7 +82,9 @@ private fun ArticleItem(
             .fillMaxWidth()
             .clickable(
                 onClick = {
-                    //TODO article detail
+                    navHostController.navigate(
+                        route = "article/${article.id}"
+                    )
                 }
             )
             .padding(vertical = 8.dp, horizontal = 12.dp)
@@ -104,6 +95,7 @@ private fun ArticleItem(
                 .fillMaxWidth()
                 .height(height = 228.dp)
         ) {
+            //TODO replace with generated url
             Photo(
                 imageUrl = "https://cdn.pixabay.com/photo/2023/07/13/20/39/coffee-beans-8125757_1280.jpg",
                 modifier = Modifier

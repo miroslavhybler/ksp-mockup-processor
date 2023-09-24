@@ -1,8 +1,7 @@
-import java.util.Properties
-import kotlin.collections.mutableMapOf
+
 import org.jetbrains.dokka.DokkaConfiguration.Visibility
 import java.io.FileInputStream
-import kotlin.collections.mutableListOf
+import java.util.Properties
 
 
 plugins {
@@ -77,7 +76,7 @@ publishing {
     publications {
         register<MavenPublication>("ksp-mockup-publish") {
             groupId = "mir.oslav.mockup"
-            artifactId = "core"
+            artifactId = "processor"
             version = "1.0.0"
 
             //afterEvaluate {
@@ -103,4 +102,3 @@ publishing {
         }
     }
 }
-

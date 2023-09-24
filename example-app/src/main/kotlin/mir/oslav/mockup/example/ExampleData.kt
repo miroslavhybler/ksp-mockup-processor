@@ -57,6 +57,7 @@ data class UserRank constructor(
 
 @Mockup
 class User constructor() {
+    var id:Int = 0
     var firstName: String = "John"
     var lastName: String = "Doe"
     var dateOfBirth: String = "01-01-1970"

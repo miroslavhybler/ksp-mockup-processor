@@ -1,4 +1,4 @@
-package mir.oslav.mockup.example.ui
+package mir.oslav.mockup.example.ui.author
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,16 +24,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import mir.oslav.mockup.Mockup
-import mir.oslav.mockup.example.Photo
-import mir.oslav.mockup.example.R
 import mir.oslav.mockup.example.User
+import mir.oslav.mockup.example.ui.Photo
 
 
 /**
@@ -54,21 +51,16 @@ fun AuthorsScreen(
         topBar = {
             TopAppBar(
                 title = { Text(text = "Authors") },
-                navigationIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_back),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .clickable(onClick = navHostController::popBackStack)
-                    )
-                }
             )
         },
         content = { paddingValues ->
             LazyColumn(
                 content = {
                     itemsIndexed(items = users) { index, user ->
-                        AuthorItem(user = user)
+                        AuthorItem(
+                            user = user,
+                            navHostController = navHostController
+                        )
                     }
                 },
                 contentPadding = paddingValues,
@@ -81,16 +73,20 @@ fun AuthorsScreen(
 
 
 @Composable
-private fun AuthorItem(user: User) {
+private fun AuthorItem(user: User, navHostController: NavHostController) {
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = {
+                navHostController.navigate(route = "author/${user.id}")
+            })
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
 
+        //TODO replace with generated url
         Photo(
             imageUrl = "https://cdn.pixabay.com/photo/2023/08/30/04/16/man-8222531_1280.jpg",
             modifier = Modifier

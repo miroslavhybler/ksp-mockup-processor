@@ -55,6 +55,12 @@ val user = Mockup.user.single
 val usersLis = Mockup.user.list
 ```
 
+### Supported types
+- Simple types like Int, Long, String, ...
+- Lists
+- Arrays with known type (like IntArray, FloatArray, ...) are generated empty
+- Classes annotated with @Mockup annotation
+
 
 ### Used resources
 Images for previews taken from [https://pixabay.com/](Pixabay).

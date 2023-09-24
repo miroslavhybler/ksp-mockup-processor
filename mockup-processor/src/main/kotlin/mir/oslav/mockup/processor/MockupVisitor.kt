@@ -79,7 +79,8 @@ class MockupVisitor constructor(
      * @since 1.0.0
      */
     private fun visitClass(
-        classDeclaration: KSClassDeclaration, outTypesList: ArrayList<MockupType.Property>
+        classDeclaration: KSClassDeclaration,
+        outTypesList: ArrayList<MockupType.Property>
     ) {
         val primaryConstructor = classDeclaration.primaryConstructor
 
@@ -120,8 +121,7 @@ class MockupVisitor constructor(
             val qualifiedName = declaration.qualifiedName?.asString()
             qualifiedName == "mir.oslav.mockup.annotations.Mockup"
         } ?: throw IllegalStateException(
-            "Class ${classDeclaration.simpleName.getShortName()} is probably not annotated " +
-                    "with @Mockup! If your class is annotated please report an issue."
+            "Class ${classDeclaration.simpleName.getShortName()} is probably not annotated " + "with @Mockup! If your class is annotated please report an issue."
         )
 
         var count = 10
@@ -155,10 +155,7 @@ class MockupVisitor constructor(
     ) {
 
         val propertyType = resolveMockupType(
-            type = type,
-            property = property,
-            name = name,
-            imports = imports
+            type = type, property = property, name = name, imports = imports
         )
 
         val typeQualifiedName = type.declaration.qualifiedName
@@ -168,8 +165,7 @@ class MockupVisitor constructor(
 
             val constructorPropertyName = parameter.name
 
-            parameterQualifiedName == typeQualifiedName
-                    && propertyName == constructorPropertyName
+            parameterQualifiedName == typeQualifiedName && propertyName == constructorPropertyName
 
         } != null
 
@@ -227,9 +223,7 @@ class MockupVisitor constructor(
                 //TODO message, type is probably not annotated with @Mockup
                 val mockUpped = findMockedClass(type = type)
                 return mockUpped ?: throw IllegalStateException(
-                    "Unable to resolve type, class ${type.declaration.simpleName.getShortName()} " +
-                            "is probably not annotated with @Mockup! " +
-                            "If your class is annotated please report an issue."
+                    "Unable to resolve type, class ${type.declaration.simpleName.getShortName()} " + "is probably not annotated with @Mockup! " + "If your class is annotated please report an issue."
                 )
             }
         }

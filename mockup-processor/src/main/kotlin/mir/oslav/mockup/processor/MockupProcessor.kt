@@ -70,21 +70,38 @@ class MockupProcessor constructor(
 
 
     /**
+     * In order to prevent ksp from <a href="https://kotlinlang.org/docs/ksp-multi-round.html#changes-to-getsymbolsannotatedwith">multiple round processing</a>
+     * [process] should be processing only once. When [wasInvoked] is true, [emptyList] is returned
+     * immediately from [process].
+     * @since 1.0.0
+     */
+    private var wasInvoked: Boolean = false
+
+    /**
      * @since 1.0.0
      */
     override fun process(resolver: Resolver): List<KSAnnotated> {
+        if (wasInvoked) {
+            return emptyList()
+        }
+
         val mockupClassDeclarations = resolver.findAnnotations()
+
+        AbstractMockupDataProviderGenerator(
+            outputStream = generateOutputFile(
+                classes = mockupClassDeclarations,
+                filename = "MockupDataProvider.kt"
+            )
+        ).generateContent()
+
+
+        /*
         try {
-            AbstractMockupDataProviderGenerator(
-                outputStream = generateOutputFile(
-                    classes = mockupClassDeclarations,
-                    filename = "MockupDataProvider.kt"
-                )
-            ).generateContent()
         } catch (ignored: FileAlreadyExistsException) {
             // Means that all files are already generated, abort the process
             return mockupClassDeclarations
         }
+         */
 
         mockupTypesList.clear()
 
@@ -122,7 +139,7 @@ class MockupProcessor constructor(
             )
         ).generateContent(providers = providers)
 
-
+        wasInvoked = true
         return mockupClassDeclarations
     }
 
@@ -202,7 +219,7 @@ class MockupProcessor constructor(
     ): OutputStream {
         return environment.codeGenerator.createNewFile(
             dependencies = Dependencies(
-                aggregating = false,
+                aggregating = true,
                 sources = classes
                     .mapNotNull(KSClassDeclaration::containingFile)
                     .toTypedArray()
@@ -325,7 +342,7 @@ class MockupProcessor constructor(
             type.isFloat -> "${Random.nextFloat()}"
             type.isDouble -> "${Random.nextDouble()}"
             type.isBoolean -> "${Random.nextBoolean()}"
-            type.isString -> "\"${loremIpsum(maxLength = 256)}\""
+            type.isString -> "\"${loremIpsum()}\""
             else -> throw WrongTypeException(expectedType = "Simple", givenType = "$type")
         }
     }
