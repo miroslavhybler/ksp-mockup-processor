@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -27,9 +29,9 @@ publishing {
             artifactId = "annotations"
             version = "1.0.0"
 
-            //afterEvaluate {
-            //    from(components["debug"])
-            //}
+            afterEvaluate {
+                from(components.getByName("kotlin"))
+            }
         }
     }
 

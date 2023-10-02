@@ -1,4 +1,3 @@
-
 import org.jetbrains.dokka.DokkaConfiguration.Visibility
 import java.io.FileInputStream
 import java.util.Properties
@@ -9,15 +8,16 @@ plugins {
     id("kotlin-kapt")
     id("org.jetbrains.dokka")
     id("maven-publish")
+    id("com.google.devtools.ksp")
 }
 
 kotlin {
     jvmToolchain(jdkVersion = 8)
 }
 
-dependencies {
-    api(project(":mockup-annotations"))
 
+dependencies {
+    implementation(project(":mockup-annotations"))
     implementation("com.google.devtools.ksp:symbol-processing-api:1.9.10-1.0.13")
     implementation("androidx.annotation:annotation:1.7.0")
 
@@ -41,7 +41,6 @@ tasks.register("runMockupProcessor", JavaExec::class) {
 
 
 tasks.dokkaHtml.configure {
-    //    outputDirectory.set(rootDir.resolve("docs-html"))
     outputDirectory.set(buildDir.resolve("dokkaHtml"))
 
     dokkaSourceSets {
@@ -52,13 +51,13 @@ tasks.dokkaHtml.configure {
                 )
             )
             documentedVisibilities.set(
-                mutableListOf(
-                    Visibility.PUBLIC,
-                    Visibility.PRIVATE,
-                    Visibility.PROTECTED,
-                    Visibility.INTERNAL,
-                    Visibility.PACKAGE
-                )
+                 mutableListOf(
+                     Visibility.PUBLIC,
+                     Visibility.PRIVATE,
+                     Visibility.PROTECTED,
+                     Visibility.INTERNAL,
+                     Visibility.PACKAGE
+                 )
             )
 
             skipEmptyPackages.set(true)
@@ -78,10 +77,9 @@ publishing {
             groupId = "mir.oslav.mockup"
             artifactId = "processor"
             version = "1.0.0"
-
-            //afterEvaluate {
-            //    from(components["debug"])
-            //}
+            afterEvaluate {
+                from(components.getByName("kotlin"))
+            }
         }
     }
 

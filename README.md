@@ -32,6 +32,7 @@ plugins {
 dependencies {
     val mockupVersion= "1.0.0"
     implementation("mir.oslav.mockup:annotations:$mockupVersion")
+    ksp("mir.oslav.mockup:annotations:$mockupVersion")
     ksp("mir.oslav.mockup:processor:$mockupVersion")
 }
 ```
@@ -40,7 +41,7 @@ dependencies {
 Annotate desired classes with @Mockup.
 
 ```kotlin
-@Mockup(isDataClass = true)
+@Mockup
 data class User constructor(
     val id: Int,
     val firstName: String,
@@ -63,4 +64,4 @@ val usersLis = Mockup.user.list
 
 
 ### Used resources
-Images for previews taken from [https://pixabay.com/](Pixabay).
+Images for previews taken from [Pixabay](https://www.pixabay.com/).
