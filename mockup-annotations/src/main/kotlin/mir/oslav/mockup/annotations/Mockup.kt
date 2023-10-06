@@ -6,10 +6,11 @@ import androidx.annotation.IntRange
 
 
 /**
- * Annotates desired class for mockup data generation
- * @param count Number of items generated, keep it low for better performance and less memory consumption
- * @param enableNullValues
- * @param name
+ * Annotates desired class for mockup data generation.
+ * @param count Number of items generated, keep it low for better performance and less memory consumption.
+ * @param enableNullValues True if you want to allow random null values is nullable properties, false otherwise.
+ * @param name Name of mockup data provider property in generated Mockup.kt object. If empty, class name
+ * is used instead.
  * @since 1.0.0
  * @author Miroslav Hýbler <br>
  * created on 15.09.2023

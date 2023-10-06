@@ -5,6 +5,14 @@ import java.io.OutputStream
 
 
 /**
+ * Generates MockupDataProvider abstract class which defines the mockup providers. Generated class has: <br>
+ * <ul>
+ *     <li>One generic null safe parameter T</li>
+ *     <li>One primary constructor with values member which is List of T</li>
+ *     <li>Property single - getter which takes random item from values</li>
+ *     <li>Property list - getter which returns values property</li>
+ * </ul>
+ * @param outputStream Target output stream. The file of this stream should be named MockupDataProvider.kt
  * @since 1.0.0
  * @author Miroslav Hýbler <br>
  * created on 16.09.2023
@@ -13,7 +21,9 @@ class AbstractMockupDataProviderGenerator constructor(
     private val outputStream: OutputStream
 ) {
 
+
     /**
+     * Writes code into [outputStream]
      * @since 1.0.0
      */
     fun generateContent() {

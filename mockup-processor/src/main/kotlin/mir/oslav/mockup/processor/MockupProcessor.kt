@@ -35,11 +35,13 @@ import kotlin.random.Random
 
 
 /**
+ * Processor of ksp-mockup library.
  * @param environment
  * @since 1.0.0
  * @author Miroslav Hýbler <br>
  * created on 15.09.2023
  */
+//TODO support enums
 class MockupProcessor constructor(
     private val environment: SymbolProcessorEnvironment,
 ) : SymbolProcessor {
@@ -52,6 +54,7 @@ class MockupProcessor constructor(
 
 
     /**
+     * Hods all imports that are needed in generated classes.
      * @since 1.0.0
      */
     private val importsList: ArrayList<String> = ArrayList()
@@ -77,31 +80,28 @@ class MockupProcessor constructor(
      */
     private var wasInvoked: Boolean = false
 
+
     /**
      * @since 1.0.0
      */
     override fun process(resolver: Resolver): List<KSAnnotated> {
+
+        //TODO environment.options to enable/disable
+
         if (wasInvoked) {
+            // If processor was invoked previously return emptyList() immediately for unwanted
+            // multiple round processing.
             return emptyList()
         }
 
-        val mockupClassDeclarations = resolver.findAnnotations()
+        val mockupClassDeclarations = resolver.findAnnotatedClasses()
 
         AbstractMockupDataProviderGenerator(
             outputStream = generateOutputFile(
                 classes = mockupClassDeclarations,
-                filename = "MockupDataProvider.kt"
+                filename = "MockupDataProvider"
             )
         ).generateContent()
-
-
-        /*
-        try {
-        } catch (ignored: FileAlreadyExistsException) {
-            // Means that all files are already generated, abort the process
-            return mockupClassDeclarations
-        }
-         */
 
         mockupTypesList.clear()
 
@@ -112,10 +112,7 @@ class MockupProcessor constructor(
         )
 
         mockupClassDeclarations.forEach { classDeclaration ->
-            visitor.extractImport(
-                classDeclaration = classDeclaration,
-                outImportsList = importsList
-            )
+            classDeclaration.qualifiedName?.asString()?.let(importsList::add)
         }
 
         visitor.imports = importsList
@@ -135,7 +132,7 @@ class MockupProcessor constructor(
         MockupObjectGenerator(
             outputStream = generateOutputFile(
                 mockupClassDeclarations,
-                filename = "Mockup.kt"
+                filename = "Mockup"
             )
         ).generateContent(providers = providers)
 
@@ -162,8 +159,9 @@ class MockupProcessor constructor(
         require(
             value = size1 == size2,
             lazyMessage = {
-                "Declarations list and classes list having different sizes ($size1!=$size2). This is " +
-                        "probably some weird bug, report an issue please."
+                "Declarations list and classes list having different sizes ($size1!=$size2). " +
+                        "This is probably some weird bug, report an issue please here " +
+                        "https://github.com/miroslavhybler/ksp-mockup/issues."
             }
         )
 
@@ -175,7 +173,7 @@ class MockupProcessor constructor(
             val dataProviderClazzName = dataProvidersGenerator.generateContent(
                 outputStream = generateOutputFile(
                     classes = classesDeclarations,
-                    filename = "${mockupClass.name}MockupProvider.kt",
+                    filename = "${mockupClass.name}MockupProvider",
                     packageName = "mir.oslav.mockup.providers"
                 ),
                 clazz = mockupClass,
@@ -185,7 +183,7 @@ class MockupProcessor constructor(
                 MockupObjectMember(
                     providerClassName = dataProviderClazzName,
                     providerClassPackage = "mir.oslav.mockup.providers",
-                    itemClassName = mockupClass.name
+                    propertyName = mockupClass.name
                 )
             )
         }
@@ -198,15 +196,15 @@ class MockupProcessor constructor(
      * @return List of declared classes that are annotated with @[Mockup] annotations.
      * @since 1.0.0
      */
-    private fun Resolver.findAnnotations(
+    private fun Resolver.findAnnotatedClasses(
     ): List<KSClassDeclaration> = getSymbolsWithAnnotation(
         Mockup::class.qualifiedName.toString()
     ).filterIsInstance<KSClassDeclaration>().toList()
 
 
     /**
-     * Creates single file for code generation
-     * @param filename Filename. Can be both with or without extension.
+     * Creates single file for code generation and returns it's opened [OutputStream]
+     * @param filename Filename without *.kt extension
      * @param packageName Package name for generated files
      * @since 1.0.0
      * @throws FileAlreadyExistsException If file already exits
@@ -215,17 +213,18 @@ class MockupProcessor constructor(
     private fun generateOutputFile(
         classes: List<KSClassDeclaration>,
         filename: String,
-        packageName: String = "mir.oslav.mockup"
+        packageName: String = "mir.oslav.mockup",
+        isAggregating: Boolean = true
     ): OutputStream {
         return environment.codeGenerator.createNewFile(
             dependencies = Dependencies(
-                aggregating = true,
+                aggregating = isAggregating,
                 sources = classes
                     .mapNotNull(KSClassDeclaration::containingFile)
                     .toTypedArray()
             ),
             packageName = packageName,
-            fileName = filename,
+            fileName = filename.removeSuffix(suffix = ".kt"),
         )
     }
 
@@ -265,7 +264,7 @@ class MockupProcessor constructor(
      * <b>Simple Types</b><br/>
      * generates single line code of assignment like: <code>id = 123</code><br/><br/>
      * <b>Mockupped classes Type</b><br/>
-     * Generates code of assignment for class property. [generateCodeForMockuppedType] will choose
+     * Generates code of assignment for class property. [generateCodeForMockUppedType] will choose
      * if it will use primary constructor or [apply] scope function for [MockupType.MockUpped.properties].
      * <br/><br/>
      * <b>Collection Type</b><br/>
@@ -273,7 +272,7 @@ class MockupProcessor constructor(
      * @see generateCodeForProperty
      * @since 1.0.0
      */
-    //TODO hashmap later
+    //TODO hashmap
     private fun generateCodeForProperty(property: MockupType.Property): String {
         var outputCode = ""
         outputCode += "\t\t\t"
@@ -291,30 +290,45 @@ class MockupProcessor constructor(
             }
 
             is MockupType.MockUpped -> {
-                val propertyValue = generateCodeForMockuppedType(
+                val propertyValue = generateCodeForMockUppedType(
                     type = type,
                     mockupClasses = mockupTypesList.filterIsInstance<MockupType.MockUpped>()
                 )
                 outputCode += propertyValue
             }
 
+            //TODO prevent infinite collection generation
             is MockupType.Collection -> {
                 outputCode += "listOf(\n"
-                val propertyValue = when (val elementType = type.elementType) {
-                    is MockupType.Simple -> generateCodeForSimpleType(property = elementType)
+                var propertyValueCode = ""
+                when (val elementType = type.elementType) {
+                    is MockupType.Simple -> {
+                        for (i in 0 until 5) {
+                            propertyValueCode += generateCodeForSimpleType(property = elementType)
+                            if (i != 4) {
+                                propertyValueCode += ",\n"
+                            }
+                        }
+                    }
+
                     is MockupType.MockUpped -> {
-                        generateCodeForMockuppedType(
-                            mockupClasses = mockupTypesList.filterIsInstance<MockupType.MockUpped>(),
-                            type = elementType
-                        )
+                        for (i in 0 until 5) {
+                            propertyValueCode += generateCodeForMockUppedType(
+                                mockupClasses = mockupTypesList.filterIsInstance<MockupType.MockUpped>(),
+                                type = elementType
+                            )
+                            if (i != 4) {
+                                propertyValueCode += ",\n"
+                            }
+                        }
                     }
 
                     is MockupType.FixedTypeArray -> generateCodeForFixedTypeArray(type = elementType)
-                    is MockupType.Collection -> ""
-                    else -> ""
+                    is MockupType.Collection -> propertyValueCode = ""
+                    else -> propertyValueCode = ""
                 }
 
-                outputCode += propertyValue
+                outputCode += propertyValueCode
                 outputCode += ")\n"
             }
 
@@ -332,7 +346,6 @@ class MockupProcessor constructor(
      * @throws WrongTypeException
      * @since 1.0.0
      */
-    //TODO recognition
     private fun generateCodeForSimpleType(property: MockupType.Simple): String {
         val type = property.type
         return when {
@@ -381,7 +394,7 @@ class MockupProcessor constructor(
      * @see generateItemPrimaryConstructorCall
      * @see generateCodeForProperty
      */
-    private fun generateCodeForMockuppedType(
+    private fun generateCodeForMockUppedType(
         type: MockupType.MockUpped,
         mockupClasses: List<MockupType.MockUpped>,
     ): String {
@@ -394,8 +407,10 @@ class MockupProcessor constructor(
             mockupClass.name == memberClassName
                     && mockupClass.packageName == memberClassPackageName
         } ?: throw NullPointerException(
-            "Cannot generate mockup data for non annotated class ${memberClassName}. Make sure to " +
-                    "annotate class with @Mockup annotation!"
+            "Cannot generate mockup data for class ${memberClassName}. This can have two causes:\n" +
+                    "Cause 1: Class $memberClassName is not supported. List of supported types can be found here https://github.com/miroslavhybler/ksp-mockup/#supported-types\n" +
+                    "Cause 2: Class $memberClassName is not annotated with @Mockup annotation.\n" +
+                    "If neither of these one has happened, please report an issue here https://github.com/miroslavhybler/ksp-mockup/issues.\n\n"
         )
 
         outCode += generateItemPrimaryConstructorCall(mockupClass = memberClass)

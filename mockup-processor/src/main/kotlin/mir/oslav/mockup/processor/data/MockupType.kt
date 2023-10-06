@@ -7,6 +7,10 @@ import mir.oslav.mockup.annotations.Mockup
 
 
 /**
+ * Wrapper class around [KSType] containing additional data
+ * @param name Name of type class or property name based on context
+ * @param type Resolved [KSType]
+ * @param declaration
  * @since 1.0.0
  * @author Miroslav Hýbler <br>
  * created on 21.09.2023
@@ -18,12 +22,17 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
 ) {
 
 
+    /**
+     * Package name of the [declaration]
+     * @since 1.0.0
+     */
     val packageName: String get() = declaration.packageName.asString()
 
 
     /**
      * Represents a simple data type (etc. [Int], [String], ...), [KSType.isSimpleType] must always
-     * be true, otherwise type was not recognized correctly.
+     * be true, otherwise type was not recognized correctly and [WrongTypeException] would be thrown
+     * elsewhere.
      * @see KSType.isSimpleType
      * @since 1.0.0
      */
@@ -37,10 +46,9 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
         declaration = declaration
     )
 
-
     /**
      * Representing type for classes annotated with @[Mockup] annotation.
-     * @since1.0.0
+     * @since 1.0.0
      */
     data class MockUpped constructor(
         override val name: String,
@@ -85,8 +93,8 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
     data class FixedTypeArray constructor(
         override val name: String,
         override val type: KSType,
-        override val declaration: KSClassDeclaration,
-    ) : MockupType<KSClassDeclaration>(
+        override val declaration: KSDeclaration,
+    ) : MockupType<KSDeclaration>(
         name = name,
         type = type,
         declaration = declaration
@@ -98,14 +106,16 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
      * @param name Name of the property from class (e.g. id, name, ...), name of the property's type
      * is in [resolvedType]
      * @param type Raw [KSType] of property
-     * @param declaration
-     * @param imports
-     * @param resolvedType
+     * @param declaration Original property declaration.
+     * @param imports All imports that are needed by this property.
+     * @param resolvedType Wrapped type of this property
      * @param isMutable True when property is mutable (declared with var keyword in source). False
      * when property is not mutable (declared with "val" keyword in source)
-     * Represents property type
+     * @param isInPrimaryConstructorProperty True when property is declared in primary constructor
+     * of the class.
      * @since 1.0.0
      */
+    //TODO put elsewhere, doesnt make much sense from Mockup type
     data class Property constructor(
         override val name: String,
         override val type: KSType,
@@ -121,6 +131,12 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
         declaration = declaration
     ) {
 
+
+        /**
+         * True when this property is <b>not</b> declared in primary constructor, false otherwise.
+         * @see isInPrimaryConstructorProperty
+         * @since 1.0.0
+         */
         val isNotInPrimaryConstructorProperty:Boolean
             get() = !isInPrimaryConstructorProperty
 

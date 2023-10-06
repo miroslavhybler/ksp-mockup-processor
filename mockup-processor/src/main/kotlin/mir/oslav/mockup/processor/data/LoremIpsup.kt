@@ -1,10 +1,11 @@
 package mir.oslav.mockup.processor.data
 
-import androidx.annotation.IntRange
 import kotlin.random.Random
 
 
 /**
+ * Lorem ipsum text to be used in string generated values
+ * @since 1.0.0
  * @author Miroslav Hýbler <br>
  * created on 16.09.2023
  */
@@ -33,6 +34,7 @@ private val loremIpsum: String
 
 
 /**
+ * @return String of "Lorem ipsum ..." content [maxLength] characters long
  * @since 1.0.0
  */
 fun loremIpsum(
@@ -45,4 +47,26 @@ fun loremIpsum(
 
 
     return outRaw.replace("\n", "")
+}
+
+
+/**
+ * @param wordCount Number of words of output string. [loremIpsum] whole will be returned when
+ * [wordCount] would be bigger then count of words.
+ * @return String of "Lorem ipsum ..." content. Text will have [wordCount] words.
+ * @since 1.1.0
+ */
+fun loremIpsumWords(wordCount: Int): String {
+    val split = loremIpsum.split(" ")
+
+    if (wordCount >= split.size) {
+        return loremIpsum
+    }
+
+
+    return buildString {
+        for (i in 0 until wordCount) {
+            append(split[0])
+        }
+    }
 }

@@ -1,11 +1,15 @@
+@file:OptIn(ExperimentalLayoutApi::class)
+
 package mir.oslav.mockup.example.ui.article
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,7 +19,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -45,28 +48,24 @@ fun ArticlesScreen(
     paddingValues: PaddingValues
 ) {
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = "Articles") },
-            )
-        },
-        content = { _ ->
-            LazyColumn(
-                content = {
-                    itemsIndexed(items = articles) { index, article ->
-                        ArticleItem(
-                            article = article,
-                            navHostController = navHostController
-                        )
-                    }
-                },
-                contentPadding = paddingValues,
-                modifier = Modifier.fillMaxSize(),
-            )
-        },
-    )
+    Column {
+        TopAppBar(
+            title = { Text(text = "Articles") },
+        )
 
+        LazyColumn(
+            content = {
+                itemsIndexed(items = articles) { index, article ->
+                    ArticleItem(
+                        article = article,
+                        navHostController = navHostController
+                    )
+                }
+            },
+            contentPadding = paddingValues,
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
 }
 
 
@@ -103,10 +102,12 @@ private fun ArticleItem(
                     .clip(shape = RoundedCornerShape(size = 16.dp))
             )
 
-            Row(
+            FlowRow(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(top = 12.dp, end = 12.dp)
-                    .align(alignment = Alignment.TopEnd)
+                    .align(alignment = Alignment.TopEnd),
+                horizontalArrangement = Arrangement.End
             ) {
                 article.categories.forEach { category ->
                     Text(
@@ -147,7 +148,7 @@ private fun ArticleItem(
 }
 
 @Composable
-@Preview
+@Preview(showBackground = true)
 private fun ArticleScreenPreview() {
     ArticlesScreen(
         navHostController = rememberNavController(),

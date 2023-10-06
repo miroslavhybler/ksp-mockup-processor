@@ -7,6 +7,8 @@ import java.util.Locale
 
 
 /**
+ * Generator of Mockup.kt object which is only way for getting generated data via its properties
+ * @since 1.0.0
  * @author Miroslav Hýbler <br>
  * created on 15.09.2023
  */
@@ -15,6 +17,12 @@ open class MockupObjectGenerator constructor(
 ) {
 
 
+    /**
+     * Generates Mockup.kt object code containing properties defined by [providers].
+     * @param providers List of generated providers which are going to be accessible as public object's
+     * properties.
+     * @since 1.0.0
+     */
     fun generateContent(providers: List<MockupObjectMember>) {
 
         //Header
@@ -45,9 +53,9 @@ open class MockupObjectGenerator constructor(
 
             //Item documentation
             outputStream += "\t/**\n"
-            outputStream += "\t * Provides generated data for ${provider.itemClassName}\n"
+            outputStream += "\t * Provides generated data for ${provider.propertyName}\n"
             outputStream += "\t */\n"
-            val valName = provider.itemClassName.replaceFirstChar { it.lowercase(Locale.ROOT) }
+            val valName = provider.propertyName.replaceFirstChar { it.lowercase(Locale.ROOT) }
             val valDeclaration = "public val $valName"
             val valType = ": ${provider.providerClassName}"
             val constructorCall = "${provider.providerClassName}()"

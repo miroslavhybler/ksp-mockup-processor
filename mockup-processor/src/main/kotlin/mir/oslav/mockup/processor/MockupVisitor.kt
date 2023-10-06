@@ -3,8 +3,6 @@ package mir.oslav.mockup.processor
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSDeclaration
-import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSVisitorVoid
@@ -17,8 +15,11 @@ import mir.oslav.mockup.processor.generation.isSimpleType
 
 
 /**
+ *
  * @param environment
- * @param outputClassList
+ * @param outputTypeList Output List where resolved types will be stored.
+ * @param allClassesDeclarations Input list containing declarations from target module of all classes
+ * annotated with @[Mockup] annotation.
  * @since 1.0.0
  * @author Miroslav Hýbler <br>
  * created on 15.09.2023
@@ -40,11 +41,7 @@ class MockupVisitor constructor(
         val outTypesList: ArrayList<MockupType.Property> = ArrayList()
 
 
-        visitClass(
-            classDeclaration = classDeclaration, outTypesList = outTypesList
-        )
-
-        //TODO resolve @IgnoreOnMockup annotations on members
+        visitClass(classDeclaration = classDeclaration, outTypesList = outTypesList)
 
         val annotationData = visitMockupAnnotation(classDeclaration = classDeclaration)
         val classType = classDeclaration.asType(typeArguments = emptyList())
@@ -59,23 +56,14 @@ class MockupVisitor constructor(
         )
 
         outputTypeList.add(mockupClass)
-
     }
 
 
     /**
-     * @since 1.0.0
-     */
-    fun extractImport(
-        classDeclaration: KSClassDeclaration, outImportsList: ArrayList<String>
-    ) {
-        classDeclaration.qualifiedName?.asString()?.let(outImportsList::add)
-    }
-
-
-    /**
-     * Visits class annotated with @Mockup declaration and fills outLists
+     * Visits class annotated with @[Mockup] and resolves it's properties. Properties will be inserted
+     * into [outTypesList]
      * @param classDeclaration Declaration of class
+     * @param outTypesList Output list where resolved properties will be added
      * @since 1.0.0
      */
     private fun visitClass(
@@ -87,30 +75,51 @@ class MockupVisitor constructor(
         classDeclaration.getDeclaredProperties().forEach { property ->
             val name = property.simpleName.getShortName()
             val type = property.type.resolve()
-            val isNullable = type.isMarkedNullable
             val declaration = type.declaration
 
 
-            //TODO imports of classes inside (Article -> User -> UserRank)
-            insertIntoTypeList(
-                name = name,
+            val propertyType = resolveMockupType(
                 type = type,
-                declaration = declaration,
-                outTypesList = outTypesList,
-                imports = imports,
                 property = property,
-                primaryConstructor = primaryConstructor
+                name = name,
+                imports = imports
+            )
+
+            val typeQualifiedName = type.declaration.qualifiedName
+            val propertyName = property.simpleName
+            val isInsidePrimaryConstructor = primaryConstructor?.parameters?.find { parameter ->
+                val parameterQualifiedName = parameter.type.resolve().declaration.qualifiedName
+                val constructorPropertyName = parameter.name
+                parameterQualifiedName == typeQualifiedName && propertyName == constructorPropertyName
+
+            } != null
+
+            outTypesList.add(
+                MockupType.Property(
+                    resolvedType = propertyType,
+                    name = name,
+                    type = type,
+                    declaration = declaration,
+                    imports = imports,
+                    isMutable = property.isMutable,
+                    isInPrimaryConstructorProperty = isInsidePrimaryConstructor
+
+                )
             )
         }
     }
 
 
     /**
-     * Tries to extract @Mockup annotation data.
+     * Visits [classDeclaration] and tries to extract @[Mockup] annotation data.
      * @param classDeclaration Class declaration. Should be ALWAYS annotated with @Mockup.
-     * @throws IllegalStateException If class is not annotated with @Mockup annotations.
-     * @throws TypeCastException When @[Mockup] annotation data would be invalid (this should never happen)
-     * @return Extracted @Mockup annotation data.
+     * @throws IllegalStateException If class is not annotated with @[Mockup] annotations. This should
+     * never happen since classes are queried by [MockupProcessor.findAnnotatedClasses] which takes
+     * classes ONLY annotated with @[Mockup]. If this happens  please report an issue
+     * <a href="https://github.com/miroslavhybler/ksp-mockup/issues">here</a>.
+     * @throws TypeCastException When @[Mockup] annotation data would be invalid. This should never
+     * happen but if so, please report an issue <a href="https://github.com/miroslavhybler/ksp-mockup/issues">here</a>.
+     * @return Extracted @[Mockup] annotation data.
      * @since 1.0.0
      */
     private fun visitMockupAnnotation(
@@ -120,85 +129,58 @@ class MockupVisitor constructor(
             val declaration = ksAnnotation.annotationType.resolve().declaration
             val qualifiedName = declaration.qualifiedName?.asString()
             qualifiedName == "mir.oslav.mockup.annotations.Mockup"
-        } ?: throw IllegalStateException(
-            "Class ${classDeclaration.simpleName.getShortName()} is probably not annotated " + "with @Mockup! If your class is annotated please report an issue."
-        )
+        }
+
+        require(value = annotation != null, lazyMessage = {
+            "Unable to resolve type, class ${classDeclaration.simpleName.getShortName()} " +
+                    "is probably not annotated with @Mockup! If your class is annotated please" +
+                    " report an issue here https://github.com/miroslavhybler/ksp-mockup/issues."
+        })
+
 
         var count = 10
         var enableNullValues = false
         var name = ""
-        var isDataClass = true
 
         annotation.arguments.forEach { argument ->
             when (argument.name?.getShortName()) {
                 "count" -> count = argument.value as Int
                 "enableNullValues" -> enableNullValues = argument.value as Boolean
                 "name" -> name = argument.value as String
-                "isDataClass" -> isDataClass = argument.value as Boolean
             }
         }
 
         return MockupAnnotationData(
-            count = count, name = name, enableNullValues = enableNullValues
+            count = count,
+            name = name,
+            enableNullValues = enableNullValues
         )
     }
 
 
-    private fun insertIntoTypeList(
-        name: String,
-        declaration: KSDeclaration,
-        type: KSType,
-        property: KSPropertyDeclaration,
-        outTypesList: ArrayList<MockupType.Property>,
-        imports: List<String>,
-        primaryConstructor: KSFunctionDeclaration?
-    ) {
-
-        val propertyType = resolveMockupType(
-            type = type, property = property, name = name, imports = imports
-        )
-
-        val typeQualifiedName = type.declaration.qualifiedName
-        val propertyName = property.simpleName
-        val isInsidePrimaryConstructor = primaryConstructor?.parameters?.find { parameter ->
-            val parameterQualifiedName = parameter.type.resolve().declaration.qualifiedName
-
-            val constructorPropertyName = parameter.name
-
-            parameterQualifiedName == typeQualifiedName && propertyName == constructorPropertyName
-
-        } != null
-
-        outTypesList.add(
-            MockupType.Property(
-                resolvedType = propertyType,
-                name = name,
-                type = type,
-                declaration = declaration,
-                imports = imports,
-                isMutable = property.isMutable,
-                isInPrimaryConstructorProperty = isInsidePrimaryConstructor
-
-            )
-        )
-    }
-
-
+    /**
+     * Tries to resolve [type]
+     * @param type -> Type to resolve
+     * @param name -> name of type class or property name based on context
+     * @param property -> Property declaration with [type]
+     * @param imports -> Imports that are needed by [type] and [property]
+     * @return Resolved Mockup type
+     * @since 1.0.0
+     */
     private fun resolveMockupType(
-        type: KSType, name: String, property: KSPropertyDeclaration, imports: List<String>
+        type: KSType,
+        name: String,
+        property: KSPropertyDeclaration,
+        imports: List<String>
     ): MockupType<*> {
         val declaration = type.declaration
         return when {
             type.isSimpleType -> {
-                MockupType.Simple(
-                    name = name, type = type, declaration = declaration
-                )
+                MockupType.Simple(name = name, type = type, declaration = declaration)
             }
 
             type.isFixedArrayType -> {
-                MockupType.Simple(
-                    name = name, type = type, declaration = declaration
-                )
+                MockupType.FixedTypeArray(name = name, type = type, declaration = declaration)
             }
 
             type.isGenericCollectionType -> {
@@ -219,28 +201,37 @@ class MockupVisitor constructor(
                 )
             }
 
-            else -> {
-                //TODO message, type is probably not annotated with @Mockup
-                val mockUpped = findMockedClass(type = type)
-                return mockUpped ?: throw IllegalStateException(
-                    "Unable to resolve type, class ${type.declaration.simpleName.getShortName()} " + "is probably not annotated with @Mockup! " + "If your class is annotated please report an issue."
-                )
-            }
+            else -> findMockUppedClass(type = type)
+
         }
     }
 
 
-    private fun findMockedClass(
+    /**
+     * @return [MockupType] representing class annotated with [Mockup] annotation, null otherwise.
+     * @since 1.0.0
+     */
+    private fun findMockUppedClass(
         type: KSType
-    ): MockupType.MockUpped? {
+    ): MockupType.MockUpped {
         val classDeclaration = allClassesDeclarations.find { mockupClass ->
             mockupClass.qualifiedName == type.declaration.qualifiedName
-        } ?: return null
+        }
+
+
+        require(value = classDeclaration != null, lazyMessage = {
+            val typeName = type.declaration.simpleName.getShortName()
+            "Unable to resolve type ${typeName}. This can have two causes:\n" +
+                    "Cause 1: Class $typeName is not supported. List of supported types can be found here https://github.com/miroslavhybler/ksp-mockup/#supported-types\n" +
+                    "Cause 2: Class $typeName is not annotated with @Mockup annotation.\n" +
+                    "If neither of these one has happened, please report an issue here https://github.com/miroslavhybler/ksp-mockup/issues.\n\n"
+        })
 
         val outTypesList: ArrayList<MockupType.Property> = ArrayList()
 
         visitClass(
-            classDeclaration = classDeclaration, outTypesList = outTypesList
+            classDeclaration = classDeclaration,
+            outTypesList = outTypesList
         )
 
         return MockupType.MockUpped(

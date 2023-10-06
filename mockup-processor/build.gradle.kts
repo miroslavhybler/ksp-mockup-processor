@@ -22,7 +22,7 @@ dependencies {
     implementation("androidx.annotation:annotation:1.7.0")
 
 
-    val autoServiceVersion = "1.0-rc7"
+    val autoServiceVersion = "1.0"
     kapt("com.google.auto.service:auto-service:$autoServiceVersion")
     compileOnly("com.google.auto.service:auto-service-annotations:$autoServiceVersion")
 

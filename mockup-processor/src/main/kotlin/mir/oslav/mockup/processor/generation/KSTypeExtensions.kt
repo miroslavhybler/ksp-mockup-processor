@@ -153,6 +153,7 @@ val KSType.isBooleanArray: Boolean
 
 
 /**
+ * True if this type is simple kotlin language type, false otherwise
  * @since 1.0.0
  */
 val KSType.isSimpleType: Boolean
@@ -167,6 +168,7 @@ val KSType.isSimpleType: Boolean
 
 
 /**
+ * True if this type is array with known (not generic) type, false otherwise
  * @since 1.0.0
  */
 val KSType.isFixedArrayType: Boolean
@@ -179,7 +181,9 @@ val KSType.isFixedArrayType: Boolean
             || this.isByteArray
 
 
+
 /**
+ * True if this type is collection with generic parameter, false otherwise
  * @since 1.0.0
  */
 val KSType.isGenericCollectionType: Boolean

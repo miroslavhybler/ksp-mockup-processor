@@ -1,11 +1,9 @@
 package mir.oslav.mockup.processor.data
 
-import com.google.devtools.ksp.symbol.KSType
-import java.lang.IllegalStateException
-
 
 /**
- * TODO message
+ * Exception to be thrown when some part of the processor would receive type that is not expected.
+ * @since 1.0.0
  * @author Miroslav Hýbler <br>
  * created on 22.09.2023
  */
