@@ -5,6 +5,8 @@ import java.io.OutputStream
 
 
 /**
+ * Writes [other] text into the output stream
+ * @since 1.0.0
  * @author Miroslav Hýbler <br>
  * created on 15.09.2023
  */
@@ -61,8 +63,13 @@ val KSType.isBoolean: Boolean
     get() = declaration.qualifiedName?.asString() == "kotlin.Boolean"
 
 
+/**
+ * True if this type is [Byte], false otherwise
+ * @since 1.0.0
+ */
 val KSType.isByte: Boolean
     get() = declaration.qualifiedName?.asString() == "kotlin.Byte"
+
 
 /**
  * True if this type is [String], false otherwise
@@ -79,6 +86,13 @@ val KSType.isString: Boolean
 val KSType.isList: Boolean
     get() = declaration.qualifiedName?.asString() == "kotlin.collections.List"
 
+
+/**
+ * True if this type is [ArrayList], false otherwise
+ * @since 1.0.0
+ */
+val KSType.isArrayList: Boolean
+    get() = declaration.qualifiedName?.asString() == "kotlin.collections.ArrayList"
 
 /**
  * True if this type is [Array], false otherwise
@@ -183,7 +197,8 @@ val KSType.isFixedArrayType: Boolean
 
 
 /**
- * True if this type is collection with generic parameter, false otherwise
+ * True if this type is collection with generic parameter, false otherwise. Arraylist check added
+ * at version 1.1.0
  * @since 1.0.0
  */
 val KSType.isGenericCollectionType: Boolean

@@ -178,6 +178,23 @@ private fun ArticleDetailScreenContent(
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(horizontal = 12.dp)
                 )
+
+
+                Text(text = "Gallery", style = MaterialTheme.typography.titleMedium)
+
+                FlowRow {
+                    article.gallery.forEach { galleryPhoto ->
+                        //TODO replace with generated image url
+                        Photo(
+                            imageUrl = "https://cdn.pixabay.com/photo/2023/08/30/04/16/man-8222531_1280.jpg",
+                            modifier = Modifier
+                                .padding(vertical = 8.dp, horizontal = 8.dp)
+                                .size(size = 96.dp)
+                                .clip(shape = RoundedCornerShape(size = 16.dp))
+                        )
+                    }
+                }
+
             }
         },
         snackbarHost = {

@@ -53,9 +53,11 @@ open class MockupObjectGenerator constructor(
 
             //Item documentation
             outputStream += "\t/**\n"
-            outputStream += "\t * Provides generated data for ${provider.propertyName}\n"
+            outputStream += "\t * Provides generated mockup data for ${provider.propertyName}\n"
             outputStream += "\t */\n"
-            val valName = provider.propertyName.replaceFirstChar { it.lowercase(Locale.ROOT) }
+            val valName = provider.propertyName.replaceFirstChar { char ->
+                    char.lowercase(locale = Locale.ROOT)
+                }
             val valDeclaration = "public val $valName"
             val valType = ": ${provider.providerClassName}"
             val constructorCall = "${provider.providerClassName}()"

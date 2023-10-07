@@ -15,7 +15,7 @@ data class Article constructor(
     val content: String,
     val contentExtra: String?,
     val author: User,
-    val tags: List<String>,
+    val tags: Array<String>,
     val categories: List<Category>,
     val isSpecialEdition: Boolean,
     val headerImageUrl: String,

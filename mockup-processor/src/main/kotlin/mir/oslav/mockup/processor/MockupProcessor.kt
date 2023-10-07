@@ -15,6 +15,7 @@ import mir.oslav.mockup.processor.generation.AbstractMockupDataProviderGenerator
 import mir.oslav.mockup.processor.generation.MockupDataProviderGenerator
 import mir.oslav.mockup.processor.generation.MockupObjectGenerator
 import mir.oslav.mockup.processor.generation.decapitalized
+import mir.oslav.mockup.processor.generation.isArray
 import mir.oslav.mockup.processor.generation.isBoolean
 import mir.oslav.mockup.processor.generation.isBooleanArray
 import mir.oslav.mockup.processor.generation.isByteArray
@@ -25,6 +26,7 @@ import mir.oslav.mockup.processor.generation.isFloat
 import mir.oslav.mockup.processor.generation.isFloatArray
 import mir.oslav.mockup.processor.generation.isInt
 import mir.oslav.mockup.processor.generation.isIntArray
+import mir.oslav.mockup.processor.generation.isList
 import mir.oslav.mockup.processor.generation.isLong
 import mir.oslav.mockup.processor.generation.isLongArray
 import mir.oslav.mockup.processor.generation.isShort
@@ -263,7 +265,7 @@ class MockupProcessor constructor(
      * Generates property's value assignment code.<br>
      * <b>Simple Types</b><br/>
      * generates single line code of assignment like: <code>id = 123</code><br/><br/>
-     * <b>Mockupped classes Type</b><br/>
+     * <b>Mockup classes Type</b><br/>
      * Generates code of assignment for class property. [generateCodeForMockUppedType] will choose
      * if it will use primary constructor or [apply] scope function for [MockupType.MockUpped.properties].
      * <br/><br/>
@@ -299,11 +301,19 @@ class MockupProcessor constructor(
 
             //TODO prevent infinite collection generation
             is MockupType.Collection -> {
-                outputCode += "listOf(\n"
+
+                outputCode += when {
+                    type.type.isList -> "listOf(\n"
+                    type.type.isArray -> "arrayOf(\n"
+                    else -> throw WrongTypeException(
+                        expectedType = "Generic collection type",
+                        givenType = type.name
+                    )
+                }
                 var propertyValueCode = ""
                 when (val elementType = type.elementType) {
                     is MockupType.Simple -> {
-                        for (i in 0 until 5) {
+                        for (i in 0 until  Random.nextInt(from = 1, until = 6)) {
                             propertyValueCode += generateCodeForSimpleType(property = elementType)
                             if (i != 4) {
                                 propertyValueCode += ",\n"
