@@ -9,6 +9,7 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import mir.oslav.mockup.annotations.Mockup
 import mir.oslav.mockup.processor.data.MockupObjectMember
 import mir.oslav.mockup.processor.data.MockupType
+import mir.oslav.mockup.processor.data.ResolvedProperty
 import mir.oslav.mockup.processor.data.WrongTypeException
 import mir.oslav.mockup.processor.data.loremIpsum
 import mir.oslav.mockup.processor.generation.AbstractMockupDataProviderGenerator
@@ -275,7 +276,7 @@ class MockupProcessor constructor(
      * @since 1.0.0
      */
     //TODO hashmap
-    private fun generateCodeForProperty(property: MockupType.Property): String {
+    private fun generateCodeForProperty(property: ResolvedProperty): String {
         var outputCode = ""
         outputCode += "\t\t\t"
         outputCode += "${property.name.decapitalized()} = "
@@ -313,7 +314,7 @@ class MockupProcessor constructor(
                 var propertyValueCode = ""
                 when (val elementType = type.elementType) {
                     is MockupType.Simple -> {
-                        for (i in 0 until  Random.nextInt(from = 1, until = 6)) {
+                        for (i in 0 until Random.nextInt(from = 1, until = 6)) {
                             propertyValueCode += generateCodeForSimpleType(property = elementType)
                             if (i != 4) {
                                 propertyValueCode += ",\n"
@@ -449,7 +450,7 @@ class MockupProcessor constructor(
 
         //List of class properties declared in primary constructor
         val constructorProperties = mockupClass.properties
-            .filter(MockupType.Property::isInPrimaryConstructorProperty)
+            .filter(ResolvedProperty::isInPrimaryConstructorProperty)
 
         if (constructorProperties.isEmpty()) {
             return "\t\t$type()"
@@ -482,8 +483,8 @@ class MockupProcessor constructor(
      */
     private fun generateItemApplyCall(mockupClass: MockupType.MockUpped): String {
         val notConstructorParameters = mockupClass.properties
-            .filter(MockupType.Property::isMutable)
-            .filter(MockupType.Property::isNotInPrimaryConstructorProperty)
+            .filter(ResolvedProperty::isMutable)
+            .filter(ResolvedProperty::isNotInPrimaryConstructorProperty)
 
         if (notConstructorParameters.isEmpty()) {
             return ""

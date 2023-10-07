@@ -9,6 +9,7 @@ import com.google.devtools.ksp.symbol.KSVisitorVoid
 import mir.oslav.mockup.annotations.Mockup
 import mir.oslav.mockup.processor.data.MockupAnnotationData
 import mir.oslav.mockup.processor.data.MockupType
+import mir.oslav.mockup.processor.data.ResolvedProperty
 import mir.oslav.mockup.processor.generation.isFixedArrayType
 import mir.oslav.mockup.processor.generation.isGenericCollectionType
 import mir.oslav.mockup.processor.generation.isSimpleType
@@ -38,17 +39,17 @@ class MockupVisitor constructor(
      * @since 1.0.0
      */
     override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
-        val outTypesList: ArrayList<MockupType.Property> = ArrayList()
+        val resolvedProperties: ArrayList<ResolvedProperty> = ArrayList()
 
 
-        visitClass(classDeclaration = classDeclaration, outTypesList = outTypesList)
+        visitClass(classDeclaration = classDeclaration, outputList = resolvedProperties)
 
         val annotationData = visitMockupAnnotation(classDeclaration = classDeclaration)
         val classType = classDeclaration.asType(typeArguments = emptyList())
         val mockupClass = MockupType.MockUpped(
             name = annotationData.name.takeIf(String::isNotBlank)
                 ?: classDeclaration.simpleName.getShortName(),
-            properties = outTypesList,
+            properties = resolvedProperties,
             imports = imports,
             type = classType,
             data = annotationData,
@@ -61,14 +62,14 @@ class MockupVisitor constructor(
 
     /**
      * Visits class annotated with @[Mockup] and resolves it's properties. Properties will be inserted
-     * into [outTypesList]
+     * into [outputList]
      * @param classDeclaration Declaration of class
-     * @param outTypesList Output list where resolved properties will be added
+     * @param outputList Output list where resolved properties will be added
      * @since 1.0.0
      */
     private fun visitClass(
         classDeclaration: KSClassDeclaration,
-        outTypesList: ArrayList<MockupType.Property>
+        outputList: ArrayList<ResolvedProperty>
     ) {
         val primaryConstructor = classDeclaration.primaryConstructor
 
@@ -94,8 +95,8 @@ class MockupVisitor constructor(
 
             } != null
 
-            outTypesList.add(
-                MockupType.Property(
+            outputList.add(
+                ResolvedProperty(
                     resolvedType = propertyType,
                     name = name,
                     type = type,
@@ -227,11 +228,11 @@ class MockupVisitor constructor(
                     "If neither of these one has happened, please report an issue here https://github.com/miroslavhybler/ksp-mockup/issues.\n\n"
         })
 
-        val outTypesList: ArrayList<MockupType.Property> = ArrayList()
+        val outputPropertiesList: ArrayList<ResolvedProperty> = ArrayList()
 
         visitClass(
             classDeclaration = classDeclaration,
-            outTypesList = outTypesList
+            outputList = outputPropertiesList
         )
 
         return MockupType.MockUpped(
@@ -240,7 +241,7 @@ class MockupVisitor constructor(
             data = visitMockupAnnotation(classDeclaration = classDeclaration),
             type = type,
             imports = imports,
-            properties = outTypesList
+            properties = outputPropertiesList
         )
     }
 }

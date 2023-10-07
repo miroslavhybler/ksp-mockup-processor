@@ -56,7 +56,7 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
         override val declaration: KSClassDeclaration,
         val data: MockupAnnotationData,
         val imports: List<String>,
-        val properties: List<Property>
+        val properties: List<ResolvedProperty>
     ) : MockupType<KSClassDeclaration>(
         name = name,
         type = type,
@@ -99,47 +99,4 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
         type = type,
         declaration = declaration
     )
-
-
-    /**
-     * Representing class property
-     * @param name Name of the property from class (e.g. id, name, ...), name of the property's type
-     * is in [resolvedType]
-     * @param type Raw [KSType] of property
-     * @param declaration Original property declaration.
-     * @param imports All imports that are needed by this property.
-     * @param resolvedType Wrapped type of this property
-     * @param isMutable True when property is mutable (declared with var keyword in source). False
-     * when property is not mutable (declared with "val" keyword in source)
-     * @param isInPrimaryConstructorProperty True when property is declared in primary constructor
-     * of the class.
-     * @since 1.0.0
-     */
-    //TODO put elsewhere, doesnt make much sense from Mockup type
-    data class Property constructor(
-        override val name: String,
-        override val type: KSType,
-        override val declaration: KSDeclaration,
-        val imports: List<String>,
-        val resolvedType: MockupType<*>,
-        val isMutable: Boolean,
-        val isInPrimaryConstructorProperty: Boolean
-
-    ) : MockupType<KSDeclaration>(
-        name = name,
-        type = type,
-        declaration = declaration
-    ) {
-
-
-        /**
-         * True when this property is <b>not</b> declared in primary constructor, false otherwise.
-         * @see isInPrimaryConstructorProperty
-         * @since 1.0.0
-         */
-        val isNotInPrimaryConstructorProperty:Boolean
-            get() = !isInPrimaryConstructorProperty
-
-    }
-
 }
