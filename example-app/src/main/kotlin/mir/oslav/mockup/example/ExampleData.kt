@@ -2,6 +2,8 @@ package mir.oslav.mockup.example
 
 import androidx.annotation.ColorInt
 import mir.oslav.mockup.annotations.Mockup
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
 
 
 /**
@@ -13,14 +15,28 @@ data class Article constructor(
     val id: Int,
     val title: String,
     val content: String,
-    val contentExtra: String?,
     val author: User,
     val tags: Array<String>,
     val categories: List<Category>,
     val isSpecialEdition: Boolean,
-    val headerImageUrl: String,
-    val gallery: List<GalleryPhoto>
+    val imageUrl: String,
+    val gallery: List<GalleryPhoto>,
+    val createdAt: String,
 ) {
+
+    companion object {
+        //You can set custom JodaTime format for the date generation in your app's build.gradle.kts
+        //ksp {
+        //  arg(k = "mockup-date-format", v = "yyyy-MM-dd")
+        //}
+        //https://www.joda.org/joda-time/key_format.html
+        private val dateTimeFormat: DateTimeFormatter = DateTimeFormat.forPattern(
+            "yyyy-MM-dd"
+        )
+    }
+
+    val createdAtFormatted: String
+        get() = dateTimeFormat.parseDateTime(createdAt).toString("MM. dd. yyyy")
 
     @Mockup
     data class GalleryPhoto constructor(
@@ -28,7 +44,6 @@ data class Article constructor(
     ) {
 
     }
-
 }
 
 @Mockup
@@ -55,9 +70,9 @@ data class UserRank constructor(
 )
 
 
-@Mockup
+@Mockup(count = 3)
 class User constructor() {
-    var id:Int = 0
+    var id: Int = 0
     var firstName: String = "John"
     var lastName: String = "Doe"
     var dateOfBirth: String = "01-01-1970"

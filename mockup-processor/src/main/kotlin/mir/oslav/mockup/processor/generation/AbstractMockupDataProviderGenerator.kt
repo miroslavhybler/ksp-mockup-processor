@@ -47,7 +47,7 @@ class AbstractMockupDataProviderGenerator constructor(
         outputStream += "\t private val values: List<T> = emptyList()\n"
         outputStream += ") {\n"
         outputStream += "\n"
-        outputStream += "\tval singe: T get() = values.random()\n"
+        outputStream += "\tval single: T get() = values.random()\n"
         outputStream += "\n"
         outputStream += "\tval list: List<T> get() = values\n"
         outputStream += "}"

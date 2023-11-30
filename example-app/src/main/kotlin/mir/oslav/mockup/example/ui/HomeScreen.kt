@@ -44,9 +44,11 @@ fun HomeScreen(
                 NavigationBarItem(
                     selected = selectedIndex == 0,
                     onClick = {
-                        selectedIndex = 0
-                        bottomMenuNavHostController.popBackStack()
-                        bottomMenuNavHostController.navigate(route = "articles")
+                        if (selectedIndex != 0) {
+                            selectedIndex = 0
+                            bottomMenuNavHostController.popBackStack()
+                            bottomMenuNavHostController.navigate(route = "articles")
+                        }
                     },
                     icon = {
                         Icon(
@@ -61,9 +63,11 @@ fun HomeScreen(
                 NavigationBarItem(
                     selected = selectedIndex == 1,
                     onClick = {
-                        selectedIndex = 1
-                        bottomMenuNavHostController.popBackStack()
-                        bottomMenuNavHostController.navigate(route = "authors")
+                        if (selectedIndex != 1) {
+                            selectedIndex = 1
+                            bottomMenuNavHostController.popBackStack()
+                            bottomMenuNavHostController.navigate(route = "authors")
+                        }
                     },
                     icon = {
                         Icon(

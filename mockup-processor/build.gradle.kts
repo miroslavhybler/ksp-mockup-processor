@@ -20,12 +20,10 @@ dependencies {
     implementation(project(":mockup-annotations"))
     implementation("com.google.devtools.ksp:symbol-processing-api:1.9.10-1.0.13")
     implementation("androidx.annotation:annotation:1.7.0")
-
-
+    implementation("joda-time:joda-time:2.12.5")
     val autoServiceVersion = "1.0"
     kapt("com.google.auto.service:auto-service:$autoServiceVersion")
     compileOnly("com.google.auto.service:auto-service-annotations:$autoServiceVersion")
-
 }
 
 
@@ -51,13 +49,13 @@ tasks.dokkaHtml.configure {
                 )
             )
             documentedVisibilities.set(
-                 mutableListOf(
-                     Visibility.PUBLIC,
-                     Visibility.PRIVATE,
-                     Visibility.PROTECTED,
-                     Visibility.INTERNAL,
-                     Visibility.PACKAGE
-                 )
+                mutableListOf(
+                    Visibility.PUBLIC,
+                    Visibility.PRIVATE,
+                    Visibility.PROTECTED,
+                    Visibility.INTERNAL,
+                    Visibility.PACKAGE
+                )
             )
 
             skipEmptyPackages.set(true)
@@ -76,7 +74,7 @@ publishing {
         register<MavenPublication>("ksp-mockup-publish") {
             groupId = "mir.oslav.mockup"
             artifactId = "processor"
-            version = "1.0.0"
+            version = "1.1.0"
             afterEvaluate {
                 from(components.getByName("kotlin"))
             }

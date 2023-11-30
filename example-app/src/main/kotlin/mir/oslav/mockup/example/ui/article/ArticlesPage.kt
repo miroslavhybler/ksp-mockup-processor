@@ -86,7 +86,7 @@ private fun ArticleItem(
                     )
                 }
             )
-            .padding(vertical = 8.dp, horizontal = 12.dp)
+            .padding(vertical = 16.dp, horizontal = 12.dp)
     ) {
 
         Box(
@@ -94,9 +94,8 @@ private fun ArticleItem(
                 .fillMaxWidth()
                 .height(height = 228.dp)
         ) {
-            //TODO replace with generated url
             Photo(
-                imageUrl = "https://cdn.pixabay.com/photo/2023/07/13/20/39/coffee-beans-8125757_1280.jpg",
+                imageUrl = article.imageUrl,
                 modifier = Modifier
                     .matchParentSize()
                     .clip(shape = RoundedCornerShape(size = 16.dp))
@@ -126,12 +125,29 @@ private fun ArticleItem(
                     )
                 }
             }
+
+
+            Text(
+                text = remember(key1 = article) {
+                    article.createdAtFormatted
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                modifier = Modifier
+                    .padding(start = 8.dp, bottom = 4.dp)
+                    .align(alignment = Alignment.BottomStart)
+                    .background(
+                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                        shape = MaterialTheme.shapes.small
+                    )
+                    .padding(horizontal = 4.dp, vertical = 2.dp)
+            )
         }
 
 
         Text(
             text = article.title,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis
@@ -139,7 +155,7 @@ private fun ArticleItem(
 
         Text(
             text = article.author.fullName,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis

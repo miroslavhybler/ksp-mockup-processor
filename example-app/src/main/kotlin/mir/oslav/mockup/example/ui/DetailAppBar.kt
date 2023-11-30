@@ -46,7 +46,14 @@ fun DetailAppBar(
                 modifier = Modifier
                     .size(size = 48.dp)
                     .clip(shape = CircleShape)
-                    .clickable(onClick = navHostController::popBackStack)
+                    .clickable(onClick = {
+                        val startRoute = navHostController.graph.startDestinationRoute
+                        val actualRoute = navHostController.currentBackStackEntry
+                            ?.destination?.route
+                        if (actualRoute != startRoute) {
+                            navHostController.popBackStack()
+                        }
+                    })
                     .padding(all = 10.dp)
             )
         },

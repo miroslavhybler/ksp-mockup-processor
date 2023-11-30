@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -95,17 +94,16 @@ private fun ArticleDetailScreenContent(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(state = rememberScrollState()),
+                    .verticalScroll(state = rememberScrollState())
+                    .padding(paddingValues = paddingValues),
             ) {
-
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(height = 312.dp)
                 ) {
-                    //TODO replace with generated url
                     Photo(
-                        imageUrl = "https://cdn.pixabay.com/photo/2023/07/13/20/39/coffee-beans-8125757_1280.jpg",
+                        imageUrl = article.imageUrl,
                         modifier = Modifier.matchParentSize()
                     )
                 }
@@ -173,6 +171,15 @@ private fun ArticleDetailScreenContent(
                 Spacer(modifier = Modifier.height(height = 12.dp))
 
                 Text(
+                    text = remember(key1 = article) { article.createdAtFormatted },
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+
+                Spacer(modifier = Modifier.height(height = 12.dp))
+
+                Text(
                     text = article.content,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onBackground,
@@ -180,13 +187,16 @@ private fun ArticleDetailScreenContent(
                 )
 
 
-                Text(text = "Gallery", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = "Gallery",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
 
                 FlowRow {
                     article.gallery.forEach { galleryPhoto ->
-                        //TODO replace with generated image url
                         Photo(
-                            imageUrl = "https://cdn.pixabay.com/photo/2023/08/30/04/16/man-8222531_1280.jpg",
+                            imageUrl = galleryPhoto.imageUrl,
                             modifier = Modifier
                                 .padding(vertical = 8.dp, horizontal = 8.dp)
                                 .size(size = 96.dp)
@@ -211,7 +221,7 @@ private fun ArticleDetailScreenContent(
 private fun ArticleDetailScreenPreview() {
 
     ArticleDetailScreenContent(
-        article = Mockup.article.singe,
+        article = Mockup.article.single,
         navHostController = rememberNavController()
     )
 

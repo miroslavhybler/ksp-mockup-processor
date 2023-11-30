@@ -84,7 +84,7 @@ private fun AuthorDetailScreenContent(
                 navHostController = navHostController,
                 onFavoriteButton = {
                     coroutineScope.launch {
-                      snackBarHostState.showSnackbar(
+                        snackBarHostState.showSnackbar(
                             message = "Saved to favorites \uD83D\uDE0A",
                             actionLabel = "Dismiss",
                             duration = SnackbarDuration.Short
@@ -107,9 +107,8 @@ private fun AuthorDetailScreenContent(
                                     .fillMaxWidth()
                                     .height(height = 256.dp)
                             ) {
-                                //TODO replace with generated url
                                 Photo(
-                                    imageUrl = "https://cdn.pixabay.com/photo/2023/07/13/20/39/coffee-beans-8125757_1280.jpg",
+                                    imageUrl = author.imageUrl,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(height = 226.dp)
@@ -196,9 +195,8 @@ private fun ArticleItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        //TODO replace with generated image url
         Photo(
-            imageUrl = "https://cdn.pixabay.com/photo/2023/07/13/20/39/coffee-beans-8125757_1280.jpg",
+            imageUrl = article.imageUrl,
             modifier = Modifier
                 .size(size = 64.dp)
                 .clip(shape = RoundedCornerShape(size = 16.dp))
@@ -230,7 +228,7 @@ private fun ArticleItem(
 @Preview
 private fun AuthorDetailScreenPreview() {
     AuthorDetailScreenContent(
-        author = Mockup.user.singe,
+        author = Mockup.user.single,
         navHostController = rememberNavController(),
         articles = Mockup.article.list
     )

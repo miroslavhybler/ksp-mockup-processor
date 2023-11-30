@@ -85,10 +85,8 @@ private fun AuthorItem(user: User, navHostController: NavHostController) {
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-
-        //TODO replace with generated url
         Photo(
-            imageUrl = "https://cdn.pixabay.com/photo/2023/08/30/04/16/man-8222531_1280.jpg",
+            imageUrl = user.imageUrl,
             modifier = Modifier
                 .size(size = 56.dp)
                 .clip(shape = CircleShape)

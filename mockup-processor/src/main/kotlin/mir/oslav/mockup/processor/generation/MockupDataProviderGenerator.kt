@@ -55,7 +55,7 @@ class MockupDataProviderGenerator constructor(
         outputStream += "\n"
         outputStream += "/**\n"
         outputStream += " * Holds the generated mockup data for $name class.\n"
-        outputStream += " * Single item can be accessed by [${providerClassName}.singe] \n"
+        outputStream += " * Single item can be accessed by [${providerClassName}.single] \n"
         outputStream += " * Multiple items with [${providerClassName}.list].\n"
         outputStream += " * @since 1.0.0\n"
         outputStream += " */\n"

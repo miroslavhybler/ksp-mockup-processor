@@ -15,7 +15,7 @@ plugins {
 }
 ```
 
-**Project's settings.gradle.ksp**
+**Project's settings.gradle.kts**
 ```kotlin
 // Adds maven 
 dependencyResolutionManagement {
@@ -34,7 +34,7 @@ plugins {
 
 
 dependencies {
-    val mockupVersion= "1.0.0"
+    val mockupVersion= "1.1.0"
     implementation("mir.oslav.mockup:annotations:$mockupVersion")
     ksp("mir.oslav.mockup:annotations:$mockupVersion")
     ksp("mir.oslav.mockup:processor:$mockupVersion")

@@ -7,6 +7,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import mir.oslav.mockup.annotations.Mockup
+import mir.oslav.mockup.processor.data.InputOptions
 import mir.oslav.mockup.processor.data.MockupObjectMember
 import mir.oslav.mockup.processor.data.MockupType
 import mir.oslav.mockup.processor.data.ResolvedProperty
@@ -33,6 +34,9 @@ import mir.oslav.mockup.processor.generation.isLongArray
 import mir.oslav.mockup.processor.generation.isShort
 import mir.oslav.mockup.processor.generation.isShortArray
 import mir.oslav.mockup.processor.generation.isString
+import mir.oslav.mockup.processor.recognition.BaseRecognizer
+import mir.oslav.mockup.processor.recognition.DateTimeRecognizer
+import mir.oslav.mockup.processor.recognition.ImageUrlRecognizer
 import java.io.OutputStream
 import kotlin.random.Random
 
@@ -49,6 +53,16 @@ class MockupProcessor constructor(
     private val environment: SymbolProcessorEnvironment,
 ) : SymbolProcessor {
 
+
+    companion object {
+
+        /**
+         * TODO docs
+         * @since 1.1.0
+         */
+        var inputOptions: InputOptions? = null
+            private set
+    }
 
     /**
      * @since 1.0.0
@@ -76,6 +90,14 @@ class MockupProcessor constructor(
 
 
     /**
+     * @since 1.1.0
+     */
+    private val recognizers: List<BaseRecognizer> = listOf(
+        ImageUrlRecognizer(),
+        DateTimeRecognizer(),
+    )
+
+    /**
      * In order to prevent ksp from <a href="https://kotlinlang.org/docs/ksp-multi-round.html#changes-to-getsymbolsannotatedwith">multiple round processing</a>
      * [process] should be processing only once. When [wasInvoked] is true, [emptyList] is returned
      * immediately from [process].
@@ -85,13 +107,21 @@ class MockupProcessor constructor(
 
 
     /**
+     * @since 1.1.0
+     */
+    private var generatedProvidersCount: Int = 0
+
+
+    /**
      * @since 1.0.0
      */
     override fun process(resolver: Resolver): List<KSAnnotated> {
+        val dateFormat = environment.options["mockup-date-format"]
+            ?: DateTimeRecognizer.defaultFormat
 
-        //TODO environment.options to enable/disable
+        inputOptions = InputOptions(defaultDateFormat = dateFormat)
 
-        if (wasInvoked) {
+        if (wasInvoked && generatedProvidersCount > 0) {
             // If processor was invoked previously return emptyList() immediately for unwanted
             // multiple round processing.
             return emptyList()
@@ -139,7 +169,10 @@ class MockupProcessor constructor(
             )
         ).generateContent(providers = providers)
 
+        generatedProvidersCount = providers.size
         wasInvoked = true
+
+
         return mockupClassDeclarations
     }
 
@@ -253,7 +286,6 @@ class MockupProcessor constructor(
         for (i in 0 until mockupClass.data.count) {
             outCode += generateItemPrimaryConstructorCall(mockupClass = mockupClass)
             outCode += generateItemApplyCall(mockupClass = mockupClass)
-
             outCode += ",\n"
         }
         outCode += ")"
@@ -275,11 +307,18 @@ class MockupProcessor constructor(
      * @see generateCodeForProperty
      * @since 1.0.0
      */
-    //TODO hashmap
     private fun generateCodeForProperty(property: ResolvedProperty): String {
         var outputCode = ""
         outputCode += "\t\t\t"
         outputCode += "${property.name.decapitalized()} = "
+
+
+        recognizers.forEach { recognizer ->
+            if (recognizer.recognize(property = property)) {
+                outputCode += recognizer.generateCodeValueForProperty(property = property)
+                return outputCode
+            }
+        }
 
         when (val type = property.resolvedType) {
             is MockupType.Simple -> {
@@ -360,13 +399,14 @@ class MockupProcessor constructor(
     private fun generateCodeForSimpleType(property: MockupType.Simple): String {
         val type = property.type
         return when {
-            //Simple types
+            //Simple types and string
             type.isShort -> "${Random.nextInt(from = 0, until = 255)}"
-            type.isInt || type.isLong -> "${Random.nextInt()}"
+            type.isInt -> "${Random.nextInt(from = 0, until = 5000)}"
+            type.isLong -> "${Random.nextInt()}"
             type.isFloat -> "${Random.nextFloat()}"
             type.isDouble -> "${Random.nextDouble()}"
             type.isBoolean -> "${Random.nextBoolean()}"
-            type.isString -> "\"${loremIpsum()}\""
+            type.isString -> "\"${generateStringValue(property = property)}\""
             else -> throw WrongTypeException(expectedType = "Simple", givenType = "$type")
         }
     }
@@ -394,6 +434,18 @@ class MockupProcessor constructor(
                 givenType = "$elementType"
             )
         }
+    }
+
+
+    private fun generateStringValue(property: MockupType.Simple): String {
+        recognizers.forEach { recognizer ->
+
+            //         if (recognizer.recognize(property = property)) {
+
+            //     }
+        }
+
+        return loremIpsum()
     }
 
 
