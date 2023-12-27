@@ -1,6 +1,5 @@
+
 import org.jetbrains.dokka.DokkaConfiguration.Visibility
-import java.io.FileInputStream
-import java.util.Properties
 
 
 plugins {
@@ -69,32 +68,22 @@ tasks.dokkaHtml.configure {
 }
 
 
-publishing {
-    publications {
-        register<MavenPublication>("ksp-mockup-publish") {
-            groupId = "mir.oslav.mockup"
-            artifactId = "processor"
-            version = "1.1.0"
-            afterEvaluate {
-                from(components.getByName("kotlin"))
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from (components.getByName("kotlin"))
+                groupId = "mir.oslav.mockup"
+                artifactId = "processor"
+                version = "1.1.1"
+                pom {
+                    description.set("Jitpack.io deploy")
+                }
             }
+
         }
-    }
-
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri(path = "https://maven.pkg.github.com/miroslavhybler/ksp-mockup/")
-
-            val githubProperties = Properties()
-            githubProperties.load(FileInputStream(rootProject.file("github.properties")))
-            val username = githubProperties["github.username"].toString()
-            val token = githubProperties["github.token"].toString()
-
-            credentials {
-                this.username = username
-                this.password = token
-            }
+        repositories {
+            mavenLocal()
         }
     }
 }
