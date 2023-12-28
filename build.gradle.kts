@@ -6,5 +6,3 @@ plugins {
     id("com.google.devtools.ksp") version "1.9.10-1.0.13" apply false
     id("org.jetbrains.dokka") version "1.8.20" apply false
 }
-
-group = "mir.oslav.mockup"

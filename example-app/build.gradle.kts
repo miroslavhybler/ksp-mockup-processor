@@ -79,7 +79,8 @@ android {
 dependencies {
 
     /** Mockup plugin */
-    implementation(project(":mockup-annotations"))
+    //Always keep same version for processor and annotations
+    implementation("com.github.miroslavhybler:ksp-mockup-annotations:1.1.2")
     ksp(project(":mockup-processor"))
 
     /** Compose and material */

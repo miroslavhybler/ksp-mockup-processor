@@ -20,7 +20,7 @@ plugins {
 // Adds maven 
 dependencyResolutionManagement {
     repositories {
-        maven(url = "https://maven.pkg.github.com/miroslavhybler/Maven")
+        maven(url="https://jitpack.io")
     }
 }
 ```
@@ -34,10 +34,11 @@ plugins {
 
 
 dependencies {
+    //Always keep the same version for annotations and processor
     val mockupVersion= "1.1.0"
-    implementation("mir.oslav.mockup:annotations:$mockupVersion")
-    ksp("mir.oslav.mockup:annotations:$mockupVersion")
-    ksp("mir.oslav.mockup:processor:$mockupVersion")
+    implementation("com.github.miroslavhybler:ksp-mockup-annotations:$mockupVersion")
+    ksp("com.github.miroslavhybler:ksp-mockup-annotations:$mockupVersion")
+    ksp("com.github.miroslavhybler:kps-mockup-processor:$mockupVersion")
 }
 ```
 

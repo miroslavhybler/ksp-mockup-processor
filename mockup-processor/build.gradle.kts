@@ -10,13 +10,16 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+group ="com.github.miroslavhybler.mockup-processor"
+version= "1.1.2"
+
 kotlin {
     jvmToolchain(jdkVersion = 8)
 }
 
 
 dependencies {
-    implementation(project(":mockup-annotations"))
+    implementation("com.github.miroslavhybler:ksp-mockup-annotations:1.1.2")
     implementation("com.google.devtools.ksp:symbol-processing-api:1.9.10-1.0.13")
     implementation("androidx.annotation:annotation:1.7.0")
     implementation("joda-time:joda-time:2.12.5")
@@ -75,7 +78,7 @@ afterEvaluate {
                 from (components.getByName("kotlin"))
                 groupId = "mir.oslav.mockup"
                 artifactId = "processor"
-                version = "1.1.1"
+                version = "1.1.2"
                 pom {
                     description.set("Jitpack.io deploy")
                 }
