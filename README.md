@@ -1,7 +1,8 @@
 # ksp-mockup
-Ksp mockup is simple ksp (Kotlin Symbol Processing) library for generating fake mockup data. These are
-handy  and convenient to be used in @Preview functions  in Jetpack Compose applications. Instead of 
-creating @PreviewParameterProvider just get mockup data with Mockup object.
+Ksp mockup is simple ksp ([Kotlin Symbol Processing](https://kotlinlang.org/docs/ksp-overview.html#supported-libraries)) 
+library for generating fake mockup data. These are handy  and convenient to be used in @Preview 
+functions in Jetpack Compose applications. Instead of creating @PreviewParameterProvider just get 
+mockup data with Mockup object.
 
 ## Add Library
 Add maven repository and library dependency to your app's gradle files. Make sure to add ksp plugin too.
@@ -10,8 +11,8 @@ Add maven repository and library dependency to your app's gradle files. Make sur
 ```kotlin
 // Project's build.gradle.kts make sure to keep compatible ksp version with your kotlin version 
 plugins {
-    id("org.jetbrains.kotlin.android") version "1.9.10" apply false
-    id("com.google.devtools.ksp") version "1.9.10-1.0.13" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.21" apply false
+    id("com.google.devtools.ksp") version "1.9.21-1.0.16" apply false
 }
 ```
 
@@ -35,7 +36,7 @@ plugins {
 
 dependencies {
     //Always keep the same version for annotations and processor
-    val mockupVersion= "1.1.0"
+    val mockupVersion= "1.1.2"
     implementation("com.github.miroslavhybler:ksp-mockup-annotations:$mockupVersion")
     ksp("com.github.miroslavhybler:ksp-mockup-annotations:$mockupVersion")
     ksp("com.github.miroslavhybler:kps-mockup-processor:$mockupVersion")
@@ -71,7 +72,7 @@ val usersLis = Mockup.user.list
 ### Limitations 
 - Not applicable to to java classes and java types
 - Any other types that are not specified in [Supported types](#Supported-types) are **not** supported and code generation will fail.
-- Generated data are **not** aggregated between each other! Don't try to access data based on id's or something.
+- Generated data are **not** aggregated between each other! Don't try to access data related on id's or something.
 
 ### Used resources
 🏞 Images for previews taken from [Pixabay](https://www.pixabay.com/).
