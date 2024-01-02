@@ -1,4 +1,3 @@
-
 import org.jetbrains.dokka.DokkaConfiguration.Visibility
 
 
@@ -10,13 +9,17 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-group ="com.github.miroslavhybler.mockup-processor"
-version= "1.1.2"
+group = "com.github.miroslavhybler.mockup-processor"
+version = "1.1.3"
 
 kotlin {
     jvmToolchain(jdkVersion = 8)
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
 
 dependencies {
     implementation("com.github.miroslavhybler:ksp-mockup-annotations:1.1.2")
@@ -75,10 +78,10 @@ afterEvaluate {
     publishing {
         publications {
             create<MavenPublication>("release") {
-                from (components.getByName("kotlin"))
+                from(components.getByName("kotlin"))
                 groupId = "mir.oslav.mockup"
                 artifactId = "processor"
-                version = "1.1.2"
+                version = "1.1.3"
                 pom {
                     description.set("Jitpack.io deploy")
                 }
