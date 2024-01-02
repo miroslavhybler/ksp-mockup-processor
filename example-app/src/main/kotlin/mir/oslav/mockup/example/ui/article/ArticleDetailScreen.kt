@@ -3,6 +3,7 @@
 package mir.oslav.mockup.example.ui.article
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -145,19 +147,29 @@ private fun ArticleDetailScreenContent(
 
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp),
+                        .wrapContentWidth()
+                        .clip(shape = CircleShape)
+                        .clickable(
+                            onClick = {
+                                //As described in the readme.md data are not aggregated, can't use
+                                //Author id from article because he is not in publisher list probably
+                                navHostController.navigate(
+                                    route = "author/${Mockup.publisher.list.random().id}"
+                                )
+                            }
+                        )
+                        .padding(horizontal = 12.dp, vertical = 2.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
 
                     Photo(
-                        imageUrl = "https://cdn.pixabay.com/photo/2023/08/30/04/16/man-8222531_1280.jpg",
+                        imageUrl = article.author.avatarUrl,
                         modifier = Modifier
                             .size(size = 32.dp)
                             .clip(shape = CircleShape)
                     )
 
-                    Spacer(modifier = Modifier.width(width = 24.dp))
+                    Spacer(modifier = Modifier.width(width = 14.dp))
 
                     Text(
                         text = article.author.fullName,

@@ -103,8 +103,8 @@ class MockupVisitor constructor(
                     declaration = declaration,
                     imports = imports,
                     isMutable = property.isMutable,
-                    isInPrimaryConstructorProperty = isInsidePrimaryConstructor
-
+                    isInPrimaryConstructorProperty = isInsidePrimaryConstructor,
+                    containingClassDeclaration = classDeclaration
                 )
             )
         }

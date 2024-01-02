@@ -20,8 +20,8 @@ kotlin {
 
 dependencies {
     implementation("com.github.miroslavhybler:ksp-mockup-annotations:1.1.2")
-    implementation("com.google.devtools.ksp:symbol-processing-api:1.9.10-1.0.13")
-    implementation("androidx.annotation:annotation:1.7.0")
+    implementation("com.google.devtools.ksp:symbol-processing-api:1.9.21-1.0.16")
+    implementation("androidx.annotation:annotation:1.7.1")
     implementation("joda-time:joda-time:2.12.5")
     val autoServiceVersion = "1.0"
     kapt("com.google.auto.service:auto-service:$autoServiceVersion")

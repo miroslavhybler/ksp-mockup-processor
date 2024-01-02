@@ -41,20 +41,29 @@ class ImageUrlRecognizer constructor() : BaseRecognizer() {
             "https://cdn.pixabay.com/photo/2023/08/15/09/21/camera-8191564_1280.jpg",
             "https://cdn.pixabay.com/photo/2023/11/02/19/25/woman-8361440_1280.jpg",
             "https://cdn.pixabay.com/photo/2023/10/31/23/06/tiger-8356190_1280.jpg",
+            "https://cdn.pixabay.com/photo/2023/10/20/19/25/moon-8330104_1280.png",
             "https://cdn.pixabay.com/photo/2023/11/04/07/57/owl-8364426_1280.jpg",
             "https://cdn.pixabay.com/photo/2023/10/10/07/59/lake-8305673_1280.jpg",
             "https://cdn.pixabay.com/photo/2023/10/26/18/18/coneflower-8343278_1280.jpg",
             "https://cdn.pixabay.com/photo/2023/11/02/11/32/woman-8360355_1280.jpg",
+            "https://cdn.pixabay.com/photo/2023/07/05/16/50/mountain-8108721_1280.jpg",
+            "https://cdn.pixabay.com/photo/2023/11/29/11/55/pine-hills-8419433_1280.jpg",
             "https://cdn.pixabay.com/photo/2023/10/12/12/54/woman-8310743_1280.jpg",
+            "https://cdn.pixabay.com/photo/2023/11/07/12/55/wolf-8372315_1280.jpg",
+            "https://cdn.pixabay.com/photo/2023/11/26/10/26/piano-8413277_1280.jpg",
             "https://cdn.pixabay.com/photo/2023/09/14/15/48/woman-8253239_1280.jpg",
+            "https://cdn.pixabay.com/photo/2023/12/07/10/59/giraffe-8435321_1280.jpg",
             "https://cdn.pixabay.com/photo/2023/09/26/06/45/bride-8276620_1280.jpg",
             "https://cdn.pixabay.com/photo/2023/08/30/04/16/man-8222531_1280.jpg",
             "https://cdn.pixabay.com/photo/2023/07/31/17/06/couple-8161451_1280.jpg",
             "https://cdn.pixabay.com/photo/2023/07/20/04/45/leva-8138344_1280.jpg",
             "https://cdn.pixabay.com/photo/2023/04/21/15/42/portrait-7942151_1280.jpg",
-            "https://cdn.pixabay.com/photo/2023/04/28/07/16/man-7956041_1280.jpg"
-
-
+            "https://cdn.pixabay.com/photo/2023/04/28/07/16/man-7956041_1280.jpg",
+            "https://cdn.pixabay.com/photo/2023/11/24/18/52/cat-8410502_1280.jpg",
+            "https://cdn.pixabay.com/photo/2023/04/21/17/47/plum-blossoms-7942343_1280.jpg",
+            "https://cdn.pixabay.com/photo/2023/12/09/15/04/dog-8439530_1280.jpg",
+            "https://cdn.pixabay.com/photo/2023/11/30/07/51/bridge-8420945_1280.jpg",
+            "https://cdn.pixabay.com/photo/2023/09/25/13/42/kingfisher-8275049_1280.png"
         )
 
         /**
@@ -68,8 +77,15 @@ class ImageUrlRecognizer constructor() : BaseRecognizer() {
      * @return True when [property] is considered being image url.
      * @since 1.1.0
      */
-    override fun recognize(property: ResolvedProperty): Boolean {
-        return recognizableNames.contains(element = property.name)
+    override fun recognize(property: ResolvedProperty, containingClassName: String): Boolean {
+        val isClear = recognizableNames.contains(element = property.name)
+        if (isClear) {
+            return true
+        }
+        val isMaybe = recognizableNames.find { imgPropertyName ->
+            property.name.contains(other = imgPropertyName, ignoreCase = true)
+        } != null
+        return  isMaybe
     }
 
 

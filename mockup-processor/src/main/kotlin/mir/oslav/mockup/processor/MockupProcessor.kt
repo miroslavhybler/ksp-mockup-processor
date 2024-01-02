@@ -37,6 +37,7 @@ import mir.oslav.mockup.processor.generation.isString
 import mir.oslav.mockup.processor.recognition.BaseRecognizer
 import mir.oslav.mockup.processor.recognition.DateTimeRecognizer
 import mir.oslav.mockup.processor.recognition.ImageUrlRecognizer
+import mir.oslav.mockup.processor.recognition.UsernameRecognizer
 import java.io.OutputStream
 import kotlin.random.Random
 
@@ -95,6 +96,7 @@ class MockupProcessor constructor(
     private val recognizers: List<BaseRecognizer> = listOf(
         ImageUrlRecognizer(),
         DateTimeRecognizer(),
+        UsernameRecognizer()
     )
 
     /**
@@ -128,6 +130,21 @@ class MockupProcessor constructor(
         }
 
         val mockupClassDeclarations = resolver.findAnnotatedClasses()
+
+        if (Debugger.isDebugEnabled) {
+            Debugger.setOutputStream(
+                outputStream = environment.codeGenerator.createNewFile(
+                    packageName = "mir.oslav.mockup",
+                    fileName = "logs",
+                    dependencies = Dependencies(
+                        aggregating = false,
+                        sources = mockupClassDeclarations
+                            .mapNotNull(KSClassDeclaration::containingFile)
+                            .toTypedArray()
+                    ),
+                )
+            )
+        }
 
         AbstractMockupDataProviderGenerator(
             outputStream = generateOutputFile(
@@ -173,6 +190,7 @@ class MockupProcessor constructor(
         wasInvoked = true
 
 
+        Debugger.close()
         return mockupClassDeclarations
     }
 
@@ -201,7 +219,7 @@ class MockupProcessor constructor(
             }
         )
 
-        mockupClasses.forEachIndexed { index, mockupClass ->
+        mockupClasses.forEachIndexed { _, mockupClass ->
             val mockupDataGeneratedContent: String = generateMockupDataListForProvider(
                 mockupClass = mockupClass
             )
@@ -314,7 +332,11 @@ class MockupProcessor constructor(
 
 
         recognizers.forEach { recognizer ->
-            if (recognizer.recognize(property = property)) {
+            if (recognizer.recognize(
+                    property = property,
+                    containingClassName = property.containingClassName
+                )
+            ) {
                 outputCode += recognizer.generateCodeValueForProperty(property = property)
                 return outputCode
             }
@@ -322,7 +344,7 @@ class MockupProcessor constructor(
 
         when (val type = property.resolvedType) {
             is MockupType.Simple -> {
-                val propertyValue = generateCodeForSimpleType(property = type)
+                val propertyValue = generateRandomCodeForSimpleType(property = type)
                 outputCode += propertyValue
             }
 
@@ -341,7 +363,6 @@ class MockupProcessor constructor(
 
             //TODO prevent infinite collection generation
             is MockupType.Collection -> {
-
                 outputCode += when {
                     type.type.isList -> "listOf(\n"
                     type.type.isArray -> "arrayOf(\n"
@@ -354,7 +375,7 @@ class MockupProcessor constructor(
                 when (val elementType = type.elementType) {
                     is MockupType.Simple -> {
                         for (i in 0 until Random.nextInt(from = 1, until = 6)) {
-                            propertyValueCode += generateCodeForSimpleType(property = elementType)
+                            propertyValueCode += generateRandomCodeForSimpleType(property = elementType)
                             if (i != 4) {
                                 propertyValueCode += ",\n"
                             }
@@ -375,14 +396,11 @@ class MockupProcessor constructor(
 
                     is MockupType.FixedTypeArray -> generateCodeForFixedTypeArray(type = elementType)
                     is MockupType.Collection -> propertyValueCode = ""
-                    else -> propertyValueCode = ""
                 }
 
                 outputCode += propertyValueCode
                 outputCode += ")\n"
             }
-
-            else -> throw IllegalStateException("")
         }
 
         return outputCode
@@ -390,13 +408,13 @@ class MockupProcessor constructor(
 
 
     /**
-     * Generates code for value of [property], e.g. <code>id = 123</code>
+     * Generates random code for value of [property], e.g. <code>id = 123</code>
      * @param property Single property of class
      * @return Generated code
      * @throws WrongTypeException
      * @since 1.0.0
      */
-    private fun generateCodeForSimpleType(property: MockupType.Simple): String {
+    private fun generateRandomCodeForSimpleType(property: MockupType.Simple): String {
         val type = property.type
         return when {
             //Simple types and string
@@ -406,7 +424,7 @@ class MockupProcessor constructor(
             type.isFloat -> "${Random.nextFloat()}"
             type.isDouble -> "${Random.nextDouble()}"
             type.isBoolean -> "${Random.nextBoolean()}"
-            type.isString -> "\"${generateStringValue(property = property)}\""
+            type.isString -> "\"${loremIpsum()}\""
             else -> throw WrongTypeException(expectedType = "Simple", givenType = "$type")
         }
     }
@@ -434,18 +452,6 @@ class MockupProcessor constructor(
                 givenType = "$elementType"
             )
         }
-    }
-
-
-    private fun generateStringValue(property: MockupType.Simple): String {
-        recognizers.forEach { recognizer ->
-
-            //         if (recognizer.recognize(property = property)) {
-
-            //     }
-        }
-
-        return loremIpsum()
     }
 
 
@@ -531,7 +537,7 @@ class MockupProcessor constructor(
      * }</code><br>
      * @return Generated code
      * @since 1.0.0
-     * @see generateCodeForSimpleType
+     * @see generateRandomCodeForSimpleType
      */
     private fun generateItemApplyCall(mockupClass: MockupType.MockUpped): String {
         val notConstructorParameters = mockupClass.properties

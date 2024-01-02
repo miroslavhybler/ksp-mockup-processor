@@ -15,7 +15,7 @@ data class Article constructor(
     val id: Int,
     val title: String,
     val content: String,
-    val author: User,
+    val author: Publisher,
     val tags: Array<String>,
     val categories: List<Category>,
     val isSpecialEdition: Boolean,
@@ -71,16 +71,29 @@ data class UserRank constructor(
 
 
 @Mockup(count = 3)
-class User constructor() {
+class Publisher constructor() {
     var id: Int = 0
     var firstName: String = "John"
     var lastName: String = "Doe"
     var dateOfBirth: String = "01-01-1970"
 
     var description: String = ""
-    var imageUrl: String = ""
+    var themeImageUrl: String?=null
+    var avatarUrl: String?=null
     var rank: UserRank? = null
 
 
     val fullName: String get() = "$firstName $lastName"
+}
+
+
+@Mockup(count = 1)
+class Reader constructor() {
+
+    data class UserName constructor(
+        val surname: String,
+        val birthname: String
+    ) {
+
+    }
 }

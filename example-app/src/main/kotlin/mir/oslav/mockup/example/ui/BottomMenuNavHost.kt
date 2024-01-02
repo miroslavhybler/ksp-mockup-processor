@@ -26,14 +26,12 @@ fun BottomMenuNavHost(
         composable(route = "articles") {
             ArticlesScreen(
                 navHostController = globalNavHostController,
-                paddingValues = paddingValues
             )
         }
 
         composable(route = "authors") {
             AuthorsScreen(
                 navHostController = globalNavHostController,
-                paddingValues = paddingValues
             )
         }
     }

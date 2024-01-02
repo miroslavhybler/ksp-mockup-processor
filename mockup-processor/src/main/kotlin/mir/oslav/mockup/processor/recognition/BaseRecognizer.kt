@@ -17,7 +17,8 @@ abstract class BaseRecognizer constructor() {
      * @since 1.1.0
      */
     abstract fun recognize(
-        property: ResolvedProperty
+        property: ResolvedProperty,
+        containingClassName: String
     ): Boolean
 
 

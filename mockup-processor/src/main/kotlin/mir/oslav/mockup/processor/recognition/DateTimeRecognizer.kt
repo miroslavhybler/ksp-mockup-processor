@@ -68,7 +68,7 @@ class DateTimeRecognizer constructor() : BaseRecognizer() {
      * contextually a dateTime.
      * @since 1.1.0
      */
-    override fun recognize(property: ResolvedProperty): Boolean {
+    override fun recognize(property: ResolvedProperty, containingClassName: String): Boolean {
         return recognizableNames.contains(element = property.name)
     }
 

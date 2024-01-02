@@ -26,7 +26,7 @@ import mir.oslav.mockup.example.ImagesForPreview
 @Composable
 fun Photo(
     modifier: Modifier = Modifier,
-    imageUrl: String,
+    imageUrl: String?,
     contentScale: ContentScale = ContentScale.Crop,
 ) {
 

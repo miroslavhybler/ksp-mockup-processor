@@ -1,5 +1,6 @@
 package mir.oslav.mockup.processor.data
 
+import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSType
 
@@ -14,6 +15,7 @@ import com.google.devtools.ksp.symbol.KSType
  * @param isMutable True when property is mutable (declared with var keyword in source). False
  * when property is not mutable (declared with "val" keyword in source)
  * @param isInPrimaryConstructorProperty True when property is declared in primary constructor
+ * @param containingClassDeclaration Name of the class where is this property declared and used
  * of the class.
  * @since 1.0.0
  */
@@ -24,10 +26,9 @@ data class ResolvedProperty constructor(
     val imports: List<String>,
     val resolvedType: MockupType<*>,
     val isMutable: Boolean,
-    val isInPrimaryConstructorProperty: Boolean
-
+    val isInPrimaryConstructorProperty: Boolean,
+    val containingClassDeclaration: KSClassDeclaration
 ) {
-
 
     /**
      * True when this property is <b>not</b> declared in primary constructor, false otherwise.
@@ -37,4 +38,7 @@ data class ResolvedProperty constructor(
     val isNotInPrimaryConstructorProperty: Boolean
         get() = !isInPrimaryConstructorProperty
 
+
+    val containingClassName: String
+        get() = containingClassDeclaration.simpleName.asString()
 }

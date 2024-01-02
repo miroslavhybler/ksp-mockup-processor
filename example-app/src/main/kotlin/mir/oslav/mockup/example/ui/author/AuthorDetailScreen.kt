@@ -40,7 +40,7 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import mir.oslav.mockup.Mockup
 import mir.oslav.mockup.example.Article
-import mir.oslav.mockup.example.User
+import mir.oslav.mockup.example.Publisher
 import mir.oslav.mockup.example.ui.DetailAppBar
 import mir.oslav.mockup.example.ui.Photo
 
@@ -56,7 +56,7 @@ fun AuthorDetailScreen(
 ) {
 
     AuthorDetailScreenContent(
-        author = remember { Mockup.user.list.find { it.id == authorId }!! },
+        author = remember { Mockup.publisher.list.find { it.id == authorId }!! },
         navHostController = navHostController,
         articles = remember { Mockup.article.list.take(n = 5) }
     )
@@ -67,7 +67,7 @@ fun AuthorDetailScreen(
 @Composable
 private fun AuthorDetailScreenContent(
     modifier: Modifier = Modifier,
-    author: User,
+    author: Publisher,
     articles: List<Article>,
     navHostController: NavHostController
 ) {
@@ -108,13 +108,13 @@ private fun AuthorDetailScreenContent(
                                     .height(height = 256.dp)
                             ) {
                                 Photo(
-                                    imageUrl = author.imageUrl,
+                                    imageUrl = author.themeImageUrl,
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .height(height = 226.dp)
                                 )
                                 Photo(
-                                    imageUrl = "https://cdn.pixabay.com/photo/2023/08/30/04/16/man-8222531_1280.jpg",
+                                    imageUrl = author.avatarUrl,
                                     modifier = Modifier
                                         .align(alignment = Alignment.BottomStart)
                                         .padding(start = 32.dp, top = 22.dp)
@@ -228,7 +228,7 @@ private fun ArticleItem(
 @Preview
 private fun AuthorDetailScreenPreview() {
     AuthorDetailScreenContent(
-        author = Mockup.user.single,
+        author = Mockup.publisher.single,
         navHostController = rememberNavController(),
         articles = Mockup.article.list
     )

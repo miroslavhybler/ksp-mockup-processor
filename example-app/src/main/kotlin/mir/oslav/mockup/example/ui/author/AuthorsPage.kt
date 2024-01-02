@@ -2,7 +2,6 @@ package mir.oslav.mockup.example.ui.author
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +19,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import mir.oslav.mockup.Mockup
-import mir.oslav.mockup.example.User
+import mir.oslav.mockup.example.Publisher
 import mir.oslav.mockup.example.ui.Photo
 
 
@@ -43,8 +41,7 @@ import mir.oslav.mockup.example.ui.Photo
 //Mockup data can be used like that too, but it's not purpose
 fun AuthorsScreen(
     navHostController: NavHostController,
-    users: List<User> = Mockup.user.list,
-    paddingValues: PaddingValues,
+    publishers: List<Publisher> = Mockup.publisher.list,
 ) {
 
     Scaffold(
@@ -56,9 +53,9 @@ fun AuthorsScreen(
         content = { paddingValues ->
             LazyColumn(
                 content = {
-                    itemsIndexed(items = users) { index, user ->
+                    itemsIndexed(items = publishers) { index, user ->
                         AuthorItem(
-                            user = user,
+                            publisher = user,
                             navHostController = navHostController
                         )
                     }
@@ -73,20 +70,20 @@ fun AuthorsScreen(
 
 
 @Composable
-private fun AuthorItem(user: User, navHostController: NavHostController) {
+private fun AuthorItem(publisher: Publisher, navHostController: NavHostController) {
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = {
-                navHostController.navigate(route = "author/${user.id}")
+                navHostController.navigate(route = "author/${publisher.id}")
             })
             .padding(horizontal = 20.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
         Photo(
-            imageUrl = user.imageUrl,
+            imageUrl = publisher.themeImageUrl,
             modifier = Modifier
                 .size(size = 56.dp)
                 .clip(shape = CircleShape)
@@ -96,14 +93,14 @@ private fun AuthorItem(user: User, navHostController: NavHostController) {
 
         Column(modifier = Modifier.weight(weight = 1f)) {
             Text(
-                text = user.fullName,
+                text = publisher.fullName,
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
             Spacer(modifier = Modifier.height(height = 4.dp))
             Text(
-                text = user.description,
+                text = publisher.description,
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -119,7 +116,6 @@ private fun AuthorsScreenPreview() {
     //Preview for screen using Mockup instead of @PreviewParameterProvider
     AuthorsScreen(
         navHostController = rememberNavController(),
-        users = Mockup.user.list,
-        paddingValues = remember { PaddingValues() }
+        publishers = Mockup.publisher.list,
     )
 }
