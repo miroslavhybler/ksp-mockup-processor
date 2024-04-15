@@ -80,7 +80,7 @@ dependencies {
 
     /** Mockup plugin */
     //Always keep same version for processor and annotations
-    implementation("com.github.miroslavhybler:ksp-mockup-annotations:1.1.2")
+    implementation("com.github.miroslavhybler:ksp-mockup-annotations:1.1.4")
     ksp(project(":mockup-processor"))
 
     /** Compose and material */

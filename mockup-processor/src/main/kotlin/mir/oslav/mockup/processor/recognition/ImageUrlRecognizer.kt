@@ -63,7 +63,7 @@ class ImageUrlRecognizer constructor() : BaseRecognizer() {
             "https://cdn.pixabay.com/photo/2023/04/21/17/47/plum-blossoms-7942343_1280.jpg",
             "https://cdn.pixabay.com/photo/2023/12/09/15/04/dog-8439530_1280.jpg",
             "https://cdn.pixabay.com/photo/2023/11/30/07/51/bridge-8420945_1280.jpg",
-            "https://cdn.pixabay.com/photo/2023/09/25/13/42/kingfisher-8275049_1280.png"
+            "https://cdn.pixabay.com/photo/2023/09/25/13/42/kingfisher-8275049_1280.png",
         )
 
         /**
