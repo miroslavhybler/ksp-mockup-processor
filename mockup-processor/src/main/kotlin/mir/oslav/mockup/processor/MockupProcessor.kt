@@ -12,7 +12,7 @@ import mir.oslav.mockup.processor.data.MockupObjectMember
 import mir.oslav.mockup.processor.data.MockupType
 import mir.oslav.mockup.processor.data.ResolvedProperty
 import mir.oslav.mockup.processor.data.WrongTypeException
-import mir.oslav.mockup.processor.data.loremIpsum
+import mir.oslav.mockup.processor.data.loremIpsumWords
 import mir.oslav.mockup.processor.generation.AbstractMockupDataProviderGenerator
 import mir.oslav.mockup.processor.generation.MockupDataProviderGenerator
 import mir.oslav.mockup.processor.generation.MockupObjectGenerator
@@ -146,12 +146,16 @@ class MockupProcessor constructor(
             )
         }
 
-        AbstractMockupDataProviderGenerator(
-            outputStream = generateOutputFile(
-                classes = mockupClassDeclarations,
-                filename = "MockupDataProvider"
-            )
-        ).generateContent()
+        try{
+            AbstractMockupDataProviderGenerator(
+                outputStream = generateOutputFile(
+                    classes = mockupClassDeclarations,
+                    filename = "MockupDataProvider"
+                )
+            ).generateContent()
+        } catch (e: FileAlreadyExistsException) {
+            return emptyList()
+        }
 
         mockupTypesList.clear()
 
@@ -424,7 +428,15 @@ class MockupProcessor constructor(
             type.isFloat -> "${Random.nextFloat()}"
             type.isDouble -> "${Random.nextDouble()}"
             type.isBoolean -> "${Random.nextBoolean()}"
-            type.isString -> "\"${loremIpsum()}\""
+            type.isString -> "\"${
+                loremIpsumWords(
+                    wordCount = Random.nextInt(
+                        from = 2,
+                        until = 60
+                    )
+                )
+            }\""
+
             else -> throw WrongTypeException(expectedType = "Simple", givenType = "$type")
         }
     }
