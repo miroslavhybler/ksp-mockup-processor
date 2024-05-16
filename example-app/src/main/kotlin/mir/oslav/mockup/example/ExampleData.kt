@@ -1,6 +1,7 @@
 package mir.oslav.mockup.example
 
 import androidx.annotation.ColorInt
+import androidx.annotation.FloatRange
 import mir.oslav.mockup.annotations.Mockup
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
@@ -22,6 +23,8 @@ data class Article constructor(
     val imageUrl: String,
     val gallery: List<GalleryPhoto>,
     val createdAt: String,
+    @FloatRange(from = 0.0, to = 5.0)
+    val rating: Float,
 ) {
 
     companion object {
@@ -78,8 +81,8 @@ class Publisher constructor() {
     var dateOfBirth: String = "01-01-1970"
 
     var description: String = ""
-    var themeImageUrl: String?=null
-    var avatarUrl: String?=null
+    var themeImageUrl: String? = null
+    var avatarUrl: String? = null
     var rank: UserRank? = null
 
 

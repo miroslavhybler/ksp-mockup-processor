@@ -425,7 +425,7 @@ class MockupProcessor constructor(
             type.isShort -> "${Random.nextInt(from = 0, until = 255)}"
             type.isInt -> "${Random.nextInt(from = 0, until = 5000)}"
             type.isLong -> "${Random.nextInt()}"
-            type.isFloat -> "${Random.nextFloat()}"
+            type.isFloat -> "${Random.nextFloat()}f"
             type.isDouble -> "${Random.nextDouble()}"
             type.isBoolean -> "${Random.nextBoolean()}"
             type.isString -> "\"${
