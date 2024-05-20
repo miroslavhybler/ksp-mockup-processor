@@ -15,6 +15,7 @@ import mir.oslav.mockup.processor.data.WrongTypeException
 import mir.oslav.mockup.processor.generation.AbstractMockupDataProviderGenerator
 import mir.oslav.mockup.processor.generation.MockupDataProviderGenerator
 import mir.oslav.mockup.processor.generation.MockupObjectGenerator
+import mir.oslav.mockup.processor.generation.SimpleValuesGenerator
 import mir.oslav.mockup.processor.generation.decapitalized
 import mir.oslav.mockup.processor.generation.isArray
 import mir.oslav.mockup.processor.generation.isBooleanArray
@@ -331,9 +332,9 @@ class MockupProcessor constructor(
         outputCode += "\t\t\t"
         outputCode += "${property.name.decapitalized()} = "
 
-
         recognizers.forEach { recognizer ->
-            if (recognizer.recognize(
+            if (
+                recognizer.recognize(
                     property = property,
                     containingClassName = property.containingClassName
                 )

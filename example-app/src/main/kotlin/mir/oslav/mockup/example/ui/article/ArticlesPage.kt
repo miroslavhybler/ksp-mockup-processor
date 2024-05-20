@@ -34,6 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import mir.oslav.mockup.Mockup
 import mir.oslav.mockup.example.Article
 import mir.oslav.mockup.example.ui.Photo
+import java.util.Locale
 
 
 /**
@@ -163,7 +164,7 @@ private fun ArticleItem(
         )
 
         Text(
-            text = "rating: ${article.rating}/5",
+            text = "rating: ${String.format(Locale.getDefault(), "%.2f", article.rating)}/5",
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.labelSmall,

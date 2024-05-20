@@ -11,8 +11,8 @@ Add maven repository and library dependency to your app's gradle files. Make sur
 ```kotlin
 // Project's build.gradle.kts make sure to keep compatible ksp version with your kotlin version 
 plugins {
-    id("org.jetbrains.kotlin.android") version "1.9.21" apply false
-    id("com.google.devtools.ksp") version "1.9.21-1.0.16" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.23" apply false
+    id("com.google.devtools.ksp") version "1.9.23-1.0.20" apply false
 }
 ```
 
@@ -38,8 +38,8 @@ dependencies {
     //Always use the same version for annotations and processor
     val mockupVersion= "1.1.5"
     implementation("com.github.miroslavhybler:ksp-mockup-annotations:$mockupVersion")
-    ksp("com.github.miroslavhybler:ksp-mockup-annotations:$mockupVersion")
-    ksp("com.github.miroslavhybler:kps-mockup-processor:$mockupVersion")
+    //use kspDebug since mockup is meant to be only for compose preview in debug mode
+    kspDebug("com.github.miroslavhybler:kps-mockup-processor:$mockupVersion")
 }
 ```
 
@@ -58,9 +58,16 @@ data class User constructor(
 Build your project and access generated data through generated Mockup object.
 
 ```kotlin
+//accessing same single user instance
 val user = Mockup.user.single
-val usersLis = Mockup.user.list
+
+//Getting list of items
+val usersList = Mockup.user.list
+
+//Getting random user instance from the list
+val userRandom = Mockup.user.random
 ```
+
 
 ### Supported types
 - Simple kotlin types like Int, Long, ...
@@ -68,6 +75,7 @@ val usersLis = Mockup.user.list
 - List (kotlin.List), but only when list contains simple type or @Mockup annotated classes, other types won't work
 - Arrays with known type (like IntArray, FloatArray, ...) are generated empty
 - Classes annotated with @Mockup annotation
+
 
 ### Limitations 
 - Not applicable to to java classes and java types

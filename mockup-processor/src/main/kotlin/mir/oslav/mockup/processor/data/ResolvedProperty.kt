@@ -10,7 +10,10 @@ import com.google.devtools.ksp.symbol.KSValueParameter
  * @param name Name of the property from class (e.g. id, name, ...), name of the property's type
  * is in [resolvedType]
  * @param type Raw [KSType] of property
- * @param declaration Original property declaration.
+ * @param declaration Original property declaration. May be null when property is declared in primary
+ * constructor. See [primaryConstructorDeclaration]
+ * @param primaryConstructorDeclaration <b>Added in 1.1.6</b>, non null when property of class is
+ * declared in it's primary constructor, which is most common case for data classes.
  * @param imports All imports that are needed by this property.
  * @param resolvedType Wrapped type of this property
  * @param isMutable True when property is mutable (declared with var keyword in source). False
@@ -41,6 +44,9 @@ data class ResolvedProperty constructor(
         get() = !isInPrimaryConstructorProperty
 
 
+    /**
+     * Returns name of class which is containing this property.
+     */
     val containingClassName: String
         get() = containingClassDeclaration.simpleName.asString()
 }

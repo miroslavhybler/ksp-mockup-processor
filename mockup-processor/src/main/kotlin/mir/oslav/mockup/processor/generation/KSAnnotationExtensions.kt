@@ -1,0 +1,19 @@
+package mir.oslav.mockup.processor.generation
+
+import com.google.devtools.ksp.symbol.KSAnnotation
+
+
+/**
+ * @author Miroslav Hýbler <br>
+ * created on 20.05.2024
+ * @since 1.1.6
+ */
+val KSAnnotation.isIntRange: Boolean
+    get() = this.shortName.asString() == "IntRange"
+
+
+/**
+ * @since 1.1.6
+ */
+val KSAnnotation.isFloatRange: Boolean
+    get() = this.shortName.asString() == "FloatRange"
