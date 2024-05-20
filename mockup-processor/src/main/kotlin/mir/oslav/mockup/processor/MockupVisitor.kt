@@ -78,7 +78,6 @@ class MockupVisitor constructor(
             val type = property.type.resolve()
             val declaration = type.declaration
 
-
             val propertyType = resolveMockupType(
                 type = type,
                 property = property,
@@ -88,12 +87,12 @@ class MockupVisitor constructor(
 
             val typeQualifiedName = type.declaration.qualifiedName
             val propertyName = property.simpleName
-            val isInsidePrimaryConstructor = primaryConstructor?.parameters?.find { parameter ->
+            val primaryConstructorParameter = primaryConstructor?.parameters?.find { parameter ->
                 val parameterQualifiedName = parameter.type.resolve().declaration.qualifiedName
                 val constructorPropertyName = parameter.name
                 parameterQualifiedName == typeQualifiedName && propertyName == constructorPropertyName
-
-            } != null
+            }
+            val isInsidePrimaryConstructor = primaryConstructorParameter != null
 
             outputList.add(
                 ResolvedProperty(
@@ -104,7 +103,8 @@ class MockupVisitor constructor(
                     imports = imports,
                     isMutable = property.isMutable,
                     isInPrimaryConstructorProperty = isInsidePrimaryConstructor,
-                    containingClassDeclaration = classDeclaration
+                    containingClassDeclaration = classDeclaration,
+                    primaryConstructorDeclaration =primaryConstructorParameter
                 )
             )
         }
@@ -172,12 +172,17 @@ class MockupVisitor constructor(
         type: KSType,
         name: String,
         property: KSPropertyDeclaration,
-        imports: List<String>
+        imports: List<String>,
     ): MockupType<*> {
         val declaration = type.declaration
         return when {
             type.isSimpleType -> {
-                MockupType.Simple(name = name, type = type, declaration = declaration)
+                MockupType.Simple(
+                    name = name,
+                    type = type,
+                    declaration = declaration,
+                    property = property,
+                )
             }
 
             type.isFixedArrayType -> {
@@ -196,7 +201,7 @@ class MockupVisitor constructor(
                         type = itemType,
                         name = declaration.simpleName.getShortName(),
                         imports = imports,
-                        property = property
+                        property = property,
                     ),
                     imports = imports
                 )

@@ -1,7 +1,8 @@
 package mir.oslav.mockup.example
 
 import androidx.annotation.ColorInt
-import androidx.annotation.FloatRange
+import androidx.annotation.IntRange
+import androidx.annotation.StringDef
 import mir.oslav.mockup.annotations.Mockup
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
@@ -13,6 +14,7 @@ import org.joda.time.format.DateTimeFormatter
  */
 @Mockup
 data class Article constructor(
+    @IntRange(from = 1, to = 10000)
     val id: Int,
     val title: String,
     val content: String,
@@ -22,9 +24,12 @@ data class Article constructor(
     val isSpecialEdition: Boolean,
     val imageUrl: String,
     val gallery: List<GalleryPhoto>,
+    @Transient
     val createdAt: String,
-    @FloatRange(from = 0.0, to = 5.0)
-    val rating: Float,
+    @ArticleType
+    val type: String,
+    @IntRange(from = 0, to = 5)
+    val rating: Int,
 ) {
 
     companion object {
@@ -40,6 +45,14 @@ data class Article constructor(
 
     val createdAtFormatted: String
         get() = dateTimeFormat.parseDateTime(createdAt).toString("MM. dd. yyyy")
+
+
+    @StringDef()
+    @Retention(AnnotationRetention.SOURCE)
+    @Target(AnnotationTarget.PROPERTY)
+    annotation class ArticleType {
+
+    }
 
     @Mockup
     data class GalleryPhoto constructor(

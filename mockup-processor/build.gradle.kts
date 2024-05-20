@@ -24,7 +24,7 @@ java {
 dependencies {
     implementation("com.github.miroslavhybler:ksp-mockup-annotations:1.1.5")
     implementation("com.google.devtools.ksp:symbol-processing-api:1.9.23-1.0.20")
-    implementation("androidx.annotation:annotation:1.7.1")
+    implementation("androidx.annotation:annotation:1.8.0")
     implementation("joda-time:joda-time:2.12.5")
     val autoServiceVersion = "1.0.1"
     kapt("com.google.auto.service:auto-service:$autoServiceVersion")
@@ -36,7 +36,7 @@ tasks.register("runMockupProcessor", JavaExec::class) {
     group = "Mockup"
     description = "Runs the KSP processor"
 
-    classpath = sourceSets.getByName("main").runtimeClasspath
+    classpath = sourceSets.getByName("debug").runtimeClasspath
 
     this.mainClass.set("com.google.devtools.ksp.processing.Main")
     args("--symbol", "mir.oslav.mockup.processor.MockupProcessor")

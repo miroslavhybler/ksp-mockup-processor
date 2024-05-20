@@ -161,6 +161,14 @@ private fun ArticleItem(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+
+        Text(
+            text = "rating: ${article.rating}/5",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
     }
 }
 

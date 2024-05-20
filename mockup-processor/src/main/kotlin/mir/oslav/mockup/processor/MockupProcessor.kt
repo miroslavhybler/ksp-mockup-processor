@@ -12,28 +12,20 @@ import mir.oslav.mockup.processor.data.MockupObjectMember
 import mir.oslav.mockup.processor.data.MockupType
 import mir.oslav.mockup.processor.data.ResolvedProperty
 import mir.oslav.mockup.processor.data.WrongTypeException
-import mir.oslav.mockup.processor.data.loremIpsumWords
 import mir.oslav.mockup.processor.generation.AbstractMockupDataProviderGenerator
 import mir.oslav.mockup.processor.generation.MockupDataProviderGenerator
 import mir.oslav.mockup.processor.generation.MockupObjectGenerator
 import mir.oslav.mockup.processor.generation.decapitalized
 import mir.oslav.mockup.processor.generation.isArray
-import mir.oslav.mockup.processor.generation.isBoolean
 import mir.oslav.mockup.processor.generation.isBooleanArray
 import mir.oslav.mockup.processor.generation.isByteArray
 import mir.oslav.mockup.processor.generation.isCharArray
-import mir.oslav.mockup.processor.generation.isDouble
 import mir.oslav.mockup.processor.generation.isDoubleArray
-import mir.oslav.mockup.processor.generation.isFloat
 import mir.oslav.mockup.processor.generation.isFloatArray
-import mir.oslav.mockup.processor.generation.isInt
 import mir.oslav.mockup.processor.generation.isIntArray
 import mir.oslav.mockup.processor.generation.isList
-import mir.oslav.mockup.processor.generation.isLong
 import mir.oslav.mockup.processor.generation.isLongArray
-import mir.oslav.mockup.processor.generation.isShort
 import mir.oslav.mockup.processor.generation.isShortArray
-import mir.oslav.mockup.processor.generation.isString
 import mir.oslav.mockup.processor.recognition.BaseRecognizer
 import mir.oslav.mockup.processor.recognition.DateTimeRecognizer
 import mir.oslav.mockup.processor.recognition.ImageUrlRecognizer
@@ -91,6 +83,11 @@ class MockupProcessor constructor(
 
 
     /**
+     * @since 1.1.6
+     */
+    private var simpleValuesGenerator: SimpleValuesGenerator = SimpleValuesGenerator()
+
+    /**
      * @since 1.1.0
      */
     private val recognizers: List<BaseRecognizer> = listOf(
@@ -146,7 +143,7 @@ class MockupProcessor constructor(
             )
         }
 
-        try{
+        try {
             AbstractMockupDataProviderGenerator(
                 outputStream = generateOutputFile(
                     classes = mockupClassDeclarations,
@@ -348,7 +345,10 @@ class MockupProcessor constructor(
 
         when (val type = property.resolvedType) {
             is MockupType.Simple -> {
-                val propertyValue = generateRandomCodeForSimpleType(property = type)
+                val propertyValue = simpleValuesGenerator.generate(
+                    property = type,
+                    resolvedProperty = property
+                )
                 outputCode += propertyValue
             }
 
@@ -379,7 +379,10 @@ class MockupProcessor constructor(
                 when (val elementType = type.elementType) {
                     is MockupType.Simple -> {
                         for (i in 0 until Random.nextInt(from = 1, until = 6)) {
-                            propertyValueCode += generateRandomCodeForSimpleType(property = elementType)
+                            propertyValueCode += simpleValuesGenerator.generate(
+                                property = elementType,
+                                resolvedProperty = property,
+                            )
                             if (i != 4) {
                                 propertyValueCode += ",\n"
                             }
@@ -408,37 +411,6 @@ class MockupProcessor constructor(
         }
 
         return outputCode
-    }
-
-
-    /**
-     * Generates random code for value of [property], e.g. <code>id = 123</code>
-     * @param property Single property of class
-     * @return Generated code
-     * @throws WrongTypeException
-     * @since 1.0.0
-     */
-    private fun generateRandomCodeForSimpleType(property: MockupType.Simple): String {
-        val type = property.type
-        return when {
-            //Simple types and string
-            type.isShort -> "${Random.nextInt(from = 0, until = 255)}"
-            type.isInt -> "${Random.nextInt(from = 0, until = 5000)}"
-            type.isLong -> "${Random.nextInt()}"
-            type.isFloat -> "${Random.nextFloat()}f"
-            type.isDouble -> "${Random.nextDouble()}"
-            type.isBoolean -> "${Random.nextBoolean()}"
-            type.isString -> "\"${
-                loremIpsumWords(
-                    wordCount = Random.nextInt(
-                        from = 2,
-                        until = 60
-                    )
-                )
-            }\""
-
-            else -> throw WrongTypeException(expectedType = "Simple", givenType = "$type")
-        }
     }
 
 

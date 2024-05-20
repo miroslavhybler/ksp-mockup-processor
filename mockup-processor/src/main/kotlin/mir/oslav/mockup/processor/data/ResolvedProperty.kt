@@ -3,6 +3,7 @@ package mir.oslav.mockup.processor.data
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSValueParameter
 
 /**
  * Representing class property
@@ -22,12 +23,13 @@ import com.google.devtools.ksp.symbol.KSType
 data class ResolvedProperty constructor(
     val name: String,
     val type: KSType,
-    val declaration: KSDeclaration,
+    val declaration: KSDeclaration?,
+    val primaryConstructorDeclaration: KSValueParameter?,
     val imports: List<String>,
     val resolvedType: MockupType<*>,
     val isMutable: Boolean,
     val isInPrimaryConstructorProperty: Boolean,
-    val containingClassDeclaration: KSClassDeclaration
+    val containingClassDeclaration: KSClassDeclaration,
 ) {
 
     /**

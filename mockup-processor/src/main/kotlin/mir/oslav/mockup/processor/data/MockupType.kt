@@ -1,7 +1,10 @@
+@file:Suppress("RedundantConstructorKeyword")
+
 package mir.oslav.mockup.processor.data
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import mir.oslav.mockup.annotations.Mockup
 
@@ -39,7 +42,8 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
     data class Simple constructor(
         override val name: String,
         override val type: KSType,
-        override val declaration: KSDeclaration
+        override val declaration: KSDeclaration,
+        val property: KSPropertyDeclaration,
     ) : MockupType<KSDeclaration>(
         name = name,
         type = type,
