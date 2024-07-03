@@ -34,9 +34,11 @@ class SimpleValuesGenerator constructor() {
             type.isInt -> {
                 generateIntegerValue(property = property, resolvedProperty = resolvedProperty)
             }
+
             type.isFloat -> {
                 generateFloatValue(property = property, resolvedProperty = resolvedProperty)
             }
+
             type.isLong -> "${Random.nextInt()}"
             type.isDouble -> "${Random.nextDouble()}"
             type.isBoolean -> "${Random.nextBoolean()}"
@@ -70,7 +72,9 @@ class SimpleValuesGenerator constructor() {
 
         var from = 0
         var to = 5000
+        var values: Array<Int> = emptyArray()
         for (annotation in annotations) {
+            Debugger.write(text = "annotation $annotation")
             if (annotation.isIntRange) {
                 val fromArgument = annotation.arguments.find { argument ->
                     argument.name?.asString() == "from"
@@ -79,9 +83,6 @@ class SimpleValuesGenerator constructor() {
                     argument.name?.asString() == "to"
                 }?.value as? Long
 
-                Debugger.write(text = "from: $fromArgument to: $toArgument")
-
-
                 if (fromArgument != null) {
                     from = fromArgument.toInt()
                 }
@@ -89,9 +90,28 @@ class SimpleValuesGenerator constructor() {
                     to = toArgument.toInt()
                 }
                 break
+            } else if (annotation.isIntDef) {
+                //TODO solve how to find annotation's annotations for def annotations
+                annotation.arguments.forEach {
+                    Debugger.write(text = "argument: $it value: ${it.value}")
+                }
+
+                val valuesArgument = annotation.arguments.find { argument ->
+                    argument.name?.asString() == "value"
+                }
+                val valuesArray = valuesArgument?.value as? Array<Int>
+                if (valuesArray != null) {
+                    values = valuesArray
+                }
+                Debugger.write(text = "ARGUMENT FOUND!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                Debugger.write(text = "argument: $valuesArgument value: ${valuesArgument?.value}")
+                break
             }
         }
 
+        if (values.isNotEmpty()) {
+            return "${values.random()}"
+        }
         return "${Random.nextInt(from = from, until = to)}"
     }
 
@@ -113,7 +133,7 @@ class SimpleValuesGenerator constructor() {
         var from = 0f
         var to = 5000f
         for (annotation in annotations) {
-            if (annotation.isIntRange) {
+            if (annotation.isFloatRange) {
                 val fromArgument = annotation.arguments.find { argument ->
                     argument.name?.asString() == "from"
                 }?.value as? Double

@@ -36,7 +36,7 @@ plugins {
 
 dependencies {
     //Always use the same version for annotations and processor
-    val mockupVersion= "1.1.5"
+    val mockupVersion= "1.1.6"
     implementation("com.github.miroslavhybler:ksp-mockup-annotations:$mockupVersion")
     //use kspDebug since mockup is meant to be only for compose preview in debug mode
     kspDebug("com.github.miroslavhybler:kps-mockup-processor:$mockupVersion")

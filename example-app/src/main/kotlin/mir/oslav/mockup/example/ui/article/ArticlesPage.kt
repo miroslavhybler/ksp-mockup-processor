@@ -146,6 +146,8 @@ private fun ArticleItem(
             )
         }
 
+        Text(text = article.type.toString())
+
 
         Text(
             text = article.title,

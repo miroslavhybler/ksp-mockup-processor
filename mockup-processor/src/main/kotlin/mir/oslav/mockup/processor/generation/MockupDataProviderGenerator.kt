@@ -1,6 +1,6 @@
 package mir.oslav.mockup.processor.generation
 
-import mir.oslav.mockup.annotations.Mockup
+import com.mockup.annotations.Mockup
 import mir.oslav.mockup.processor.MockupConstants
 import mir.oslav.mockup.processor.data.MockupType
 import java.io.OutputStream

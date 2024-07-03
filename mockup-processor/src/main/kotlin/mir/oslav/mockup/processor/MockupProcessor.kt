@@ -6,7 +6,7 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import mir.oslav.mockup.annotations.Mockup
+import com.mockup.annotations.Mockup
 import mir.oslav.mockup.processor.data.InputOptions
 import mir.oslav.mockup.processor.data.MockupObjectMember
 import mir.oslav.mockup.processor.data.MockupType
@@ -130,18 +130,22 @@ class MockupProcessor constructor(
         val mockupClassDeclarations = resolver.findAnnotatedClasses()
 
         if (Debugger.isDebugEnabled) {
-            Debugger.setOutputStream(
-                outputStream = environment.codeGenerator.createNewFile(
-                    packageName = "mir.oslav.mockup",
-                    fileName = "logs",
-                    dependencies = Dependencies(
-                        aggregating = false,
-                        sources = mockupClassDeclarations
-                            .mapNotNull(KSClassDeclaration::containingFile)
-                            .toTypedArray()
-                    ),
+            try{
+                Debugger.setOutputStream(
+                    outputStream = environment.codeGenerator.createNewFile(
+                        packageName = "mir.oslav.mockup",
+                        fileName = "logs",
+                        dependencies = Dependencies(
+                            aggregating = false,
+                            sources = mockupClassDeclarations
+                                .mapNotNull(KSClassDeclaration::containingFile)
+                                .toTypedArray()
+                        ),
+                    )
                 )
-            )
+            } catch (exception: FileAlreadyExistsException) {
+                //Do nothing
+            }
         }
 
         try {

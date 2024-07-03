@@ -1,7 +1,7 @@
 package mir.oslav.mockup.processor.data
 
 import androidx.annotation.IntRange
-import mir.oslav.mockup.annotations.Mockup
+import com.mockup.annotations.Mockup
 
 
 /**

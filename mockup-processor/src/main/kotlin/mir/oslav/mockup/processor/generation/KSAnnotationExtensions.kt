@@ -17,3 +17,10 @@ val KSAnnotation.isIntRange: Boolean
  */
 val KSAnnotation.isFloatRange: Boolean
     get() = this.shortName.asString() == "FloatRange"
+
+
+/**
+ * @since 1.1.6
+ */
+val KSAnnotation.isIntDef: Boolean
+    get() = this.shortName.asString() == "IntDef"

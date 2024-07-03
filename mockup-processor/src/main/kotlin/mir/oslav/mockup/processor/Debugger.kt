@@ -26,7 +26,7 @@ object Debugger {
      * property is never changing in code, it must be set constantly.
      * @since 1.1.3
      */
-    const val isDebugEnabled: Boolean = true
+    const val isDebugEnabled: Boolean = false
 
     fun setOutputStream(outputStream: OutputStream) {
         if (isDebugEnabled) {

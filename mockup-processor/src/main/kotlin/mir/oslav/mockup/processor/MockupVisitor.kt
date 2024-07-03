@@ -6,7 +6,7 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSVisitorVoid
-import mir.oslav.mockup.annotations.Mockup
+import com.mockup.annotations.Mockup
 import mir.oslav.mockup.processor.data.MockupAnnotationData
 import mir.oslav.mockup.processor.data.MockupType
 import mir.oslav.mockup.processor.data.ResolvedProperty
@@ -104,7 +104,7 @@ class MockupVisitor constructor(
                     isMutable = property.isMutable,
                     isInPrimaryConstructorProperty = isInsidePrimaryConstructor,
                     containingClassDeclaration = classDeclaration,
-                    primaryConstructorDeclaration =primaryConstructorParameter
+                    primaryConstructorDeclaration = primaryConstructorParameter
                 )
             )
         }
@@ -129,7 +129,7 @@ class MockupVisitor constructor(
         val annotation = classDeclaration.annotations.find { ksAnnotation ->
             val declaration = ksAnnotation.annotationType.resolve().declaration
             val qualifiedName = declaration.qualifiedName?.asString()
-            qualifiedName == "mir.oslav.mockup.annotations.Mockup"
+            qualifiedName == Mockup::class.qualifiedName
         }
 
         require(value = annotation != null, lazyMessage = {

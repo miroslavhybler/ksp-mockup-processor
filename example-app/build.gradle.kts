@@ -12,8 +12,8 @@ android {
         applicationId = "mir.oslav.mockup.example"
         minSdk = 21
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.1.0"
+        versionCode = 3
+        versionName = "1.1.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -55,19 +55,12 @@ android {
     }
     kotlin {
         jvmToolchain(jdkVersion = 8)
-
-        sourceSets.debug {
-            kotlin.srcDirs.add(File("build/generated/ksp/debug/kotlin"))
-        }
-        sourceSets.release {
-            kotlin.srcDirs.add(File("build/generated/ksp/release/kotlin"))
-        }
     }
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.11"
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
     packaging {
         resources {
@@ -86,16 +79,16 @@ dependencies {
 
     /** Mockup plugin */
     //Always keep same version for processor and annotations
-    implementation("com.github.miroslavhybler:ksp-mockup-annotations:1.1.5")
+    implementation("com.github.miroslavhybler:ksp-mockup-annotations:1.1.6")
 
     //use kspDebug since mockup is meant to be only for compose preview in debug mode
     kspDebug(project(":mockup-processor"))
 
     /** Compose and material */
     implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.3")
     implementation("androidx.activity:activity-compose:1.9.0")
-    implementation(platform("androidx.compose:compose-bom:2024.05.00"))
+    implementation(platform("androidx.compose:compose-bom:2024.06.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
@@ -103,14 +96,14 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
     /** Coil library for images loading */
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
     implementation("net.danlew:android.joda:2.12.5")
 
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation(platform("androidx.compose:compose-bom:2024.05.00"))
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation(platform("androidx.compose:compose-bom:2024.06.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

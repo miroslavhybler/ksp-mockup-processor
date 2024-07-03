@@ -2,14 +2,17 @@ package mir.oslav.mockup.example
 
 import androidx.annotation.ColorInt
 import androidx.annotation.FloatRange
+import androidx.annotation.IntDef
 import androidx.annotation.IntRange
-import androidx.annotation.StringDef
-import mir.oslav.mockup.annotations.Mockup
+import com.mockup.annotations.IgnoreOnMockup
+import com.mockup.annotations.Mockup
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 
 
 /**
+ * @param rating Example usage of FloatRange annotation
+ * @param readers Example usage of IntRange annotation, number of people who read the article
  * @author Miroslav Hýbler <br>
  * created on 15.09.2023
  */
@@ -24,16 +27,18 @@ data class Article constructor(
     val isSpecialEdition: Boolean,
     val imageUrl: String,
     val gallery: List<GalleryPhoto>,
-    @Transient
     val createdAt: String,
     @ArticleType
-    val type: String,
+    val type: Int,
     @FloatRange(from = 0.0, to = 5.0)
     val rating: Float,
     @IntRange(from = 0, to = 10000)
     val readers: Int,
-    val minutesReading:Short,
+    val minutesReading: Short,
 ) {
+
+    @IgnoreOnMockup
+    val topReader: Reader? = null
 
     companion object {
         //You can set custom JodaTime format for the date generation in your app's build.gradle.kts
@@ -50,11 +55,19 @@ data class Article constructor(
         get() = dateTimeFormat.parseDateTime(createdAt).toString("MM. dd. yyyy")
 
 
-    @StringDef()
+    @IntDef(
+        ArticleType.regular,
+        ArticleType.silver,
+        ArticleType.gold,
+    )
     @Retention(AnnotationRetention.SOURCE)
     @Target(AnnotationTarget.PROPERTY)
     annotation class ArticleType {
-
+        companion object {
+            const val regular: Int = 0
+            const val silver: Int = 1
+            const val gold: Int = 2
+        }
     }
 
     @Mockup
@@ -82,11 +95,7 @@ data class Category constructor(
         }
 }
 
-@Mockup
-data class UserRank constructor(
-    val id: Int,
-    val name: String
-)
+
 
 
 @Mockup(count = 3)
@@ -99,8 +108,8 @@ class Publisher constructor() {
     var description: String = ""
     var themeImageUrl: String? = null
     var avatarUrl: String? = null
-    var rank: UserRank? = null
 
+    //TODO add rank
 
     val fullName: String get() = "$firstName $lastName"
 }
@@ -108,7 +117,6 @@ class Publisher constructor() {
 
 @Mockup(count = 1)
 class Reader constructor() {
-
     data class UserName constructor(
         val surname: String,
         val birthname: String

@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.github.miroslavhybler.mockup-processor"
-version = "1.1.5"
+version = "1.1.6"
 
 kotlin {
     jvmToolchain(jdkVersion = 8)
@@ -22,8 +22,8 @@ java {
 }
 
 dependencies {
-    implementation("com.github.miroslavhybler:ksp-mockup-annotations:1.1.5")
-    implementation("com.google.devtools.ksp:symbol-processing-api:1.9.23-1.0.20")
+    implementation("com.github.miroslavhybler:ksp-mockup-annotations:1.1.6")
+    implementation("com.google.devtools.ksp:symbol-processing-api:1.9.24-1.0.20")
     implementation("androidx.annotation:annotation:1.8.0")
     implementation("joda-time:joda-time:2.12.5")
     val autoServiceVersion = "1.0.1"
@@ -79,9 +79,9 @@ afterEvaluate {
         publications {
             create<MavenPublication>("release") {
                 from(components.getByName("kotlin"))
-                groupId = "mir.oslav.mockup"
-                artifactId = "processor"
-                version = "1.1.5"
+                groupId = "com.github.miroslavhybler"
+                artifactId = "mockup-processor"
+                version = "1.1.6"
                 pom {
                     description.set("Jitpack.io deploy")
                 }
