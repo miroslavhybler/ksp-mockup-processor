@@ -36,7 +36,7 @@ tasks.register("runMockupProcessor", JavaExec::class) {
     group = "Mockup"
     description = "Runs the KSP processor"
 
-    classpath = sourceSets.getByName("debug").runtimeClasspath
+    classpath = sourceSets.getByName("main").runtimeClasspath
 
     this.mainClass.set("com.google.devtools.ksp.processing.Main")
     args("--symbol", "mir.oslav.mockup.processor.MockupProcessor")
@@ -79,7 +79,7 @@ afterEvaluate {
         publications {
             create<MavenPublication>("release") {
                 from(components.getByName("kotlin"))
-                groupId = "com.github.miroslavhybler"
+                groupId = "mir.oslav.mockup"
                 artifactId = "mockup-processor"
                 version = "1.1.6"
                 pom {

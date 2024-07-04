@@ -82,7 +82,7 @@ dependencies {
     implementation("com.github.miroslavhybler:ksp-mockup-annotations:1.1.6")
 
     //use kspDebug since mockup is meant to be only for compose preview in debug mode
-    kspDebug(project(":mockup-processor"))
+    ksp(project(":mockup-processor"))
 
     /** Compose and material */
     implementation("androidx.core:core-ktx:1.13.1")
