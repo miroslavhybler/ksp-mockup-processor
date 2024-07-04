@@ -1,6 +1,5 @@
 import org.jetbrains.dokka.DokkaConfiguration.Visibility
 
-
 plugins {
     kotlin("jvm")
     id("kotlin-kapt")
@@ -79,7 +78,7 @@ afterEvaluate {
         publications {
             create<MavenPublication>("release") {
                 from(components.getByName("kotlin"))
-                groupId = "mir.oslav.mockup"
+                groupId = "com.github.miroslavhybler"
                 artifactId = "mockup-processor"
                 version = "1.1.6"
                 pom {
