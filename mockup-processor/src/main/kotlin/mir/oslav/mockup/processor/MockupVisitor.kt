@@ -3,6 +3,7 @@ package mir.oslav.mockup.processor
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSVisitorVoid
@@ -10,6 +11,8 @@ import com.mockup.annotations.Mockup
 import mir.oslav.mockup.processor.data.MockupAnnotationData
 import mir.oslav.mockup.processor.data.MockupType
 import mir.oslav.mockup.processor.data.ResolvedProperty
+import mir.oslav.mockup.processor.generation.isEnumEntry
+import mir.oslav.mockup.processor.generation.isEnumType
 import mir.oslav.mockup.processor.generation.isFixedArrayType
 import mir.oslav.mockup.processor.generation.isGenericCollectionType
 import mir.oslav.mockup.processor.generation.isSimpleType
@@ -32,6 +35,9 @@ class MockupVisitor constructor(
 ) : KSVisitorVoid() {
 
 
+    /**
+     * @since 1.0.0
+     */
     var imports: List<String> = emptyList()
 
 
@@ -77,6 +83,16 @@ class MockupVisitor constructor(
             val name = property.simpleName.getShortName()
             val type = property.type.resolve()
             val declaration = type.declaration
+            val annotations = property.annotations
+
+            val foundAnnotation = annotations.find { annotation ->
+                annotation.shortName.asString() == "IgnoreOnMockup"
+            }
+            if (foundAnnotation != null) {
+                //Skipping because annotation is annotated with @IgnoreOnMockup
+                return@forEach
+            }
+
 
             val propertyType = resolveMockupType(
                 type = type,
@@ -166,6 +182,7 @@ class MockupVisitor constructor(
      * @param property -> Property declaration with [type]
      * @param imports -> Imports that are needed by [type] and [property]
      * @return Resolved Mockup type
+     * @throws IllegalArgumentException
      * @since 1.0.0
      */
     private fun resolveMockupType(
@@ -185,8 +202,15 @@ class MockupVisitor constructor(
                 )
             }
 
-            type.isFixedArrayType -> {
-                MockupType.FixedTypeArray(name = name, type = type, declaration = declaration)
+            type.isEnumType -> {
+                //Since enums doesn't need @Mockup annotation it's required to include import manually
+                this.imports += listOf(type.declaration.qualifiedName!!.asString())
+                MockupType.Enum(
+                    name = name,
+                    type = type,
+                    declaration = declaration,
+                    enumEntries = getEnumConstants(enumType = type)
+                )
             }
 
             type.isGenericCollectionType -> {
@@ -207,6 +231,10 @@ class MockupVisitor constructor(
                 )
             }
 
+            type.isFixedArrayType -> {
+                MockupType.FixedTypeArray(name = name, type = type, declaration = declaration)
+            }
+
             else -> findMockUppedClass(type = type)
 
         }
@@ -223,7 +251,6 @@ class MockupVisitor constructor(
         val classDeclaration = allClassesDeclarations.find { mockupClass ->
             mockupClass.qualifiedName == type.declaration.qualifiedName
         }
-
 
         require(value = classDeclaration != null, lazyMessage = {
             val typeName = type.declaration.simpleName.getShortName()
@@ -248,5 +275,20 @@ class MockupVisitor constructor(
             imports = imports,
             properties = outputPropertiesList
         )
+    }
+
+
+    /**
+     * @since 1.1.7
+     */
+    private fun getEnumConstants(
+        enumType: KSType
+    ): List<KSDeclaration> {
+        require(enumType.isEnumType) {
+            "To read enum entries provided type has to be enum!!"
+        }
+        val classDeclaration = enumType.declaration as? KSClassDeclaration ?: return emptyList()
+        val entries = classDeclaration.declarations.filter(KSDeclaration::isEnumEntry).toList()
+        return entries
     }
 }

@@ -1,4 +1,4 @@
-package mir.oslav.mockup.example.ui
+package com.mockup.example.ui
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -14,7 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import mir.oslav.mockup.example.R
+import com.mockup.example.R
 
 
 /**
@@ -36,7 +36,6 @@ fun HomeScreen(
             BottomMenuNavHost(
                 globalNavHostController = navHostController,
                 bottomMenuNavHostController = bottomMenuNavHostController,
-                paddingValues = paddingValues
             )
         },
         bottomBar = {

@@ -1,4 +1,4 @@
-package mir.oslav.mockup.example
+package com.mockup.example
 
 
 /**

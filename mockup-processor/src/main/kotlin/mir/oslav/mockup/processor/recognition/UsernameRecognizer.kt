@@ -133,6 +133,9 @@ class UsernameRecognizer constructor() : BaseRecognizer() {
     }
 
 
+    /**
+     *
+     */
     override fun recognize(property: ResolvedProperty, containingClassName: String): Boolean {
         if (!property.type.isString) {
             //Only string can be username
@@ -152,6 +155,9 @@ class UsernameRecognizer constructor() : BaseRecognizer() {
     }
 
 
+    /**
+     * @since 1.1.3
+     */
     override fun generateCodeValueForProperty(property: ResolvedProperty): String {
         if (!firstNamesIterator.hasNext()) {
             firstNamesIterator = firstNames.iterator()

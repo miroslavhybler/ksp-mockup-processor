@@ -1,5 +1,7 @@
 package mir.oslav.mockup.processor.generation
 
+import com.google.devtools.ksp.symbol.ClassKind
+import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import java.io.OutputStream
 
@@ -195,7 +197,6 @@ val KSType.isFixedArrayType: Boolean
             || this.isByteArray
 
 
-
 /**
  * True if this type is collection with generic parameter, false otherwise. Arraylist check added
  * at version 1.1.0
@@ -204,3 +205,14 @@ val KSType.isFixedArrayType: Boolean
 val KSType.isGenericCollectionType: Boolean
     get() = this.isArray
             || this.isList
+
+
+/**
+ * True if this type's declaration is Enum
+ * @since 1.1.7
+ */
+val KSType.isEnumType: Boolean
+    get() {
+        val classDeclaration = declaration as? KSClassDeclaration ?: return false
+        return classDeclaration.classKind == ClassKind.ENUM_CLASS
+    }

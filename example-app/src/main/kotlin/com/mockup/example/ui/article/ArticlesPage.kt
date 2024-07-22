@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalLayoutApi::class)
 
-package mir.oslav.mockup.example.ui.article
+package com.mockup.example.ui.article
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,13 +27,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.mockup.example.Article
+import com.mockup.example.ui.Photo
 import mir.oslav.mockup.Mockup
-import mir.oslav.mockup.example.Article
-import mir.oslav.mockup.example.ui.Photo
 import java.util.Locale
 
 
@@ -176,7 +176,7 @@ private fun ArticleItem(
 }
 
 @Composable
-@Preview(showBackground = true)
+@PreviewLightDark
 private fun ArticleScreenPreview() {
     ArticlesScreen(
         navHostController = rememberNavController(),

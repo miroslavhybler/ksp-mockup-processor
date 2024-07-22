@@ -1,4 +1,4 @@
-package mir.oslav.mockup.example.ui
+package com.mockup.example.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
-import mir.oslav.mockup.example.ImagesForPreview
+import com.mockup.example.ImagesForPreview
 
 
 /**

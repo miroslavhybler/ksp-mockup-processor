@@ -37,6 +37,7 @@ class MockupDataProviderGenerator constructor(
         val writtenImports = ArrayList<String>()
 
         //Header, package name and import of base class
+        //TODO change package to com.mockup since 2.0.0
         outputStream += MockupConstants.generatedFileHeader
         outputStream += "\n\n"
         outputStream += "package mir.oslav.mockup.providers"
@@ -45,7 +46,7 @@ class MockupDataProviderGenerator constructor(
 
         //Used types imports
         clazz.imports.sortedDescending().forEach { qualifiedName ->
-            if (!writtenImports.contains(qualifiedName)) {
+            if (!writtenImports.contains(element = qualifiedName)) {
                 outputStream += "import $qualifiedName\n"
                 writtenImports.add(qualifiedName)
             }

@@ -1,12 +1,11 @@
-package mir.oslav.mockup.example.ui
+package com.mockup.example.ui
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import mir.oslav.mockup.example.ui.article.ArticlesScreen
-import mir.oslav.mockup.example.ui.author.AuthorsScreen
+import com.mockup.example.ui.article.ArticlesScreen
+import com.mockup.example.ui.author.AuthorsScreen
 
 
 /**
@@ -17,7 +16,6 @@ import mir.oslav.mockup.example.ui.author.AuthorsScreen
 fun BottomMenuNavHost(
     globalNavHostController: NavHostController,
     bottomMenuNavHostController: NavHostController,
-    paddingValues: PaddingValues
 ) {
     NavHost(
         navController = bottomMenuNavHostController,

@@ -65,9 +65,19 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
         name = name,
         type = type,
         declaration = declaration
-    ) {
+    )
 
-    }
+
+    data class Enum constructor(
+        override val name: String,
+        override val type: KSType,
+        override val declaration: KSDeclaration,
+        val enumEntries: List<KSDeclaration>
+    ) : MockupType<KSDeclaration>(
+        name = name,
+        type = type,
+        declaration = declaration,
+    )
 
 
     /**

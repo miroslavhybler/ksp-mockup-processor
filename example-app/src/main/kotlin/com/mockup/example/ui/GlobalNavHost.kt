@@ -1,4 +1,4 @@
-package mir.oslav.mockup.example.ui
+package com.mockup.example.ui
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -6,8 +6,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import mir.oslav.mockup.example.ui.article.ArticleDetailScreen
-import mir.oslav.mockup.example.ui.author.AuthorDetailScreen
+import com.mockup.example.ui.article.ArticleDetailScreen
+import com.mockup.example.ui.author.AuthorDetailScreen
 
 
 /**

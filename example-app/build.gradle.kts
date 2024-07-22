@@ -2,14 +2,15 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
-    namespace = "mir.oslav.mockup.example"
+    namespace = "com.mockup.example"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "mir.oslav.mockup.example"
+        applicationId = "com.mockup.example"
         minSdk = 21
         targetSdk = 34
         versionCode = 3

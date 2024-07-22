@@ -1,7 +1,8 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package mir.oslav.mockup.example.ui.author
+package com.mockup.example.ui.author
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,17 +33,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.mockup.example.Article
+import com.mockup.example.AuthorRank
+import com.mockup.example.Publisher
+import com.mockup.example.ui.DetailAppBar
+import com.mockup.example.ui.Photo
 import kotlinx.coroutines.launch
 import mir.oslav.mockup.Mockup
-import mir.oslav.mockup.example.Article
-import mir.oslav.mockup.example.Publisher
-import mir.oslav.mockup.example.ui.DetailAppBar
-import mir.oslav.mockup.example.ui.Photo
 
 
 /**
@@ -108,21 +112,28 @@ private fun AuthorDetailScreenContent(
                                     .height(height = 256.dp)
                             ) {
                                 Photo(
-                                    imageUrl = author.themeImageUrl,
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(height = 226.dp)
+                                        .height(height = 226.dp),
+                                    imageUrl = author.themeImageUrl,
                                 )
                                 Photo(
-                                    imageUrl = author.avatarUrl,
                                     modifier = Modifier
                                         .align(alignment = Alignment.BottomStart)
                                         .padding(start = 32.dp, top = 22.dp)
                                         .size(size = 96.dp)
-                                        .clip(shape = CircleShape)
+                                        .clip(shape = CircleShape),
+                                    imageUrl = author.avatarUrl,
+
+                                    )
+
+                                AuthorRank(
+                                    modifier = Modifier
+                                        .padding(top = 16.dp, end = 16.dp)
+                                        .align(alignment = Alignment.TopEnd),
+                                    authorRank = author.authorRank,
                                 )
                             }
-
 
                             Text(
                                 text = author.fullName,
@@ -175,8 +186,44 @@ private fun AuthorDetailScreenContent(
             }
         }
     )
+}
 
 
+@Composable
+fun AuthorRank(
+    modifier: Modifier = Modifier,
+    authorRank: AuthorRank,
+    isBig: Boolean = true,
+) {
+    val containerColor = when (authorRank) {
+        AuthorRank.GOLD -> Color(color = 0xFFFFC107)
+        AuthorRank.SILVER -> Color(color = 0xFF797979)
+        AuthorRank.BRONZE -> Color(color = 0xFF724400)
+    }
+
+
+    Box(
+        modifier = modifier
+            .background(
+                color = containerColor,
+                shape = RoundedCornerShape(size = 16.dp),
+            )
+            .padding(
+                horizontal = if (isBig) 12.dp else 4.dp,
+                vertical = if (isBig) 8.dp else 4.dp
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = authorRank.name,
+            style = if (isBig)
+                MaterialTheme.typography.titleMedium
+            else
+                MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = Color.White,
+        )
+    }
 }
 
 
@@ -225,10 +272,10 @@ private fun ArticleItem(
 
 
 @Composable
-@Preview
+@PreviewLightDark
 private fun AuthorDetailScreenPreview() {
     AuthorDetailScreenContent(
-        author = Mockup.publisher.single,
+        author = Mockup.publisher.random,
         navHostController = rememberNavController(),
         articles = Mockup.article.list
     )

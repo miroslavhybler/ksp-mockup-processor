@@ -42,7 +42,6 @@ import kotlin.random.Random
  * @author Miroslav Hýbler <br>
  * created on 15.09.2023
  */
-//TODO support enums
 class MockupProcessor constructor(
     private val environment: SymbolProcessorEnvironment,
 ) : SymbolProcessor {
@@ -59,6 +58,7 @@ class MockupProcessor constructor(
     }
 
     /**
+     * List of all classes annotated with [Mockup] annotation and all other found supported types.
      * @since 1.0.0
      */
     private val mockupTypesList: ArrayList<MockupType<*>> = ArrayList()
@@ -130,7 +130,7 @@ class MockupProcessor constructor(
         val mockupClassDeclarations = resolver.findAnnotatedClasses()
 
         if (Debugger.isDebugEnabled) {
-            try{
+            try {
                 Debugger.setOutputStream(
                     outputStream = environment.codeGenerator.createNewFile(
                         packageName = "mir.oslav.mockup",
@@ -164,7 +164,7 @@ class MockupProcessor constructor(
         visitor = MockupVisitor(
             environment = environment,
             outputTypeList = mockupTypesList,
-            allClassesDeclarations = mockupClassDeclarations
+            allClassesDeclarations = mockupClassDeclarations,
         )
 
         mockupClassDeclarations.forEach { classDeclaration ->
@@ -172,6 +172,15 @@ class MockupProcessor constructor(
         }
 
         visitor.imports = importsList
+
+        Debugger.write(
+            text = "imports: \n${
+                importsList.joinToString(
+                    transform = { "//$it" },
+                    separator = "\n"
+                )
+            }"
+        )
 
         mockupClassDeclarations.forEach { classDeclaration ->
             visitor.visitClassDeclaration(
@@ -216,6 +225,7 @@ class MockupProcessor constructor(
         val outputNamesList = ArrayList<MockupObjectMember>()
         val size1 = classesDeclarations.size
         val size2 = mockupClasses.size
+
         require(
             value = size1 == size2,
             lazyMessage = {
@@ -291,14 +301,15 @@ class MockupProcessor constructor(
 
     /**
      * Generates code listOf(...) with items for data provider<br/>
-     * <code>
-     *listOf(<br/>
-     *&emsp;User().apply {<br>
-     * &emsp;&emsp;id = 123<br>
-     * &emsp;&emsp;firstName = "John"<br>
-     * &emsp;&emsp;lastName = "Doe"<br>
-     * &emsp;}<br/>
-     *)</code><br>
+     * ```kotlin
+     *listOf(
+     *User().apply {
+     *      id = 123
+     *      firstName = "John"
+     *      lastName = "Doe"
+     *   }
+     *)
+     * ```
      * @return Generated code
      * @since 1.0.0
      */
@@ -321,8 +332,8 @@ class MockupProcessor constructor(
     /**
      * Generates property's value assignment code.<br>
      * <b>Simple Types</b><br/>
-     * generates single line code of assignment like: <code>id = 123</code><br/><br/>
-     * <b>Mockup classes Type</b><br/>
+     * generates single line code of assignment like: ```id = 123```<br/><br/>
+     * #### Mockup classes Type
      * Generates code of assignment for class property. [generateCodeForMockUppedType] will choose
      * if it will use primary constructor or [apply] scope function for [MockupType.MockUpped.properties].
      * <br/><br/>
@@ -331,7 +342,10 @@ class MockupProcessor constructor(
      * @see generateCodeForProperty
      * @since 1.0.0
      */
-    private fun generateCodeForProperty(property: ResolvedProperty): String {
+    //TODO not icnluding import for enum
+    private fun generateCodeForProperty(
+        property: ResolvedProperty
+    ): String {
         var outputCode = ""
         outputCode += "\t\t\t"
         outputCode += "${property.name.decapitalized()} = "
@@ -347,18 +361,12 @@ class MockupProcessor constructor(
                 return outputCode
             }
         }
-
         when (val type = property.resolvedType) {
             is MockupType.Simple -> {
                 val propertyValue = simpleValuesGenerator.generate(
                     property = type,
                     resolvedProperty = property
                 )
-                outputCode += propertyValue
-            }
-
-            is MockupType.FixedTypeArray -> {
-                val propertyValue = generateCodeForFixedTypeArray(type = type)
                 outputCode += propertyValue
             }
 
@@ -370,6 +378,9 @@ class MockupProcessor constructor(
                 outputCode += propertyValue
             }
 
+            is MockupType.Enum -> {
+                outputCode += "${type.declaration.simpleName.asString()}.${type.enumEntries.random().simpleName.asString()}\n"
+            }
             //TODO prevent infinite collection generation
             is MockupType.Collection -> {
                 outputCode += when {
@@ -406,12 +417,21 @@ class MockupProcessor constructor(
                         }
                     }
 
+                    is MockupType.Enum -> {
+                        outputCode += "${elementType.enumEntries.random().simpleName.asString()}\n"
+                    }
+
                     is MockupType.FixedTypeArray -> generateCodeForFixedTypeArray(type = elementType)
                     is MockupType.Collection -> propertyValueCode = ""
                 }
 
                 outputCode += propertyValueCode
                 outputCode += ")\n"
+            }
+
+            is MockupType.FixedTypeArray -> {
+                val propertyValue = generateCodeForFixedTypeArray(type = type)
+                outputCode += propertyValue
             }
         }
 
@@ -468,6 +488,7 @@ class MockupProcessor constructor(
             "Cannot generate mockup data for class ${memberClassName}. This can have two causes:\n" +
                     "Cause 1: Class $memberClassName is not supported. List of supported types can be found here https://github.com/miroslavhybler/ksp-mockup/#supported-types\n" +
                     "Cause 2: Class $memberClassName is not annotated with @Mockup annotation.\n" +
+                    "If you want to exclude it, use @IgnoreOnMockup annotation on the parameter.\n" +
                     "If neither of these one has happened, please report an issue here https://github.com/miroslavhybler/ksp-mockup/issues.\n\n"
         )
 
@@ -482,12 +503,13 @@ class MockupProcessor constructor(
      * Generates data item creation using its primary constructor. If [mockupClass] is data class or
      * its having parameters in primary constructor, they will be generated to
      * Generated code should look like this:<br>
-     * <code>
-     *User(<br>
-     * &emsp;id = 123,<br>
-     * &emsp;firstname = "John",<br>
-     * &emsp;lastName = "Doe",<br>
-     * )</code><br>
+     * ```kotlin
+     *User(
+     *   id = 123,<br>
+     *   firstname = "John",<br>
+     *   lastName = "Doe",<br>
+     *)
+     * ```
      * @return Generated code
      * @since 1.0.0
      */
@@ -518,17 +540,19 @@ class MockupProcessor constructor(
      * If [mockupClass] has properties that are not declared inside primary constructor, additional
      * code will be generated. Generated code consist of call apply extension function with assignment
      * of class's properties.
-     * <code>
-     *.apply {<br>
-     * &emsp;id = 123<br>
-     * &emsp;firstName = "John"<br>
-     * &emsp;lastName = "Doe"<br>
-     * }</code><br>
+     * ```kotlin
+     *.apply {
+     *   id = 123
+     *   firstName = "John"
+     *   lastName = "Doe"
+     * }
+     * ```
      * @return Generated code
      * @since 1.0.0
-     * @see generateRandomCodeForSimpleType
      */
-    private fun generateItemApplyCall(mockupClass: MockupType.MockUpped): String {
+    private fun generateItemApplyCall(
+        mockupClass: MockupType.MockUpped,
+    ): String {
         val notConstructorParameters = mockupClass.properties
             .filter(ResolvedProperty::isMutable)
             .filter(ResolvedProperty::isNotInPrimaryConstructorProperty)
@@ -539,6 +563,15 @@ class MockupProcessor constructor(
 
         var outputText = ".apply {\n"
         notConstructorParameters.forEach { property ->
+            val annotations = property.type.annotations
+            val foundAnnotation = annotations.find { annotation ->
+                annotation.shortName.asString() == "IgnoreOnMockup"
+            }
+            if (foundAnnotation != null) {
+                //Skipping because annotation is annotated with @IgnoreOnMockup
+                return@forEach
+            }
+
             outputText += generateCodeForProperty(property = property)
             outputText += "\n"
         }

@@ -1,4 +1,4 @@
-package mir.oslav.mockup.example
+package com.mockup.example
 
 import androidx.annotation.ColorInt
 import androidx.annotation.FloatRange
@@ -6,6 +6,7 @@ import androidx.annotation.IntDef
 import androidx.annotation.IntRange
 import com.mockup.annotations.IgnoreOnMockup
 import com.mockup.annotations.Mockup
+import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 
@@ -96,8 +97,6 @@ data class Category constructor(
 }
 
 
-
-
 @Mockup(count = 3)
 class Publisher constructor() {
     var id: Int = 0
@@ -109,11 +108,18 @@ class Publisher constructor() {
     var themeImageUrl: String? = null
     var avatarUrl: String? = null
 
-    //TODO add rank
+    //We want to exclude this because mockup library can't generate it
+    @IgnoreOnMockup
+    var dateOfBirthDateTime: DateTime? =null
+
+    var authorRank: AuthorRank = AuthorRank.GOLD
 
     val fullName: String get() = "$firstName $lastName"
 }
 
+enum class AuthorRank {
+    GOLD, SILVER, BRONZE;
+}
 
 @Mockup(count = 1)
 class Reader constructor() {

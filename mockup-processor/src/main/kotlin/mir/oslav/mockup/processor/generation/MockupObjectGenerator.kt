@@ -26,6 +26,7 @@ open class MockupObjectGenerator constructor(
     fun generateContent(providers: List<MockupObjectMember>) {
 
         //Header
+        //TODO change package to com.mockup since 2.0.0
         outputStream += MockupConstants.generatedFileHeader
         outputStream += "\n\n"
         outputStream += "package mir.oslav.mockup"
