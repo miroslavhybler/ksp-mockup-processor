@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "com.github.miroslavhybler.mockup-processor"
-version = "1.1.6"
+version = "1.1.7"
 
 kotlin {
     jvmToolchain(jdkVersion = 8)
