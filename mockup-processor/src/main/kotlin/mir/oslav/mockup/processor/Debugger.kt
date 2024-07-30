@@ -28,12 +28,20 @@ object Debugger {
      */
     const val isDebugEnabled: Boolean = false
 
+
+    /**
+     * @since 1.1.3
+     */
     fun setOutputStream(outputStream: OutputStream) {
         if (isDebugEnabled) {
             this.outputStream = outputStream
         }
     }
 
+
+    /**
+     * @since 1.1.3
+     */
     fun write(text: String) {
         if (isDebugEnabled) {
 
@@ -41,6 +49,10 @@ object Debugger {
         }
     }
 
+
+    /**
+     * @since 1.1.3
+     */
     fun close() {
         outputStream?.close()
     }

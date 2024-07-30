@@ -51,7 +51,12 @@ data class User constructor(
     val id: Int,
     val firstName: String,
     val lastName: String,
-)
+) {
+    
+    //Use IgnoreOnMockup annotation for properties that should be excluded from mockup generation
+    @IgnoreOnMockup
+    val registrationDate: DateTime?  = null
+}
 ```
 
 Build your project and access generated data through generated Mockup object.
