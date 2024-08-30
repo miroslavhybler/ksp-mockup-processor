@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.mockup.example.Article
+import com.mockup.example.ExampleTheme
 import com.mockup.example.ui.Photo
 import mir.oslav.mockup.Mockup
 import java.util.Locale
@@ -178,8 +179,10 @@ private fun ArticleItem(
 @Composable
 @PreviewLightDark
 private fun ArticleScreenPreview() {
-    ArticlesScreen(
-        navHostController = rememberNavController(),
-        articles = Mockup.article.list,
-    )
+   ExampleTheme() {
+        ArticlesScreen(
+            navHostController = rememberNavController(),
+            articles = Mockup.article.list,
+        )
+    }
 }

@@ -37,16 +37,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.mockup.example.Article
 import com.mockup.example.AuthorRank
+import com.mockup.example.ExampleTheme
 import com.mockup.example.Publisher
 import com.mockup.example.ui.DetailAppBar
 import com.mockup.example.ui.Photo
 import kotlinx.coroutines.launch
 import mir.oslav.mockup.Mockup
+import mir.oslav.mockup.providers.PublisherMockupProvider
 
 
 /**
@@ -273,10 +276,15 @@ private fun ArticleItem(
 
 @Composable
 @PreviewLightDark
-private fun AuthorDetailScreenPreview() {
-    AuthorDetailScreenContent(
-        author = Mockup.publisher.random,
-        navHostController = rememberNavController(),
-        articles = Mockup.article.list
-    )
+private fun AuthorDetailScreenPreview(
+    @PreviewParameter(provider = PublisherMockupProvider::class)
+    publisher: Publisher,
+) {
+    ExampleTheme {
+        AuthorDetailScreenContent(
+            author = publisher,
+            navHostController = rememberNavController(),
+            articles = Mockup.article.list
+        )
+    }
 }

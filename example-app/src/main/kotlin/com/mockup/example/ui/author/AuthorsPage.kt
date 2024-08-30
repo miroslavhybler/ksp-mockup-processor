@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.mockup.example.ExampleTheme
 import com.mockup.example.Publisher
 import com.mockup.example.ui.Photo
 import mir.oslav.mockup.Mockup
@@ -133,8 +134,10 @@ private fun AuthorItem(publisher: Publisher, navHostController: NavHostControlle
 @PreviewLightDark
 private fun AuthorsScreenPreview() {
     //Preview for screen using Mockup instead of @PreviewParameterProvider
-    AuthorsScreen(
-        navHostController = rememberNavController(),
-        publishers = Mockup.publisher.list,
-    )
+    ExampleTheme() {
+        AuthorsScreen(
+            navHostController = rememberNavController(),
+            publishers = Mockup.publisher.list,
+        )
+    }
 }

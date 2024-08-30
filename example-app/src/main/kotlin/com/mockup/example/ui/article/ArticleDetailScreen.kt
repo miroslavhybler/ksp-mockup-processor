@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.mockup.example.Article
+import com.mockup.example.ExampleTheme
 import com.mockup.example.ui.DetailAppBar
 import com.mockup.example.ui.Photo
 import kotlinx.coroutines.launch
@@ -231,10 +232,10 @@ private fun ArticleDetailScreenContent(
 @Composable
 @PreviewLightDark
 private fun ArticleDetailScreenPreview() {
-
-    ArticleDetailScreenContent(
-        article = Mockup.article.single,
-        navHostController = rememberNavController()
-    )
-
+    ExampleTheme() {
+        ArticleDetailScreenContent(
+            article = Mockup.article.single,
+            navHostController = rememberNavController()
+        )
+    }
 }

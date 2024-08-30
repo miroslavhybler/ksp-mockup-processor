@@ -50,7 +50,12 @@ class MockupProcessor constructor(
     companion object {
 
         /**
-         * TODO docs
+         * Input options for processor that can be passed as arguments using ksp block, e.g.
+         * ```kotlin
+         * ksp {
+         *     arg(k = "mockup-date-format", v = "yyyy-MM-dd")
+         * }
+         * ```
          * @since 1.1.0
          */
         var inputOptions: InputOptions? = null
@@ -236,7 +241,7 @@ class MockupProcessor constructor(
         )
 
         mockupClasses.forEachIndexed { _, mockupClass ->
-            val mockupDataGeneratedContent: String = generateMockupDataListForProvider(
+            val mockupDataGeneratedContent: String = generateMockupDataSequenceForProvider(
                 mockupClass = mockupClass
             )
 
@@ -302,7 +307,7 @@ class MockupProcessor constructor(
     /**
      * Generates code listOf(...) with items for data provider<br/>
      * ```kotlin
-     *listOf(
+     *sequenceOf(
      *User().apply {
      *      id = 123
      *      firstName = "John"
@@ -313,10 +318,10 @@ class MockupProcessor constructor(
      * @return Generated code
      * @since 1.0.0
      */
-    private fun generateMockupDataListForProvider(
+    private fun generateMockupDataSequenceForProvider(
         mockupClass: MockupType.MockUpped,
     ): String {
-        var outCode = "listOf(\n"
+        var outCode = "sequenceOf(\n"
 
         for (i in 0 until mockupClass.data.count) {
             outCode += generateItemPrimaryConstructorCall(mockupClass = mockupClass)
@@ -342,7 +347,6 @@ class MockupProcessor constructor(
      * @see generateCodeForProperty
      * @since 1.0.0
      */
-    //TODO not icnluding import for enum
     private fun generateCodeForProperty(
         property: ResolvedProperty
     ): String {

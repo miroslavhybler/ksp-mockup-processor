@@ -35,6 +35,9 @@ class AbstractMockupDataProviderGenerator constructor(
         outputStream += "\n\n\n"
 
 
+        outputStream += "import androidx.compose.ui.tooling.preview.PreviewParameterProvider"
+        outputStream += "\n"
+
         //Javadoc
         outputStream += "/**\n"
         outputStream += " * Defines the mockup data provider class\n"
@@ -44,14 +47,14 @@ class AbstractMockupDataProviderGenerator constructor(
 
         //Code
         outputStream += "public abstract class MockupDataProvider<T : Any> constructor(\n"
-        outputStream += "\t private val values: List<T> = emptyList()\n"
-        outputStream += ") {\n"
+        outputStream += "\t override val values: Sequence<T> = emptySequence()\n"
+        outputStream += "): PreviewParameterProvider<T> {\n"
         outputStream += "\n"
         outputStream += "\tval single: T get() = values.first()\n"
         outputStream += "\n"
-        outputStream += "\tval random: T get() = values.random()\n"
+        outputStream += "\tval list: List<T> get() = values.toList()\n"
         outputStream += "\n"
-        outputStream += "\tval list: List<T> get() = values\n"
+        outputStream += "\tval random: T get() = list.random()\n"
         outputStream += "}"
     }
 

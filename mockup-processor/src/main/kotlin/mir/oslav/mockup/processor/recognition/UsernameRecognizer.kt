@@ -13,7 +13,6 @@ import mir.oslav.mockup.processor.generation.isString
  * @author Miroslav Hýbler <br>
  * created on 01.01.2024
  */
-//TODO solve the e.g. isFirstName duplicits
 class UsernameRecognizer constructor() : BaseRecognizer() {
 
 

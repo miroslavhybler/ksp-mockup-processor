@@ -36,7 +36,7 @@ plugins {
 
 dependencies {
     //Always use the same version for annotations and processor
-    val mockupVersion= "1.1.7"
+    val mockupVersion= "1.1.8"
     implementation("com.github.miroslavhybler:ksp-mockup-annotations:$mockupVersion")
     ksp("com.github.miroslavhybler:ksp-mockup-annotations:$mockupVersion")
     ksp("com.github.miroslavhybler:kps-mockup-processor:$mockupVersion")
@@ -73,6 +73,19 @@ val usersList = Mockup.user.list
 val userRandom = Mockup.user.random
 ```
 
+Since version 1.1.8 is it also possible to use as PreviewParameterProvider
+
+```kotlin
+//For class "User" the name would be UserMockupProvider by default
+@Composable
+@PreviewLightDark
+private fun UserScreen(
+    @PreviewParameter(provider = UserMockupProvider::class)
+    user: Publisher,
+) {
+    //Preview content
+}
+```
 
 ### Supported types
 - Simple kotlin types like Int, Long, ...
