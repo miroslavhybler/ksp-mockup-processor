@@ -58,6 +58,7 @@ class MockupProcessor constructor(
          * ```
          * @since 1.1.0
          */
+        //TODO use default value instead of null
         var inputOptions: InputOptions? = null
             private set
     }
@@ -138,7 +139,7 @@ class MockupProcessor constructor(
             try {
                 Debugger.setOutputStream(
                     outputStream = environment.codeGenerator.createNewFile(
-                        packageName = "mir.oslav.mockup",
+                        packageName = "com.mockup",
                         fileName = "logs",
                         dependencies = Dependencies(
                             aggregating = false,
@@ -249,7 +250,7 @@ class MockupProcessor constructor(
                 outputStream = generateOutputFile(
                     classes = classesDeclarations,
                     filename = "${mockupClass.name}MockupProvider",
-                    packageName = "mir.oslav.mockup.providers"
+                    packageName = "com.mockup.providers"
                 ),
                 clazz = mockupClass,
                 generatedValuesContent = mockupDataGeneratedContent
@@ -257,7 +258,7 @@ class MockupProcessor constructor(
             outputNamesList.add(
                 MockupObjectMember(
                     providerClassName = dataProviderClazzName,
-                    providerClassPackage = "mir.oslav.mockup.providers",
+                    providerClassPackage = "com.mockup.providers",
                     propertyName = mockupClass.name
                 )
             )
@@ -288,7 +289,7 @@ class MockupProcessor constructor(
     private fun generateOutputFile(
         classes: List<KSClassDeclaration>,
         filename: String,
-        packageName: String = "mir.oslav.mockup",
+        packageName: String = "com.mockup",
         isAggregating: Boolean = true
     ): OutputStream {
         return environment.codeGenerator.createNewFile(
@@ -348,22 +349,22 @@ class MockupProcessor constructor(
      * @since 1.0.0
      */
     private fun generateCodeForProperty(
-        property: ResolvedProperty
+        property: ResolvedProperty,
     ): String {
         var outputCode = ""
         outputCode += "\t\t\t"
         outputCode += "${property.name.decapitalized()} = "
 
         recognizers.forEach { recognizer ->
-            if (
-                recognizer.recognize(
-                    property = property,
-                    containingClassName = property.containingClassName
-                )
-            ) {
-                outputCode += recognizer.generateCodeValueForProperty(property = property)
+            val codeForProperty = recognizer.tryRecognizeAndGenerateValue(
+                property = property,
+                containingClassName = property.containingClassName,
+            )
+            if (codeForProperty != null) {
+                outputCode += codeForProperty
                 return outputCode
             }
+
         }
         when (val type = property.resolvedType) {
             is MockupType.Simple -> {

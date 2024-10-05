@@ -37,10 +37,16 @@ abstract class BaseRecognizer constructor() {
      * @since 1.1.0
      */
     @Deprecated(
-        message = "Refactor in 1.2.0, recognition and code generation in two steps meains more code and twice as time. " +
+        message = "Refactor in 1.2.0, recognition and code generation in two steps means more code and twice as time. " +
                 "Put recognition and generation in one step."
     )
     abstract fun generateCodeValueForProperty(
         property: ResolvedProperty,
     ): String
+
+
+    abstract fun tryRecognizeAndGenerateValue(
+        property: ResolvedProperty,
+        containingClassName: String,
+    ): String?
 }

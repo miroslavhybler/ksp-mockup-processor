@@ -31,7 +31,7 @@ class AbstractMockupDataProviderGenerator constructor(
         //File header
         outputStream += MockupConstants.generatedFileHeader
         outputStream += "\n\n\n"
-        outputStream += "package mir.oslav.mockup"
+        outputStream += "package com.mockup"
         outputStream += "\n\n\n"
 
 

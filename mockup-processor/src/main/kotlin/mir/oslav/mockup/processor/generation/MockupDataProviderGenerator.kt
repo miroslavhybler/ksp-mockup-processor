@@ -40,9 +40,9 @@ class MockupDataProviderGenerator constructor(
         //TODO change package to com.mockup since 2.0.0
         outputStream += MockupConstants.generatedFileHeader
         outputStream += "\n\n"
-        outputStream += "package mir.oslav.mockup.providers"
+        outputStream += "package com.mockup.providers"
         outputStream += "\n\n"
-        outputStream += "import mir.oslav.mockup.MockupDataProvider\n"
+        outputStream += "import com.mockup.MockupDataProvider\n"
 
         //Used types imports
         clazz.imports.sortedDescending().forEach { qualifiedName ->

@@ -85,7 +85,7 @@ class ImageUrlRecognizer constructor() : BaseRecognizer() {
         val isMaybe = recognizableNames.find { imgPropertyName ->
             property.name.contains(other = imgPropertyName, ignoreCase = true)
         } != null
-        return  isMaybe
+        return isMaybe
     }
 
 
@@ -93,7 +93,9 @@ class ImageUrlRecognizer constructor() : BaseRecognizer() {
      * @return Code, and actual image url wrapped in "".
      * @since 1.1.0
      */
-    override tailrec fun generateCodeValueForProperty(property: ResolvedProperty): String {
+    override tailrec fun generateCodeValueForProperty(
+        property: ResolvedProperty
+    ): String {
         if (iterator.hasNext()) {
             val imageUrl = iterator.next()
             return "\"$imageUrl\""
@@ -103,4 +105,24 @@ class ImageUrlRecognizer constructor() : BaseRecognizer() {
         return generateCodeValueForProperty(property = property)
     }
 
+
+    /**
+     * @since 1.2.0
+     */
+    override fun tryRecognizeAndGenerateValue(
+        property: ResolvedProperty,
+        containingClassName: String
+    ): String? {
+        val isClear = recognizableNames.contains(element = property.name)
+        if (isClear) {
+            return generateCodeValueForProperty(property = property)
+        }
+        val isMaybe = recognizableNames.find { imgPropertyName ->
+            property.name.contains(other = imgPropertyName, ignoreCase = true)
+        } != null
+
+        return if (isMaybe) {
+            generateCodeValueForProperty(property = property)
+        } else null
+    }
 }

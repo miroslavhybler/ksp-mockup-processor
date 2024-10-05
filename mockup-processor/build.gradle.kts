@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "com.github.miroslavhybler.mockup-processor"
-version = "1.1.8"
+version = "1.2.0"
 
 kotlin {
     jvmToolchain(jdkVersion = 8)
@@ -80,7 +80,7 @@ afterEvaluate {
                 from(components.getByName("kotlin"))
                 groupId = "com.github.miroslavhybler"
                 artifactId = "mockup-processor"
-                version = "1.1.8"
+                version = "1.2.0"
                 pom {
                     description.set("Jitpack.io deploy")
                 }

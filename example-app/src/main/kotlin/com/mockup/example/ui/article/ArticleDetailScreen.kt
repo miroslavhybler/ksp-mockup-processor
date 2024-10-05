@@ -40,12 +40,12 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.mockup.Mockup
 import com.mockup.example.Article
 import com.mockup.example.ExampleTheme
 import com.mockup.example.ui.DetailAppBar
 import com.mockup.example.ui.Photo
 import kotlinx.coroutines.launch
-import mir.oslav.mockup.Mockup
 
 
 /**

@@ -6,7 +6,6 @@ import mir.oslav.mockup.processor.data.ResolvedProperty
 import mir.oslav.mockup.processor.generation.isInt
 import mir.oslav.mockup.processor.generation.isLong
 import mir.oslav.mockup.processor.generation.isString
-import mir.oslav.mockup.processor.recognition.DateTimeRecognizer.Companion.recognizableNames
 import org.joda.time.DateTimeZone
 import org.joda.time.IllegalFieldValueException
 import org.joda.time.MutableDateTime
@@ -45,7 +44,11 @@ class DateTimeRecognizer constructor() : BaseRecognizer() {
             "created_at", "createdAt",
             "updated_at", "updatedAt",
             "deleted_at", "deletedAt",
-            "date_of_birth", "dateOfBirth"
+            "date_of_birth", "dateOfBirth",
+            "date_from", "dateFrom",
+            "date_to", "dateTo",
+            "fromDate", "toDate",
+            "from_date", "to_date",
         )
     }
 
@@ -91,6 +94,21 @@ class DateTimeRecognizer constructor() : BaseRecognizer() {
         }
 
         return code
+    }
+
+
+    /**
+     * @since 1.2.0
+     */
+    override fun tryRecognizeAndGenerateValue(
+        property: ResolvedProperty,
+        containingClassName: String
+    ): String? {
+        if (recognizableNames.contains(element = property.name)) {
+            return generateCodeValueForProperty(property = property)
+        }
+
+        return null
     }
 
 

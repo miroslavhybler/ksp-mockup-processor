@@ -133,7 +133,52 @@ class UsernameRecognizer constructor() : BaseRecognizer() {
 
 
     /**
-     *
+     * @since 1.2.0
+     */
+    override fun tryRecognizeAndGenerateValue(
+        property: ResolvedProperty,
+        containingClassName: String
+    ): String? {
+        if (!property.type.isString) {
+            //Only string can be username
+            return null
+        }
+
+
+        val isPropertyClear = primaryRecognizablePropertiesNames.contains(element = property.name)
+        val isUserClassContext = recognizableClassNames.contains(element = containingClassName)
+        val isFirstName = recognizableFirstNames.contains(element = property.name)
+        val isLastName = recognizableLastNames.contains(element = property.name)
+
+        val isRecognized = if (isUserClassContext) {
+            val isClear = secondaryRecognizablePropertiesNames.contains(element = property.name)
+            isPropertyClear || isClear || isFirstName || isLastName
+        } else isPropertyClear || isFirstName || isLastName
+
+        if (isRecognized) {
+            if (!firstNamesIterator.hasNext()) {
+                firstNamesIterator = firstNames.iterator()
+                return generateCodeValueForProperty(property = property)
+            }
+            if (!lastNamesIterator.hasNext()) {
+                lastNamesIterator = lastNames.iterator()
+                return generateCodeValueForProperty(property = property)
+            }
+
+            val username = when {
+                isFirstName -> firstNamesIterator.next()
+                isLastName -> lastNamesIterator.next()
+                else -> "${firstNamesIterator.next()} ${lastNamesIterator.next()}"
+            }
+            return "\"$username\""
+        }
+
+        return null
+    }
+
+
+    /**
+     * @since 1.1.3
      */
     override fun recognize(property: ResolvedProperty, containingClassName: String): Boolean {
         if (!property.type.isString) {

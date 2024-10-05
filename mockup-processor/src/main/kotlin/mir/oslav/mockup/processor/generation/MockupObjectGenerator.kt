@@ -29,7 +29,7 @@ open class MockupObjectGenerator constructor(
         //TODO change package to com.mockup since 2.0.0
         outputStream += MockupConstants.generatedFileHeader
         outputStream += "\n\n"
-        outputStream += "package mir.oslav.mockup"
+        outputStream += "package com.mockup"
         outputStream += "\n\n"
 
         //Imports
