@@ -1,6 +1,7 @@
 package mir.oslav.mockup.processor.recognition
 
 import mir.oslav.mockup.processor.data.ResolvedProperty
+import mir.oslav.mockup.processor.generation.isString
 
 
 /**
@@ -78,6 +79,11 @@ class ImageUrlRecognizer constructor() : BaseRecognizer() {
      * @since 1.1.0
      */
     override fun recognize(property: ResolvedProperty, containingClassName: String): Boolean {
+
+        if(!property.type.isString) {
+            return false
+        }
+
         val isClear = recognizableNames.contains(element = property.name)
         if (isClear) {
             return true
