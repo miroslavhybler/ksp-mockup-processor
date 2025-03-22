@@ -28,6 +28,7 @@ import mir.oslav.mockup.processor.generation.isSimpleType
  * @author Miroslav Hýbler <br>
  * created on 15.09.2023
  */
+//TODO circular dependency - when class uses itself as parameter it leads to stackOverflow
 class MockupVisitor constructor(
     private val environment: SymbolProcessorEnvironment,
     private val outputTypeList: ArrayList<MockupType<*>>,
@@ -46,7 +47,6 @@ class MockupVisitor constructor(
      */
     override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
         val resolvedProperties: ArrayList<ResolvedProperty> = ArrayList()
-
 
         visitClass(classDeclaration = classDeclaration, outputList = resolvedProperties)
 
@@ -150,8 +150,8 @@ class MockupVisitor constructor(
 
         require(value = annotation != null, lazyMessage = {
             "Unable to resolve type, class ${classDeclaration.simpleName.getShortName()} " +
-                    "is probably not annotated with @Mockup! If your class is annotated please" +
-                    " report an issue here https://github.com/miroslavhybler/ksp-mockup/issues."
+                    "is probably not annotated with @Mockup! If your class is annotated please " +
+                    "report an issue here https://github.com/miroslavhybler/ksp-mockup/issues."
         })
 
 

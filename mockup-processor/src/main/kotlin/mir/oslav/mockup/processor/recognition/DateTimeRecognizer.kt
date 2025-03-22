@@ -6,6 +6,7 @@ import mir.oslav.mockup.processor.data.ResolvedProperty
 import mir.oslav.mockup.processor.generation.isInt
 import mir.oslav.mockup.processor.generation.isLong
 import mir.oslav.mockup.processor.generation.isString
+import mir.oslav.mockup.processor.recognition.DateTimeRecognizer.Companion.recognizableNames
 import org.joda.time.DateTimeZone
 import org.joda.time.IllegalFieldValueException
 import org.joda.time.MutableDateTime
@@ -17,10 +18,11 @@ import kotlin.random.Random
 /**
  * Recognizer for date and time, using [recognizableNames]. Can generate Int, Long and String values. <br>
  * You can set custom dateTime format like this:
- * <code><br>
+ * ```kotlin
  * ksp {<br>
  *    arg(k = "mockup-date-format", v = "yyyy-MM-dd")<br>
- * }</code>
+ * }
+ * ```
  * @since 1.1.0
  * @author Miroslav Hýbler <br>
  * created on 16.11.2023
@@ -153,7 +155,15 @@ class DateTimeRecognizer constructor() : BaseRecognizer() {
         outTempDateTime.millisOfSecond = millis
         outTempDateTime.zone = DateTimeZone.forOffsetHours(zone)
 
-        val formatter = DateTimeFormat.forPattern(format)
+        val formatter = try {
+            DateTimeFormat.forPattern(format)
+        } catch (e: IllegalArgumentException) {
+            throw IllegalArgumentException(
+                "DateTimeFormatter was not able to process desired mockup-date-format, " +
+                        "check your mockup-date-format argument in app.gradle.kts file. " +
+                        "Error: ${e.message}"
+            )
+        }
         val stringDate = outTempDateTime.toString(formatter)
         return "\"$stringDate\""
     }

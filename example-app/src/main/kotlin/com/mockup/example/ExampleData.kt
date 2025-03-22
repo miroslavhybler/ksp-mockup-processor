@@ -1,15 +1,14 @@
 package com.mockup.example
 
+import android.annotation.SuppressLint
 import androidx.annotation.ColorInt
 import androidx.annotation.FloatRange
 import androidx.annotation.IntDef
 import androidx.annotation.IntRange
 import com.mockup.annotations.IgnoreOnMockup
 import com.mockup.annotations.Mockup
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
-
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 /**
  * @param rating Example usage of FloatRange annotation
@@ -42,18 +41,20 @@ data class Article constructor(
     val topReader: Reader? = null
 
     companion object {
-        //You can set custom JodaTime format for the date generation in your app's build.gradle.kts
+        //You can set custom dateTime format for the date generation in your app's build.gradle.kts
         //ksp {
         //  arg(k = "mockup-date-format", v = "yyyy-MM-dd")
         //}
         //https://www.joda.org/joda-time/key_format.html
-        private val dateTimeFormat: DateTimeFormatter = DateTimeFormat.forPattern(
-            "yyyy-MM-dd"
+        @SuppressLint("ConstantLocale") // for simplification
+        private val dateTimeFormat: SimpleDateFormat = SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss:ZZ",
+            Locale.getDefault(),
         )
     }
 
     val createdAtFormatted: String
-        get() = dateTimeFormat.parseDateTime(createdAt).toString("MM. dd. yyyy")
+        get() = dateTimeFormat.format(createdAtFormatted)
 
 
     @IntDef(
@@ -110,12 +111,13 @@ class Publisher constructor() {
 
     //We want to exclude this because mockup library can't generate it
     @IgnoreOnMockup
-    var dateOfBirthDateTime: DateTime? =null
+    var someUnknownObject: Any? = null
 
     var authorRank: AuthorRank = AuthorRank.GOLD
 
     val fullName: String get() = "$firstName $lastName"
 }
+
 
 enum class AuthorRank {
     GOLD, SILVER, BRONZE;

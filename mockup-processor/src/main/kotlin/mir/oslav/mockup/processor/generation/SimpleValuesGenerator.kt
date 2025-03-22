@@ -9,6 +9,7 @@ import kotlin.random.Random
 
 
 /**
+ * TODO - handle properties with lazy declaration (do not geneerate value)
  * @author Miroslav Hýbler <br>
  * created on 17.05.2024
  * @since 1.1.6
@@ -17,7 +18,7 @@ class SimpleValuesGenerator constructor() {
 
 
     /**
-     * Generates random code for value of [property], e.g. <code>id = 123</code>
+     * Generates random code for value of [property], e.g. `id = 123`
      * @param property Single property of class
      * @return Generated code
      * @throws WrongTypeException
