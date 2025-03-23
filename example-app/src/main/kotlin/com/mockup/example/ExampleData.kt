@@ -47,14 +47,23 @@ data class Article constructor(
         //}
         //https://www.joda.org/joda-time/key_format.html
         @SuppressLint("ConstantLocale") // for simplification
-        private val dateTimeFormat: SimpleDateFormat = SimpleDateFormat(
-            "yyyy-MM-dd HH:mm:ss:ZZ",
+        private val dateParser: SimpleDateFormat = SimpleDateFormat(
+            "yyyy-MM-dd HH:mm:ss Z",
+            Locale.getDefault(),
+        )
+        @SuppressLint("ConstantLocale") // for simplification
+        private val dateFormatter: SimpleDateFormat = SimpleDateFormat(
+            "dd. MM. yyyy",
             Locale.getDefault(),
         )
     }
 
     val createdAtFormatted: String
-        get() = dateTimeFormat.format(createdAtFormatted)
+        get() {
+            val date = dateParser.parse(createdAt)!!
+           return dateFormatter.format(date)
+
+        }
 
 
     @IntDef(

@@ -73,7 +73,7 @@ android {
     ksp {
         //You can set custom dateTime format for the date generation
         //https://www.joda.org/joda-time/key_format.html
-        arg(k = "mockup-date-format", v = "yyyy-MM-dd HH:mm:ss:ZZ")
+        arg(k = "mockup-date-format", v = "yyyy-MM-dd HH:mm:ss Z")
     }
 }
 

@@ -22,7 +22,7 @@ java {
 
 dependencies {
     implementation("com.github.miroslavhybler:ksp-mockup-annotations:1.2.1")
-    implementation("com.google.devtools.ksp:symbol-processing-api:2.0.20-1.0.25")
+    implementation("com.google.devtools.ksp:symbol-processing-api:2.1.10-1.0.29")
     implementation("androidx.annotation:annotation:1.9.1")
     val autoServiceVersion = "1.0.1"
     kapt("com.google.auto.service:auto-service:$autoServiceVersion")

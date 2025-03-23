@@ -7,7 +7,7 @@ import com.google.devtools.ksp.symbol.KSDeclaration
 
 /**
  * True if this declaration is Enum entry
- * @author Miroslav Hýbler (Peko Studio s.r.o)<br>
+ * @author Miroslav Hýbler <br>
  * created on 19.07.2024
  * @since 1.1.7
  */

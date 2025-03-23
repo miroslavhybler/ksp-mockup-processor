@@ -7,11 +7,10 @@ import mir.oslav.mockup.processor.generation.isInt
 import mir.oslav.mockup.processor.generation.isLong
 import mir.oslav.mockup.processor.generation.isString
 import mir.oslav.mockup.processor.recognition.DateTimeRecognizer.Companion.recognizableNames
-import org.joda.time.DateTimeZone
-import org.joda.time.IllegalFieldValueException
-import org.joda.time.MutableDateTime
-import org.joda.time.format.DateTimeFormat
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import kotlin.random.Random
 
 
@@ -59,12 +58,6 @@ class DateTimeRecognizer constructor() : BaseRecognizer() {
      * @since 1.1.0
      */
     private val calendar = Calendar.getInstance()
-
-
-    /**
-     * @since 1.1.0
-     */
-    private val outTempDateTime: MutableDateTime = MutableDateTime()
 
 
     /**
@@ -142,21 +135,15 @@ class DateTimeRecognizer constructor() : BaseRecognizer() {
         val millis = Random.nextInt(from = 0, until = 999)
         val zone = Random.nextInt(from = -12, until = 14)
 
-        outTempDateTime.year = year
-        outTempDateTime.monthOfYear = month
-        try {
-            outTempDateTime.dayOfMonth = day
-        } catch (ignored: IllegalFieldValueException) {
-            outTempDateTime.dayOfMonth = 1
-        }
-        outTempDateTime.hourOfDay = hour
-        outTempDateTime.minuteOfHour = minute
-        outTempDateTime.secondOfMinute = second
-        outTempDateTime.millisOfSecond = millis
-        outTempDateTime.zone = DateTimeZone.forOffsetHours(zone)
+
+        calendar.set(Calendar.HOUR_OF_DAY, hour)
+        calendar.set(Calendar.MINUTE, minute)
+        calendar.set(Calendar.SECOND, second)
+        calendar.set(Calendar.MILLISECOND, millis)
+        calendar.set(Calendar.ZONE_OFFSET, zone)
 
         val formatter = try {
-            DateTimeFormat.forPattern(format)
+            SimpleDateFormat(format, Locale.getDefault())
         } catch (e: IllegalArgumentException) {
             throw IllegalArgumentException(
                 "DateTimeFormatter was not able to process desired mockup-date-format, " +
@@ -164,7 +151,7 @@ class DateTimeRecognizer constructor() : BaseRecognizer() {
                         "Error: ${e.message}"
             )
         }
-        val stringDate = outTempDateTime.toString(formatter)
+        val stringDate = formatter.format(Date(calendar.timeInMillis))
         return "\"$stringDate\""
     }
 
