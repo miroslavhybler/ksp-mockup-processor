@@ -19,6 +19,8 @@ import com.google.devtools.ksp.symbol.KSValueParameter
  * @param isMutable True when property is mutable (declared with var keyword in source). False
  * when property is not mutable (declared with "val" keyword in source)
  * @param isInPrimaryConstructorProperty True when property is declared in primary constructor
+ * @param isDelegated True when property is delegated using `by` delegation, false otherwise. Added
+ * in 1.2.2.
  * @param containingClassDeclaration Name of the class where is this property declared and used
  * of the class.
  * @since 1.0.0
@@ -32,6 +34,7 @@ data class ResolvedProperty constructor(
     val resolvedType: MockupType<*>,
     val isMutable: Boolean,
     val isInPrimaryConstructorProperty: Boolean,
+    val isDelegated : Boolean,
     val containingClassDeclaration: KSClassDeclaration,
 ) {
 
@@ -42,6 +45,14 @@ data class ResolvedProperty constructor(
      */
     val isNotInPrimaryConstructorProperty: Boolean
         get() = !isInPrimaryConstructorProperty
+
+
+    /**
+     * True when this property is not delegated, false otherwise.
+     * @since 1.2.2
+     */
+    val isNotDelegate: Boolean
+        get() = !isDelegated
 
 
     /**

@@ -518,7 +518,9 @@ class MockupProcessor constructor(
      * @return Generated code
      * @since 1.0.0
      */
-    private fun generateItemPrimaryConstructorCall(mockupClass: MockupType.MockUpped): String {
+    private fun generateItemPrimaryConstructorCall(
+        mockupClass: MockupType.MockUpped,
+    ): String {
         val declaration = mockupClass.type.declaration
         val type = declaration.simpleName.getShortName()
 
@@ -559,8 +561,12 @@ class MockupProcessor constructor(
         mockupClass: MockupType.MockUpped,
     ): String {
         val notConstructorParameters = mockupClass.properties
-            .filter(ResolvedProperty::isMutable)
-            .filter(ResolvedProperty::isNotInPrimaryConstructorProperty)
+            //Property MUST be mutable to assign value
+            .filter(predicate = ResolvedProperty::isMutable)
+            //Property MUST not use lazy delegation
+            .filter(predicate = ResolvedProperty::isNotDelegate)
+            //Property MUST NOT be declared in primary constructor, those are generated in generateItemPrimaryConstructorCall
+            .filter(predicate = ResolvedProperty::isNotInPrimaryConstructorProperty)
 
         if (notConstructorParameters.isEmpty()) {
             return ""

@@ -51,6 +51,7 @@ data class Article constructor(
             "yyyy-MM-dd HH:mm:ss Z",
             Locale.getDefault(),
         )
+
         @SuppressLint("ConstantLocale") // for simplification
         private val dateFormatter: SimpleDateFormat = SimpleDateFormat(
             "dd. MM. yyyy",
@@ -58,12 +59,10 @@ data class Article constructor(
         )
     }
 
-    val createdAtFormatted: String
-        get() {
-            val date = dateParser.parse(createdAt)!!
-           return dateFormatter.format(date)
-
-        }
+    val createdAtFormatted: String by lazy {
+        val date = dateParser.parse(createdAt)!!
+        dateFormatter.format(date)
+    }
 
 
     @IntDef(

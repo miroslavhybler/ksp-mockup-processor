@@ -110,6 +110,8 @@ class MockupVisitor constructor(
             }
             val isInsidePrimaryConstructor = primaryConstructorParameter != null
 
+            //TODO check lazy init
+            property.isDelegated()
             outputList.add(
                 ResolvedProperty(
                     resolvedType = propertyType,
@@ -118,6 +120,7 @@ class MockupVisitor constructor(
                     declaration = declaration,
                     imports = imports,
                     isMutable = property.isMutable,
+                    isDelegated = property.isDelegated(),
                     isInPrimaryConstructorProperty = isInsidePrimaryConstructor,
                     containingClassDeclaration = classDeclaration,
                     primaryConstructorDeclaration = primaryConstructorParameter
@@ -128,11 +131,11 @@ class MockupVisitor constructor(
 
 
     /**
-     * Visits [classDeclaration] and tries to extract @[Mockup] annotation data.
+     * Visits [classDeclaration] and tries to extract [Mockup] annotation data.
      * @param classDeclaration Class declaration. Should be ALWAYS annotated with @Mockup.
-     * @throws IllegalStateException If class is not annotated with @[Mockup] annotations. This should
+     * @throws IllegalStateException If class is not annotated with [Mockup] annotations. This should
      * never happen since classes are queried by [MockupProcessor.findAnnotatedClasses] which takes
-     * classes ONLY annotated with @[Mockup]. If this happens  please report an issue
+     * classes ONLY annotated with [Mockup]. If this happens  please report an issue
      * <a href="https://github.com/miroslavhybler/ksp-mockup/issues">here</a>.
      * @throws TypeCastException When @[Mockup] annotation data would be invalid. This should never
      * happen but if so, please report an issue <a href="https://github.com/miroslavhybler/ksp-mockup/issues">here</a>.
