@@ -19,7 +19,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
  * created on 15.09.2023
  */
 @AutoService(value = [SymbolProcessorProvider::class])
-public class MockupProcessorProvider constructor() : SymbolProcessorProvider {
+public class MockupProcessorProvider public constructor() : SymbolProcessorProvider {
 
     /**
      * In order to prevent ksp from <a href="https://kotlinlang.org/docs/ksp-multi-round.html#changes-to-getsymbolsannotatedwith">multiple round processing</a>

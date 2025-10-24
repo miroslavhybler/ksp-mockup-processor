@@ -53,7 +53,7 @@ class MockupVisitor constructor(
         val annotationData = visitMockupAnnotation(classDeclaration = classDeclaration)
         val classType = classDeclaration.asType(typeArguments = emptyList())
         val mockupClass = MockupType.MockUpped(
-            name = annotationData.name.takeIf(String::isNotBlank)
+            name = annotationData.name.takeIf(predicate = String::isNotBlank)
                 ?: classDeclaration.simpleName.getShortName(),
             properties = resolvedProperties,
             imports = imports,
@@ -255,19 +255,22 @@ class MockupVisitor constructor(
             mockupClass.qualifiedName == type.declaration.qualifiedName
         }
 
-        require(value = classDeclaration != null, lazyMessage = {
-            val typeName = type.declaration.simpleName.getShortName()
-            "Unable to resolve type ${typeName}. This can have two causes:\n" +
-                    "Cause 1: Class $typeName is not supported. List of supported types can be found here https://github.com/miroslavhybler/ksp-mockup/#supported-types\n" +
-                    "Cause 2: Class $typeName is not annotated with @Mockup annotation.\n" +
-                    "If neither of these one has happened, please report an issue here https://github.com/miroslavhybler/ksp-mockup/issues.\n\n"
-        })
+        require(
+            value = classDeclaration != null,
+            lazyMessage = {
+                val typeName = type.declaration.simpleName.getShortName()
+                "Unable to resolve type ${typeName}. This can have two causes:\n" +
+                        "Cause 1: Class $typeName is not supported. List of supported types can be found here https://github.com/miroslavhybler/ksp-mockup/#supported-types\n" +
+                        "Cause 2: Class $typeName is not annotated with @Mockup annotation.\n" +
+                        "If neither of these one has happened, please report an issue here https://github.com/miroslavhybler/ksp-mockup/issues.\n\n"
+            }
+        )
 
         val outputPropertiesList: ArrayList<ResolvedProperty> = ArrayList()
 
         visitClass(
             classDeclaration = classDeclaration,
-            outputList = outputPropertiesList
+            outputList = outputPropertiesList,
         )
 
         return MockupType.MockUpped(

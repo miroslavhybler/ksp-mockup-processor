@@ -38,7 +38,7 @@ class MockupDataProviderGenerator constructor(
 
         //Header, package name and import of base class
         //TODO change package to com.mockup since 2.0.0
-        outputStream += MockupConstants.generatedFileHeader
+        outputStream += MockupConstants.GENERATED_FILE_HEADER
         outputStream += "\n\n"
         outputStream += "package com.mockup.providers"
         outputStream += "\n\n"

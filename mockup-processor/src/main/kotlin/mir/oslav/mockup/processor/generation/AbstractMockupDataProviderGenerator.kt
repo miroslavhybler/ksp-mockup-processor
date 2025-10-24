@@ -29,7 +29,7 @@ class AbstractMockupDataProviderGenerator constructor(
     fun generateContent() {
 
         //File header
-        outputStream += MockupConstants.generatedFileHeader
+        outputStream += MockupConstants.GENERATED_FILE_HEADER
         outputStream += "\n\n\n"
         outputStream += "package com.mockup"
         outputStream += "\n\n\n"

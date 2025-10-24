@@ -9,5 +9,5 @@ import java.util.Locale
  * created on 21.09.2023
  */
 fun String.decapitalized(): String {
-    return replaceFirstChar { it.lowercase(Locale.getDefault()) }
+    return replaceFirstChar(transform = { it.lowercase(Locale.getDefault()) })
 }

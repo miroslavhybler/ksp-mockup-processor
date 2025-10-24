@@ -66,6 +66,7 @@ class DateTimeRecognizer constructor() : BaseRecognizer() {
      * contextually a dateTime.
      * @since 1.1.0
      */
+    @Deprecated(message = "Refactor in 1.2.0, recognition and code generation in two steps meains more code and twice as time. Put recognition and generation in one step.")
     override fun recognize(property: ResolvedProperty, containingClassName: String): Boolean {
         return recognizableNames.contains(element = property.name)
     }
@@ -76,6 +77,7 @@ class DateTimeRecognizer constructor() : BaseRecognizer() {
      * other types are not supported.
      * @since 1.1.0
      */
+    @Deprecated(message = "Refactor in 1.2.0, recognition and code generation in two steps means more code and twice as time. Put recognition and generation in one step.")
     override fun generateCodeValueForProperty(property: ResolvedProperty): String {
         val type = property.type
         val code = when {

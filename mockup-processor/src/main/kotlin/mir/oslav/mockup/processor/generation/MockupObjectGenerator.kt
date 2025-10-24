@@ -27,7 +27,7 @@ open class MockupObjectGenerator constructor(
 
         //Header
         //TODO change package to com.mockup since 2.0.0
-        outputStream += MockupConstants.generatedFileHeader
+        outputStream += MockupConstants.GENERATED_FILE_HEADER
         outputStream += "\n\n"
         outputStream += "package com.mockup"
         outputStream += "\n\n"

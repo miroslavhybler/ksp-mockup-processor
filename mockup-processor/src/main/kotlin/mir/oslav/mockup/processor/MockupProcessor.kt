@@ -150,6 +150,7 @@ class MockupProcessor constructor(
                     )
                 )
             } catch (exception: FileAlreadyExistsException) {
+                exception.printStackTrace()
                 //Do nothing
             }
         }
@@ -162,6 +163,7 @@ class MockupProcessor constructor(
                 )
             ).generateContent()
         } catch (e: FileAlreadyExistsException) {
+            e.printStackTrace()
             return emptyList()
         }
 
@@ -174,7 +176,7 @@ class MockupProcessor constructor(
         )
 
         mockupClassDeclarations.forEach { classDeclaration ->
-            classDeclaration.qualifiedName?.asString()?.let(importsList::add)
+            classDeclaration.qualifiedName?.asString()?.let(block = importsList::add)
         }
 
         visitor.imports = importsList
@@ -202,8 +204,8 @@ class MockupProcessor constructor(
 
         MockupObjectGenerator(
             outputStream = generateOutputFile(
-                mockupClassDeclarations,
-                filename = "Mockup"
+                classes = mockupClassDeclarations,
+                filename = "Mockup",
             )
         ).generateContent(providers = providers)
 
@@ -241,7 +243,7 @@ class MockupProcessor constructor(
             }
         )
 
-        mockupClasses.forEachIndexed { _, mockupClass ->
+        mockupClasses.forEachIndexed { index, mockupClass ->
             val mockupDataGeneratedContent: String = generateMockupDataSequenceForProvider(
                 mockupClass = mockupClass
             )
@@ -253,13 +255,13 @@ class MockupProcessor constructor(
                     packageName = "com.mockup.providers"
                 ),
                 clazz = mockupClass,
-                generatedValuesContent = mockupDataGeneratedContent
+                generatedValuesContent = mockupDataGeneratedContent,
             )
             outputNamesList.add(
                 MockupObjectMember(
                     providerClassName = dataProviderClazzName,
                     providerClassPackage = "com.mockup.providers",
-                    propertyName = mockupClass.name
+                    propertyName = mockupClass.name,
                 )
             )
         }
@@ -274,7 +276,7 @@ class MockupProcessor constructor(
      */
     private fun Resolver.findAnnotatedClasses(
     ): List<KSClassDeclaration> = getSymbolsWithAnnotation(
-        Mockup::class.qualifiedName.toString()
+        annotationName = Mockup::class.qualifiedName.toString()
     ).filterIsInstance<KSClassDeclaration>().toList()
 
 
@@ -296,7 +298,7 @@ class MockupProcessor constructor(
             dependencies = Dependencies(
                 aggregating = isAggregating,
                 sources = classes
-                    .mapNotNull(KSClassDeclaration::containingFile)
+                    .mapNotNull(transform = KSClassDeclaration::containingFile)
                     .toTypedArray()
             ),
             packageName = packageName,
@@ -526,7 +528,7 @@ class MockupProcessor constructor(
 
         //List of class properties declared in primary constructor
         val constructorProperties = mockupClass.properties
-            .filter(ResolvedProperty::isInPrimaryConstructorProperty)
+            .filter(predicate = ResolvedProperty::isInPrimaryConstructorProperty)
 
         if (constructorProperties.isEmpty()) {
             return "\t\t$type()"

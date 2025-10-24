@@ -1,3 +1,5 @@
+@file:Suppress("RedundantVisibilityModifier")
+
 package mir.oslav.mockup.processor.recognition
 
 import mir.oslav.mockup.processor.data.ResolvedProperty
@@ -11,7 +13,7 @@ import mir.oslav.mockup.processor.data.ResolvedProperty
  * @author Miroslav Hýbler <br>
  * created on 20.10.2023
  */
-abstract class BaseRecognizer constructor() {
+public abstract class BaseRecognizer public constructor() {
 
 
     /**
@@ -25,7 +27,7 @@ abstract class BaseRecognizer constructor() {
         message = "Refactor in 1.2.0, recognition and code generation in two steps meains more code and twice as time. " +
                 "Put recognition and generation in one step."
     )
-    abstract fun recognize(
+    public abstract fun recognize(
         property: ResolvedProperty,
         containingClassName: String
     ): Boolean
@@ -40,12 +42,12 @@ abstract class BaseRecognizer constructor() {
         message = "Refactor in 1.2.0, recognition and code generation in two steps means more code and twice as time. " +
                 "Put recognition and generation in one step."
     )
-    abstract fun generateCodeValueForProperty(
+    public abstract fun generateCodeValueForProperty(
         property: ResolvedProperty,
     ): String
 
 
-    abstract fun tryRecognizeAndGenerateValue(
+    public abstract fun tryRecognizeAndGenerateValue(
         property: ResolvedProperty,
         containingClassName: String,
     ): String?

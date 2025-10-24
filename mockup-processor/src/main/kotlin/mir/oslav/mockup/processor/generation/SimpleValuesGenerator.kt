@@ -9,7 +9,7 @@ import kotlin.random.Random
 
 
 /**
- * TODO - handle properties with lazy declaration (do not geneerate value)
+ * TODO - handle properties with lazy declaration (do not generate value)
  * @author Miroslav Hýbler <br>
  * created on 17.05.2024
  * @since 1.1.6
