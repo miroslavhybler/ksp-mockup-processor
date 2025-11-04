@@ -2,6 +2,7 @@
 
 package mir.oslav.mockup.processor
 
+import mir.oslav.mockup.processor.Debugger.outputStream
 import java.io.OutputStream
 
 
@@ -26,7 +27,7 @@ object Debugger {
      * property is never changing in code, it must be set constantly.
      * @since 1.1.3
      */
-    const val isDebugEnabled: Boolean = false
+    const val isDebugEnabled: Boolean = true
 
 
     /**

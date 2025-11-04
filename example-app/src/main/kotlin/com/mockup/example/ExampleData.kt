@@ -70,7 +70,7 @@ data class Article constructor(
         ArticleType.silver,
         ArticleType.gold,
     )
-    @Retention(AnnotationRetention.SOURCE)
+    @Retention(value = AnnotationRetention.SOURCE)
     @Target(AnnotationTarget.PROPERTY)
     annotation class ArticleType {
         companion object {
@@ -98,10 +98,7 @@ data class Category constructor(
 
     val formattedName: String
         get() {
-            return if (name.length > 11) name.substring(
-                startIndex = 0,
-                endIndex = 11
-            ) else name
+            return if (name.length > 11) name.take(n = 11) else name
         }
 }
 

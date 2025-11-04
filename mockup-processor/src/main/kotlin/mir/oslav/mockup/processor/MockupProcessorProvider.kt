@@ -34,6 +34,9 @@ public class MockupProcessorProvider public constructor() : SymbolProcessorProvi
             processor = MockupProcessor(environment = environment)
         }
 
-        return processor ?: throw NullPointerException()
+        return processor ?: throw NullPointerException(
+            "SymbolProccessorProvider create called but null returned! " +
+                    "Plese report an issue here https://github.com/miroslavhybler/ksp-mockup/issues."
+        )
     }
 }

@@ -6,6 +6,7 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.mockup.annotations.IgnoreOnMockup
 import com.mockup.annotations.Mockup
 import mir.oslav.mockup.processor.data.InputOptions
 import mir.oslav.mockup.processor.data.MockupObjectMember
@@ -121,7 +122,9 @@ class MockupProcessor constructor(
     /**
      * @since 1.0.0
      */
-    override fun process(resolver: Resolver): List<KSAnnotated> {
+    override fun process(
+        resolver: Resolver,
+    ): List<KSAnnotated> {
         val dateFormat = environment.options["mockup-date-format"]
             ?: DateTimeRecognizer.defaultFormat
 
@@ -144,7 +147,7 @@ class MockupProcessor constructor(
                         dependencies = Dependencies(
                             aggregating = false,
                             sources = mockupClassDeclarations
-                                .mapNotNull(KSClassDeclaration::containingFile)
+                                .mapNotNull(transform = KSClassDeclaration::containingFile)
                                 .toTypedArray()
                         ),
                     )
@@ -159,7 +162,7 @@ class MockupProcessor constructor(
             AbstractMockupDataProviderGenerator(
                 outputStream = generateOutputFile(
                     classes = mockupClassDeclarations,
-                    filename = "MockupDataProvider"
+                    filename = "MockupDataProvider",
                 )
             ).generateContent()
         } catch (e: FileAlreadyExistsException) {
@@ -176,7 +179,8 @@ class MockupProcessor constructor(
         )
 
         mockupClassDeclarations.forEach { classDeclaration ->
-            classDeclaration.qualifiedName?.asString()?.let(block = importsList::add)
+            classDeclaration.qualifiedName?.asString()
+                ?.let(block = importsList::add)
         }
 
         visitor.imports = importsList
@@ -199,7 +203,7 @@ class MockupProcessor constructor(
 
         val providers = generateMockupDataProviders(
             mockupClasses = mockupTypesList.filterIsInstance<MockupType.MockUpped>(),
-            classesDeclarations = mockupClassDeclarations
+            classesDeclarations = mockupClassDeclarations,
         )
 
         MockupObjectGenerator(
@@ -214,7 +218,7 @@ class MockupProcessor constructor(
 
 
         Debugger.close()
-        return mockupClassDeclarations
+        return emptyList()
     }
 
 
@@ -257,13 +261,12 @@ class MockupProcessor constructor(
                 clazz = mockupClass,
                 generatedValuesContent = mockupDataGeneratedContent,
             )
-            outputNamesList.add(
-                MockupObjectMember(
-                    providerClassName = dataProviderClazzName,
-                    providerClassPackage = "com.mockup.providers",
-                    propertyName = mockupClass.name,
-                )
+            val member = MockupObjectMember(
+                providerClassName = dataProviderClazzName,
+                providerClassPackage = "com.mockup.providers",
+                propertyName = mockupClass.name,
             )
+            outputNamesList.add(element = member)
         }
 
         return outputNamesList
@@ -292,7 +295,7 @@ class MockupProcessor constructor(
         classes: List<KSClassDeclaration>,
         filename: String,
         packageName: String = "com.mockup",
-        isAggregating: Boolean = true
+        isAggregating: Boolean = true,
     ): OutputStream {
         return environment.codeGenerator.createNewFile(
             dependencies = Dependencies(
@@ -380,7 +383,7 @@ class MockupProcessor constructor(
             is MockupType.MockUpped -> {
                 val propertyValue = generateCodeForMockUppedType(
                     type = type,
-                    mockupClasses = mockupTypesList.filterIsInstance<MockupType.MockUpped>()
+                    mockupClasses = mockupTypesList.filterIsInstance<MockupType.MockUpped>(),
                 )
                 outputCode += propertyValue
             }
@@ -451,7 +454,7 @@ class MockupProcessor constructor(
      * @since 1.0.0
      */
     private fun generateCodeForFixedTypeArray(
-        type: MockupType.FixedTypeArray
+        type: MockupType.FixedTypeArray,
     ): String {
         val elementType = type.type
         return when {
@@ -577,9 +580,11 @@ class MockupProcessor constructor(
         var outputText = ".apply {\n"
         notConstructorParameters.forEach { property ->
             val annotations = property.type.annotations
-            val foundAnnotation = annotations.find { annotation ->
-                annotation.shortName.asString() == "IgnoreOnMockup"
-            }
+            val foundAnnotation = annotations
+                .find(predicate = { annotation ->
+                    val declaration = annotation.annotationType.resolve().declaration
+                    declaration.qualifiedName?.asString() == IgnoreOnMockup::class.qualifiedName
+                })
             if (foundAnnotation != null) {
                 //Skipping because annotation is annotated with @IgnoreOnMockup
                 return@forEach

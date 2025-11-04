@@ -7,6 +7,7 @@ import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSVisitorVoid
+import com.mockup.annotations.IgnoreOnMockup
 import com.mockup.annotations.Mockup
 import mir.oslav.mockup.processor.data.MockupAnnotationData
 import mir.oslav.mockup.processor.data.MockupType
@@ -23,7 +24,7 @@ import mir.oslav.mockup.processor.generation.isSimpleType
  * @param environment
  * @param outputTypeList Output List where resolved types will be stored.
  * @param allClassesDeclarations Input list containing declarations from target module of all classes
- * annotated with @[Mockup] annotation.
+ * annotated with [Mockup] annotation.
  * @since 1.0.0
  * @author Miroslav Hýbler <br>
  * created on 15.09.2023
@@ -43,12 +44,19 @@ class MockupVisitor constructor(
 
 
     /**
+     * Visits class annotated with [Mockup] and resolves it's properties.
      * @since 1.0.0
      */
-    override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
+    override fun visitClassDeclaration(
+        classDeclaration: KSClassDeclaration,
+        data: Unit,
+    ) {
         val resolvedProperties: ArrayList<ResolvedProperty> = ArrayList()
 
-        visitClass(classDeclaration = classDeclaration, outputList = resolvedProperties)
+        visitClassImpl(
+            classDeclaration = classDeclaration,
+            outputList = resolvedProperties
+        )
 
         val annotationData = visitMockupAnnotation(classDeclaration = classDeclaration)
         val classType = classDeclaration.asType(typeArguments = emptyList())
@@ -62,20 +70,20 @@ class MockupVisitor constructor(
             declaration = classDeclaration
         )
 
-        outputTypeList.add(mockupClass)
+        outputTypeList.add(element = mockupClass)
     }
 
 
     /**
-     * Visits class annotated with @[Mockup] and resolves it's properties. Properties will be inserted
+     * Visits class annotated with [Mockup] and resolves it's properties. Properties will be inserted
      * into [outputList]
      * @param classDeclaration Declaration of class
      * @param outputList Output list where resolved properties will be added
      * @since 1.0.0
      */
-    private fun visitClass(
+    private fun visitClassImpl(
         classDeclaration: KSClassDeclaration,
-        outputList: ArrayList<ResolvedProperty>
+        outputList: ArrayList<ResolvedProperty>,
     ) {
         val primaryConstructor = classDeclaration.primaryConstructor
 
@@ -85,11 +93,14 @@ class MockupVisitor constructor(
             val declaration = type.declaration
             val annotations = property.annotations
 
-            val foundAnnotation = annotations.find { annotation ->
-                annotation.shortName.asString() == "IgnoreOnMockup"
-            }
+            val foundAnnotation = annotations.find(predicate = { annotation ->
+                val declaration = annotation.annotationType.resolve().declaration
+                val qualifiedName = declaration.qualifiedName?.asString()
+                qualifiedName == IgnoreOnMockup::class.qualifiedName
+            })
+
             if (foundAnnotation != null) {
-                //Skipping because annotation is annotated with @IgnoreOnMockup
+                //Skipping because property is annotated with @IgnoreOnMockup, meaning that it should be ignored
                 return@forEach
             }
 
@@ -98,64 +109,68 @@ class MockupVisitor constructor(
                 type = type,
                 property = property,
                 name = name,
-                imports = imports
+                imports = imports,
             )
 
             val typeQualifiedName = type.declaration.qualifiedName
             val propertyName = property.simpleName
-            val primaryConstructorParameter = primaryConstructor?.parameters?.find { parameter ->
-                val parameterQualifiedName = parameter.type.resolve().declaration.qualifiedName
-                val constructorPropertyName = parameter.name
-                parameterQualifiedName == typeQualifiedName && propertyName == constructorPropertyName
-            }
+            val primaryConstructorParameter = primaryConstructor?.parameters
+                ?.find(predicate = { parameter ->
+                    val parameterType = parameter.type.resolve()
+                    val parameterQualifiedName = parameterType.declaration.qualifiedName
+                    val constructorPropertyName = parameter.name
+                    parameterQualifiedName == typeQualifiedName && propertyName == constructorPropertyName
+                })
+
             val isInsidePrimaryConstructor = primaryConstructorParameter != null
 
-            //TODO check lazy init
-            property.isDelegated()
-            outputList.add(
-                ResolvedProperty(
-                    resolvedType = propertyType,
-                    name = name,
-                    type = type,
-                    declaration = declaration,
-                    imports = imports,
-                    isMutable = property.isMutable,
-                    isDelegated = property.isDelegated(),
-                    isInPrimaryConstructorProperty = isInsidePrimaryConstructor,
-                    containingClassDeclaration = classDeclaration,
-                    primaryConstructorDeclaration = primaryConstructorParameter
-                )
+            val resolvedProperty = ResolvedProperty(
+                resolvedType = propertyType,
+                name = name,
+                type = type,
+                declaration = declaration,
+                imports = imports,
+                isMutable = property.isMutable,
+                isDelegated = property.isDelegated(),
+                isInPrimaryConstructorProperty = isInsidePrimaryConstructor,
+                containingClassDeclaration = classDeclaration,
+                primaryConstructorDeclaration = primaryConstructorParameter
             )
+            outputList.add(element = resolvedProperty)
         }
     }
 
 
     /**
      * Visits [classDeclaration] and tries to extract [Mockup] annotation data.
-     * @param classDeclaration Class declaration. Should be ALWAYS annotated with @Mockup.
+     * @param classDeclaration Class declaration. Should be ALWAYS annotated with [Mockup].
      * @throws IllegalStateException If class is not annotated with [Mockup] annotations. This should
      * never happen since classes are queried by [MockupProcessor.findAnnotatedClasses] which takes
      * classes ONLY annotated with [Mockup]. If this happens  please report an issue
      * <a href="https://github.com/miroslavhybler/ksp-mockup/issues">here</a>.
-     * @throws TypeCastException When @[Mockup] annotation data would be invalid. This should never
+     * @throws TypeCastException When [Mockup] annotation data would be invalid. This should never
      * happen but if so, please report an issue <a href="https://github.com/miroslavhybler/ksp-mockup/issues">here</a>.
-     * @return Extracted @[Mockup] annotation data.
+     * @return Extracted [Mockup] annotation data.
      * @since 1.0.0
      */
     private fun visitMockupAnnotation(
         classDeclaration: KSClassDeclaration
     ): MockupAnnotationData {
-        val annotation = classDeclaration.annotations.find { ksAnnotation ->
-            val declaration = ksAnnotation.annotationType.resolve().declaration
-            val qualifiedName = declaration.qualifiedName?.asString()
-            qualifiedName == Mockup::class.qualifiedName
-        }
+        val annotation = classDeclaration.annotations
+            .find(predicate = { ksAnnotation ->
+                val declaration = ksAnnotation.annotationType.resolve().declaration
+                val qualifiedName = declaration.qualifiedName?.asString()
+                qualifiedName == Mockup::class.qualifiedName
+            })
 
-        require(value = annotation != null, lazyMessage = {
-            "Unable to resolve type, class ${classDeclaration.simpleName.getShortName()} " +
-                    "is probably not annotated with @Mockup! If your class is annotated please " +
-                    "report an issue here https://github.com/miroslavhybler/ksp-mockup/issues."
-        })
+        require(
+            value = annotation != null,
+            lazyMessage = {
+                "Unable to resolve type, class ${classDeclaration.qualifiedName?.asString()} " +
+                        "is probably not annotated with @Mockup! If your class is annotated please " +
+                        "report an issue here https://github.com/miroslavhybler/ksp-mockup/issues."
+            }
+        )
 
 
         var count = 10
@@ -238,7 +253,7 @@ class MockupVisitor constructor(
                 MockupType.FixedTypeArray(name = name, type = type, declaration = declaration)
             }
 
-            else -> findMockUppedClass(type = type)
+            else -> findMockupClass(type = type)
 
         }
     }
@@ -248,12 +263,13 @@ class MockupVisitor constructor(
      * @return [MockupType] representing class annotated with [Mockup] annotation, null otherwise.
      * @since 1.0.0
      */
-    private fun findMockUppedClass(
+    private fun findMockupClass(
         type: KSType
     ): MockupType.MockUpped {
-        val classDeclaration = allClassesDeclarations.find { mockupClass ->
-            mockupClass.qualifiedName == type.declaration.qualifiedName
-        }
+        val classDeclaration = allClassesDeclarations
+            .find(predicate = { mockupClass ->
+                mockupClass.qualifiedName == type.declaration.qualifiedName
+            })
 
         require(
             value = classDeclaration != null,
@@ -268,7 +284,7 @@ class MockupVisitor constructor(
 
         val outputPropertiesList: ArrayList<ResolvedProperty> = ArrayList()
 
-        visitClass(
+        visitClassImpl(
             classDeclaration = classDeclaration,
             outputList = outputPropertiesList,
         )
@@ -285,16 +301,19 @@ class MockupVisitor constructor(
 
 
     /**
+     * @return List of enum constants (similar to `Enum.entries`)
      * @since 1.1.7
      */
     private fun getEnumConstants(
         enumType: KSType
     ): List<KSDeclaration> {
-        require(enumType.isEnumType) {
+        require(value = enumType.isEnumType) {
             "To read enum entries provided type has to be enum!!"
         }
         val classDeclaration = enumType.declaration as? KSClassDeclaration ?: return emptyList()
-        val entries = classDeclaration.declarations.filter(KSDeclaration::isEnumEntry).toList()
+        val entries = classDeclaration.declarations
+            .filter(predicate = KSDeclaration::isEnumEntry)
+            .toList()
         return entries
     }
 }
