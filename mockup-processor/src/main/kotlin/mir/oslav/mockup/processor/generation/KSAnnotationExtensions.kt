@@ -24,3 +24,11 @@ val KSAnnotation.isFloatRange: Boolean
  */
 val KSAnnotation.isIntDef: Boolean
     get() = this.shortName.asString() == "IntDef"
+
+
+/**
+ * @since 1.2.2
+ */
+val KSAnnotation.isStringDef: Boolean
+    get() = this.shortName.asString() == "StringDef"
+

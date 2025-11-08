@@ -419,7 +419,7 @@ class MockupProcessor constructor(
                         for (i in 0 until 5) {
                             propertyValueCode += generateCodeForMockUppedType(
                                 mockupClasses = mockupTypesList.filterIsInstance<MockupType.MockUpped>(),
-                                type = elementType
+                                type = elementType,
                             )
                             if (i != 4) {
                                 propertyValueCode += ",\n"

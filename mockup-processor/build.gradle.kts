@@ -15,6 +15,10 @@ kotlin {
     jvmToolchain(jdkVersion = 8)
 }
 
+ksp {
+    arg("ksp.debug", "true")
+}
+
 java {
     withSourcesJar()
     withJavadocJar()

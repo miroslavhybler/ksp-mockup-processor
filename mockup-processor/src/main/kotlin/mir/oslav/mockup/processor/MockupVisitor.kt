@@ -1,5 +1,9 @@
 package mir.oslav.mockup.processor
 
+import androidx.annotation.FloatRange
+import androidx.annotation.IntDef
+import androidx.annotation.IntRange
+import androidx.annotation.StringDef
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -15,8 +19,11 @@ import mir.oslav.mockup.processor.data.ResolvedProperty
 import mir.oslav.mockup.processor.generation.isEnumEntry
 import mir.oslav.mockup.processor.generation.isEnumType
 import mir.oslav.mockup.processor.generation.isFixedArrayType
+import mir.oslav.mockup.processor.generation.isFloat
 import mir.oslav.mockup.processor.generation.isGenericCollectionType
+import mir.oslav.mockup.processor.generation.isInt
 import mir.oslav.mockup.processor.generation.isSimpleType
+import mir.oslav.mockup.processor.generation.isString
 
 
 /**
@@ -212,11 +219,19 @@ class MockupVisitor constructor(
         val declaration = type.declaration
         return when {
             type.isSimpleType -> {
+                val source = provideSourceForSimpleType(
+                    type = type,
+                    declaration = declaration,
+                )
+                Debugger.write(
+                    text = "Source for ${property.simpleName.getShortName()}: $source"
+                )
                 MockupType.Simple(
                     name = name,
                     type = type,
                     declaration = declaration,
                     property = property,
+                    source = source,
                 )
             }
 
@@ -315,5 +330,74 @@ class MockupVisitor constructor(
             .filter(predicate = KSDeclaration::isEnumEntry)
             .toList()
         return entries
+    }
+
+
+    private fun provideSourceForSimpleType(
+        type: KSType,
+        declaration: KSDeclaration,
+    ): MockupType.Simple.Source<*> {
+        return when {
+            type.isInt -> {
+                declaration.findAnnotationOrAnnotatedAnnotation(target = IntRange::class)
+                    ?.let { intRangeAnnotation ->
+                        val range = Annotations.processRangeAnnotation(
+                            annotation = intRangeAnnotation,
+                            min = Int.MIN_VALUE,
+                            max = Int.MAX_VALUE,
+                        )
+
+                        return MockupType.Simple.Source.IntNumber.Range(
+                            from = range.first,
+                            to = range.second,
+                        )
+                    }
+
+                declaration.findAnnotationOrAnnotatedAnnotation(target = IntDef::class)
+                    ?.let { intDefAnnotation ->
+                        val possibleValues: List<Int> = Annotations.proccessDefAnnotation(
+                            annotation = intDefAnnotation,
+                        )
+                        return MockupType.Simple.Source.IntNumber.Def(
+                            values = possibleValues
+                        )
+                    }
+
+                return MockupType.Simple.Source.IntNumber.Random
+            }
+
+            type.isFloat -> {
+                declaration.findAnnotationOrAnnotatedAnnotation(target = FloatRange::class)
+                    ?.let { floatRangeAnnotation ->
+                        val range = Annotations.processRangeAnnotation(
+                            annotation = floatRangeAnnotation,
+                            min = Float.MIN_VALUE,
+                            max = Float.MAX_VALUE,
+                        )
+
+                        return MockupType.Simple.Source.FloatNumber.Range(
+                            from = range.first,
+                            to = range.second,
+                        )
+                    }
+                return MockupType.Simple.Source.FloatNumber.Random
+            }
+
+            type.isString -> {
+                declaration.findAnnotationOrAnnotatedAnnotation(target = StringDef::class)
+                    ?.let { stringDefAnnotation ->
+                        val possibleValues: List<String> = Annotations.proccessDefAnnotation(
+                            annotation = stringDefAnnotation,
+                        )
+                        return MockupType.Simple.Source.Text.Def(
+                            values = possibleValues
+                        )
+                    }
+
+                return MockupType.Simple.Source.Text.Random(length = 10)
+            }
+
+            else -> MockupType.Simple.Source.Random
+        }
     }
 }

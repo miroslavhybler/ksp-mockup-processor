@@ -2,26 +2,27 @@ package mir.oslav.mockup.processor
 
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.KSDeclaration
 import kotlin.reflect.KClass
 
 
 /**
+ * TODO docs on functions
  * @author Miroslav Hýbler <br>
  * created on 25.10.2025
  * @since 1.2.2
  */
-fun KSPropertyDeclaration.isAnnotatedWithOrHasAnnotation(
+fun KSDeclaration.findAnnotationOrAnnotatedAnnotation(
     target: KClass<*>,
-): Boolean {
+): KSAnnotation? {
     if (this.isAnnotatedWith(target = target)) {
-        return true
+        return findAnnotation(target = target)
     }
 
-    val isSomeAnnotationAnnotated = annotations.any(predicate = { annotation ->
-        return annotation.isAnnotatedWith(target = target)
+    val targetAnnotation = this.annotations.find(predicate = { annotation ->
+        annotation.isAnnotatedWith(target = target)
     })
-    return isSomeAnnotationAnnotated
+    return targetAnnotation
 }
 
 
@@ -29,8 +30,20 @@ fun KSPropertyDeclaration.isAnnotatedWithOrHasAnnotation(
  * @since 1.2.2
  */
 fun KSAnnotated.isAnnotatedWith(target: KClass<*>): Boolean {
-    return annotations.any(predicate = { annotation ->
+    return this.annotations.any(predicate = { annotation ->
         return annotation.isAnnotatedWith(target = target)
+    })
+}
+
+
+/**
+ * @since 1.2.2
+ */
+fun KSAnnotated.findAnnotation(
+    target: KClass<*>,
+): KSAnnotation? {
+    return this.annotations.find(predicate = { annotation ->
+        annotation.isAnnotatedWith(target = target)
     })
 }
 
@@ -41,10 +54,9 @@ fun KSAnnotated.isAnnotatedWith(target: KClass<*>): Boolean {
 fun KSAnnotation.isAnnotatedWith(
     target: KClass<*>,
 ): Boolean {
-    val annotationType = annotationType.resolve()
+    val annotationType = this.annotationType.resolve()
     val annotationDeclaration = annotationType.declaration
 
-    // Check if THIS annotation (like @Type) is annotated with @IntDef
     return annotationDeclaration.annotations.any(
         predicate = { metaAnnotation ->
             val qualifiedName = metaAnnotation.annotationType.resolve()

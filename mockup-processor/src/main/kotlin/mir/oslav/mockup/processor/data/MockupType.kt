@@ -44,11 +44,92 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
         override val type: KSType,
         override val declaration: KSDeclaration,
         val property: KSPropertyDeclaration,
+        val source: Source<*>,
     ) : MockupType<KSDeclaration>(
         name = name,
         type = type,
         declaration = declaration
-    )
+    ) {
+
+
+        /**
+         * TODO docs
+         * @since 1.2.2
+         */
+        sealed class Source<T : Any> private constructor() {
+
+
+            /**
+             * @since 1.2.2
+             */
+            sealed class IntNumber : Source<IntNumber>() {
+
+                /**
+                 * @since 1.2.2
+                 */
+                data class Range constructor(val from: Int, val to: Int) : IntNumber()
+
+                /**
+                 * @since 1.2.2
+                 */
+                data class Def constructor(val values: List<Int>) : IntNumber()
+
+                /**
+                 * @since 1.2.2
+                 */
+                data object Random : IntNumber()
+            }
+
+
+            /**
+             * @since 1.2.2
+             */
+            sealed class FloatNumber : Source<FloatNumber>() {
+
+                /**
+                 * @since 1.2.2
+                 */
+                data class Range constructor(val from: Float, val to: Float) : FloatNumber()
+
+                /**
+                 * @since 1.2.2
+                 */
+                data class Def constructor(val values: List<Float>) : FloatNumber()
+
+                /**
+                 * @since 1.2.2
+                 */
+                data object Random : FloatNumber()
+            }
+
+
+            /**
+             * @since 1.2.2
+             */
+            sealed class Text : Source<String>() {
+
+                /**
+                 * @since 1.2.2
+                 */
+                data class Def constructor(val values: List<String>) : Text()
+
+
+                /**
+                 * @since 1.2.2
+                 */
+                data class Random constructor(val length: Int) : Text()
+            }
+
+
+            /**
+             * Other Primitive types does not have annotation related limitations, so generic object is used
+             * to avoid nullability.
+             * @since 1.2.2
+             */
+            data object Random : Source<Nothing>()
+        }
+
+    }
 
     /**
      * Representing type for classes annotated with @[Mockup] annotation.
@@ -67,7 +148,10 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
         declaration = declaration
     )
 
-
+    /**
+     * Represents enum type.
+     * @since 1.0.0
+     */
     data class Enum constructor(
         override val name: String,
         override val type: KSType,
