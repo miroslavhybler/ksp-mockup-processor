@@ -27,7 +27,7 @@ object Debugger {
      * property is never changing in code, it must be set constantly.
      * @since 1.1.3
      */
-    const val isDebugEnabled: Boolean = true
+    const val isDebugEnabled: Boolean = false
 
 
     /**
@@ -45,7 +45,6 @@ object Debugger {
      */
     fun write(text: String) {
         if (isDebugEnabled) {
-
             outputStream?.write("//     $text\n".toByteArray())
         }
     }

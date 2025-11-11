@@ -1,3 +1,5 @@
+@file:Suppress("RedundantConstructorKeyword")
+
 package mir.oslav.mockup.processor.data
 
 import com.google.devtools.ksp.symbol.KSClassDeclaration

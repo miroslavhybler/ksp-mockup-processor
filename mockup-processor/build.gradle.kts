@@ -9,10 +9,10 @@ plugins {
 }
 
 group = "com.github.miroslavhybler.mockup-processor"
-version = "1.2.1"
+version = "1.2.2"
 
 kotlin {
-    jvmToolchain(jdkVersion = 8)
+    jvmToolchain(jdkVersion = 11)
 }
 
 ksp {

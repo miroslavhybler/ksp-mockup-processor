@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -130,25 +131,53 @@ private fun ArticleItem(
             }
 
 
-            Text(
-                text = remember(key1 = article) {
-                    article.createdAtFormatted
-                },
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onTertiaryContainer,
+            Row(
                 modifier = Modifier
                     .padding(start = 8.dp, bottom = 4.dp)
-                    .align(alignment = Alignment.BottomStart)
-                    .background(
-                        color = MaterialTheme.colorScheme.tertiaryContainer,
-                        shape = MaterialTheme.shapes.small
-                    )
-                    .padding(horizontal = 4.dp, vertical = 2.dp)
-            )
+                    .align(alignment = Alignment.BottomStart),
+                horizontalArrangement = Arrangement.spacedBy(space = 12.dp),
+                verticalAlignment = Alignment.Bottom,
+            ) {
+                Text(
+                    text = article.createdAtFormatted,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer,
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            shape = MaterialTheme.shapes.small
+                        )
+                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                )
+
+                Text(
+                    text = when (article.type) {
+                        Article.ArticleType.regular -> "Regular"
+                        Article.ArticleType.silver -> "Silver"
+                        Article.ArticleType.gold -> "Gold"
+                        else -> throw IllegalStateException("Unknown article type")
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = when (article.type) {
+                        Article.ArticleType.regular -> MaterialTheme.colorScheme.tertiary
+                        Article.ArticleType.silver -> MaterialTheme.colorScheme.secondary
+                        Article.ArticleType.gold -> MaterialTheme.colorScheme.primary
+                        else -> throw IllegalStateException("Unknown article type")
+                    },
+                    modifier = Modifier
+                        .background(
+                            color = when (article.type) {
+                                Article.ArticleType.regular -> MaterialTheme.colorScheme.onTertiary
+                                Article.ArticleType.silver -> MaterialTheme.colorScheme.onSecondary
+                                Article.ArticleType.gold -> MaterialTheme.colorScheme.onPrimary
+                                else -> throw IllegalStateException("Unknown article type")
+                            },
+                            shape = MaterialTheme.shapes.small
+                        )
+                        .padding(horizontal = 4.dp, vertical = 2.dp)
+                )
+            }
         }
-
-        Text(text = article.type.toString())
-
 
         Text(
             text = article.title,
@@ -173,13 +202,21 @@ private fun ArticleItem(
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onBackground,
         )
+
+        Text(
+            text = "readers: ${article.readersCount}",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onBackground,
+        )
     }
 }
 
 @Composable
 @PreviewLightDark
 private fun ArticleScreenPreview() {
-   ExampleTheme() {
+    ExampleTheme() {
         ArticlesScreen(
             navHostController = rememberNavController(),
             articles = Mockup.article.list,

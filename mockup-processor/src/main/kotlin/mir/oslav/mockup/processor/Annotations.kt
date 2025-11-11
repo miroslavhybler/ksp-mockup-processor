@@ -43,11 +43,11 @@ public object Annotations {
     public fun <T : Any> proccessDefAnnotation(
         annotation: KSAnnotation,
     ): List<T> {
-        val array = annotation.arguments.find(predicate = { argument ->
+        val values = annotation.arguments.find(predicate = { argument ->
             argument.name?.asString() == "value"
-        })?.value as? Array<T>
+        })?.value as? List<T>
 
 
-        return array?.toList() ?: emptyList()
+        return values ?: emptyList()
     }
 }

@@ -55,14 +55,12 @@ class SimpleValuesGenerator constructor() {
             type.isLong -> "${Random.nextInt()}"
             type.isDouble -> "${Random.nextDouble()}"
             type.isBoolean -> "${Random.nextBoolean()}"
-            type.isString -> "\"${
-                loremIpsumWords(
-                    wordCount = Random.nextInt(
-                        from = 2,
-                        until = 60
-                    )
+            type.isString -> {
+                generateStringValue(
+                    property = property,
+                    resolvedProperty = resolvedProperty,
                 )
-            }\""
+            }
 
             else -> throw WrongTypeException(expectedType = "Simple", givenType = "$type")
         }
@@ -118,33 +116,46 @@ class SimpleValuesGenerator constructor() {
         property: MockupType.Simple,
         resolvedProperty: ResolvedProperty
     ): String {
-        val annotations = if (resolvedProperty.isInPrimaryConstructorProperty) {
-            resolvedProperty.primaryConstructorDeclaration?.annotations ?: emptySequence()
-        } else property.property.annotations
+        val source = property.source as? MockupType.Simple.Source.FloatNumber
+            ?: throw WrongTypeException(
+                expectedType = "FloatNumber",
+                givenType = "${property.source}"
+            )
 
-        var from = 0f
-        var to = 5000f
-        for (annotation in annotations) {
-            if (annotation.isFloatRange) {
-                val fromArgument = annotation.arguments.find(predicate = { argument ->
-                    argument.name?.asString() == "from"
-                })?.value as? Double
-                val toArgument = annotation.arguments.find(predicate = { argument ->
-                    argument.name?.asString() == "to"
-                })?.value as? Double
+        return when (source) {
+            is MockupType.Simple.Source.FloatNumber.Range -> {
+                val floatValue = Random.nextFloat()
+                "${floatValue}f"
+            }
 
-                if (fromArgument != null) {
-                    from = fromArgument.toFloat()
-                }
-                if (toArgument != null) {
-                    to = toArgument.toFloat()
-                }
-                break
+            is MockupType.Simple.Source.FloatNumber.Random -> {
+                val floatValue = Random.nextFloat()
+                "${floatValue}f"
             }
         }
+    }
 
-        val floatValue = Random.nextFloat()
-            .coerceIn(minimumValue = from, maximumValue = to)
-        return "${floatValue}f"
+
+    fun generateStringValue(
+        property: MockupType.Simple,
+        resolvedProperty: ResolvedProperty
+    ): String {
+        val source = property.source as? MockupType.Simple.Source.Text
+            ?: throw WrongTypeException(
+                expectedType = "Text",
+                givenType = "${property.source}"
+            )
+
+        return when (source) {
+            is MockupType.Simple.Source.Text.Def -> {
+                val stringValue = source.values.random()
+                "\"$stringValue\""
+            }
+
+            is MockupType.Simple.Source.Text.Random -> {
+                val loremIpsum = loremIpsumWords(wordCount = Random.nextInt(from = 2, until = 60))
+                "\"$loremIpsum\""
+            }
+        }
     }
 }

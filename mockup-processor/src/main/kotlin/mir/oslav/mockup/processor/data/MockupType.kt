@@ -91,10 +91,6 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
                  */
                 data class Range constructor(val from: Float, val to: Float) : FloatNumber()
 
-                /**
-                 * @since 1.2.2
-                 */
-                data class Def constructor(val values: List<Float>) : FloatNumber()
 
                 /**
                  * @since 1.2.2
@@ -117,7 +113,7 @@ sealed class MockupType<out D : KSDeclaration> private constructor(
                 /**
                  * @since 1.2.2
                  */
-                data class Random constructor(val length: Int) : Text()
+                data object Random : Text()
             }
 
 

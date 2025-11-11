@@ -185,15 +185,6 @@ class MockupProcessor constructor(
 
         visitor.imports = importsList
 
-        Debugger.write(
-            text = "imports: \n${
-                importsList.joinToString(
-                    transform = { "//$it" },
-                    separator = "\n"
-                )
-            }"
-        )
-
         mockupClassDeclarations.forEach { classDeclaration ->
             visitor.visitClassDeclaration(
                 classDeclaration = classDeclaration,

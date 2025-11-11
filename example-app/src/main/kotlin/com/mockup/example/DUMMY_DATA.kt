@@ -5,6 +5,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.FloatRange
 import androidx.annotation.IntDef
 import androidx.annotation.IntRange
+import androidx.annotation.StringDef
 import com.mockup.annotations.IgnoreOnMockup
 import com.mockup.annotations.Mockup
 import java.text.SimpleDateFormat
@@ -12,7 +13,7 @@ import java.util.Locale
 
 /**
  * @param rating Example usage of FloatRange annotation
- * @param readers Example usage of IntRange annotation, number of people who read the article
+ * @param readersCount Example usage of IntRange annotation, number of people who read the article
  * @author Miroslav Hýbler <br>
  * created on 15.09.2023
  */
@@ -32,8 +33,8 @@ data class Article constructor(
     val type: Int,
     @FloatRange(from = 0.0, to = 5.0)
     val rating: Float,
-    @IntRange(from = 0, to = 10000)
-    val readers: Int,
+    @IntRange(from = 0, to = 5_000)
+    val readersCount: Int,
     val minutesReading: Short,
 ) {
 
@@ -59,10 +60,7 @@ data class Article constructor(
         )
     }
 
-    val createdAtFormatted: String by lazy {
-        val date = dateParser.parse(createdAt)!!
-        dateFormatter.format(date)
-    }
+    val createdAtFormatted: String = dateFormatter.format(dateParser.parse(createdAt)!!)
 
 
     @IntDef(
@@ -70,7 +68,7 @@ data class Article constructor(
         ArticleType.silver,
         ArticleType.gold,
     )
-    @Retention(value = AnnotationRetention.SOURCE)
+    @Retention(value = AnnotationRetention.BINARY)
     @Target(AnnotationTarget.PROPERTY)
     annotation class ArticleType {
         companion object {
@@ -80,10 +78,23 @@ data class Article constructor(
         }
     }
 
+
     @Mockup
     data class GalleryPhoto constructor(
-        val imageUrl: String
+        val imageUrl: String,
+        @PhotoType
+        val type: String,
     ) {
+        @StringDef(
+            PhotoType.REGULAR,
+            PhotoType.HEADER,
+        )
+        annotation class PhotoType {
+            companion object {
+                const val REGULAR: String = "REGULAR"
+                const val HEADER: String = "HEADER"
+            }
+        }
 
     }
 }
@@ -113,6 +124,9 @@ class Publisher constructor() {
     var description: String = ""
     var themeImageUrl: String? = null
     var avatarUrl: String? = null
+
+    @IntRange(from = 0, to = 1_000)
+    var articlesCount: Int = 0
 
     //We want to exclude this because mockup library can't generate it
     @IgnoreOnMockup

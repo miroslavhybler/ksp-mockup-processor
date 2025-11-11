@@ -149,6 +149,16 @@ private fun AuthorDetailScreenContent(
                             Spacer(modifier = Modifier.height(height = 4.dp))
 
                             Text(
+                                text = "${author.articlesCount} articles written 📝",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(horizontal = 12.dp),
+                                maxLines = 10
+                            )
+
+                            Spacer(modifier = Modifier.height(height = 4.dp))
+
+                            Text(
                                 text = author.description,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onBackground,

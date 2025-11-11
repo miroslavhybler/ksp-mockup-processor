@@ -6,10 +6,12 @@ import androidx.annotation.IntRange
 import androidx.annotation.StringDef
 import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
+import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSValueParameter
 import com.google.devtools.ksp.symbol.KSVisitorVoid
 import com.mockup.annotations.IgnoreOnMockup
 import com.mockup.annotations.Mockup
@@ -111,14 +113,6 @@ class MockupVisitor constructor(
                 return@forEach
             }
 
-
-            val propertyType = resolveMockupType(
-                type = type,
-                property = property,
-                name = name,
-                imports = imports,
-            )
-
             val typeQualifiedName = type.declaration.qualifiedName
             val propertyName = property.simpleName
             val primaryConstructorParameter = primaryConstructor?.parameters
@@ -130,6 +124,15 @@ class MockupVisitor constructor(
                 })
 
             val isInsidePrimaryConstructor = primaryConstructorParameter != null
+
+
+            val propertyType = resolveMockupType(
+                type = type,
+                property = property,
+                name = name,
+                imports = imports,
+                primaryConstructorDeclaration = primaryConstructorParameter,
+            )
 
             val resolvedProperty = ResolvedProperty(
                 resolvedType = propertyType,
@@ -215,16 +218,15 @@ class MockupVisitor constructor(
         name: String,
         property: KSPropertyDeclaration,
         imports: List<String>,
+        primaryConstructorDeclaration: KSValueParameter?,
     ): MockupType<*> {
         val declaration = type.declaration
         return when {
             type.isSimpleType -> {
                 val source = provideSourceForSimpleType(
                     type = type,
-                    declaration = declaration,
-                )
-                Debugger.write(
-                    text = "Source for ${property.simpleName.getShortName()}: $source"
+                    propertyDeclaration = property,
+                    primaryConstructorDeclaration = primaryConstructorDeclaration,
                 )
                 MockupType.Simple(
                     name = name,
@@ -259,6 +261,7 @@ class MockupVisitor constructor(
                         name = declaration.simpleName.getShortName(),
                         imports = imports,
                         property = property,
+                        primaryConstructorDeclaration = primaryConstructorDeclaration,
                     ),
                     imports = imports
                 )
@@ -333,71 +336,177 @@ class MockupVisitor constructor(
     }
 
 
+    /**
+     * @since 1.2.2
+     */
     private fun provideSourceForSimpleType(
         type: KSType,
-        declaration: KSDeclaration,
+        propertyDeclaration: KSAnnotated,
+        primaryConstructorDeclaration: KSValueParameter?,
     ): MockupType.Simple.Source<*> {
         return when {
             type.isInt -> {
-                declaration.findAnnotationOrAnnotatedAnnotation(target = IntRange::class)
-                    ?.let { intRangeAnnotation ->
-                        val range = Annotations.processRangeAnnotation(
-                            annotation = intRangeAnnotation,
-                            min = Int.MIN_VALUE,
-                            max = Int.MAX_VALUE,
-                        )
-
-                        return MockupType.Simple.Source.IntNumber.Range(
-                            from = range.first,
-                            to = range.second,
-                        )
-                    }
-
-                declaration.findAnnotationOrAnnotatedAnnotation(target = IntDef::class)
-                    ?.let { intDefAnnotation ->
-                        val possibleValues: List<Int> = Annotations.proccessDefAnnotation(
-                            annotation = intDefAnnotation,
-                        )
-                        return MockupType.Simple.Source.IntNumber.Def(
-                            values = possibleValues
-                        )
-                    }
-
-                return MockupType.Simple.Source.IntNumber.Random
+                getIntSource(
+                    propertyDeclaration = propertyDeclaration,
+                    primaryConstructorDeclaration = primaryConstructorDeclaration,
+                )
             }
 
             type.isFloat -> {
-                declaration.findAnnotationOrAnnotatedAnnotation(target = FloatRange::class)
-                    ?.let { floatRangeAnnotation ->
-                        val range = Annotations.processRangeAnnotation(
-                            annotation = floatRangeAnnotation,
-                            min = Float.MIN_VALUE,
-                            max = Float.MAX_VALUE,
-                        )
-
-                        return MockupType.Simple.Source.FloatNumber.Range(
-                            from = range.first,
-                            to = range.second,
-                        )
-                    }
-                return MockupType.Simple.Source.FloatNumber.Random
+                getFloatSource(
+                    propertyDeclaration = propertyDeclaration,
+                    primaryConstructorDeclaration = primaryConstructorDeclaration,
+                )
             }
 
             type.isString -> {
-                declaration.findAnnotationOrAnnotatedAnnotation(target = StringDef::class)
-                    ?.let { stringDefAnnotation ->
-                        val possibleValues: List<String> = Annotations.proccessDefAnnotation(
-                            annotation = stringDefAnnotation,
-                        )
-                        return MockupType.Simple.Source.Text.Def(
-                            values = possibleValues
-                        )
-                    }
-
-                return MockupType.Simple.Source.Text.Random(length = 10)
+                getStringSource(
+                    propertyDeclaration = propertyDeclaration,
+                    primaryConstructorDeclaration = primaryConstructorDeclaration,
+                )
             }
 
             else -> MockupType.Simple.Source.Random
         }
+    }
+
+
+    /**
+     * @since 1.2.2
+     */
+    private fun getIntSource(
+        propertyDeclaration: KSAnnotated,
+        primaryConstructorDeclaration: KSValueParameter?,
+    ): MockupType.Simple.Source.IntNumber {
+        primaryConstructorDeclaration?.findAnnotationInAnnotationTree(target = IntRange::class)
+            ?.let { intRangeAnnotation ->
+                val range = Annotations.processRangeAnnotation(
+                    annotation = intRangeAnnotation,
+                    min = Int.MIN_VALUE,
+                    max = Int.MAX_VALUE,
+                )
+
+                return MockupType.Simple.Source.IntNumber.Range(
+                    from = range.first,
+                    to = range.second,
+                )
+            }
+        propertyDeclaration.findAnnotationInAnnotationTree(target = IntRange::class)
+            ?.let { intRangeAnnotation ->
+                val range = Annotations.processRangeAnnotation(
+                    annotation = intRangeAnnotation,
+                    min = Int.MIN_VALUE,
+                    max = Int.MAX_VALUE,
+                )
+
+                return MockupType.Simple.Source.IntNumber.Range(
+                    from = range.first,
+                    to = range.second,
+                )
+            }
+        primaryConstructorDeclaration?.findAnnotationInAnnotationTree(target = IntDef::class)
+            ?.let { intRangeAnnotation ->
+                val range = Annotations.processRangeAnnotation(
+                    annotation = intRangeAnnotation,
+                    min = Int.MIN_VALUE,
+                    max = Int.MAX_VALUE,
+                )
+
+                return MockupType.Simple.Source.IntNumber.Range(
+                    from = range.first,
+                    to = range.second,
+                )
+            }
+        propertyDeclaration.findAnnotationInAnnotationTree(target = IntDef::class)
+            ?.let { intDefAnnotation ->
+                val possibleValues: List<Int> = Annotations.proccessDefAnnotation(
+                    annotation = intDefAnnotation,
+                )
+                return if (possibleValues.isNotEmpty()) {
+                    MockupType.Simple.Source.IntNumber.Def(
+                        values = possibleValues
+                    )
+                } else {
+                    MockupType.Simple.Source.IntNumber.Random
+                }
+            }
+
+        return MockupType.Simple.Source.IntNumber.Random
+    }
+
+
+    /**
+     * @since 1.2.2
+     */
+    private fun getFloatSource(
+        propertyDeclaration: KSAnnotated,
+        primaryConstructorDeclaration: KSValueParameter?,
+    ): MockupType.Simple.Source.FloatNumber {
+        primaryConstructorDeclaration?.findAnnotationInAnnotationTree(target = FloatRange::class)
+            ?.let { floatRangeAnnotation ->
+                val range = Annotations.processRangeAnnotation(
+                    annotation = floatRangeAnnotation,
+                    min = Float.MIN_VALUE,
+                    max = Float.MAX_VALUE,
+                )
+
+                return MockupType.Simple.Source.FloatNumber.Range(
+                    from = range.first,
+                    to = range.second,
+                )
+            }
+        propertyDeclaration.findAnnotationInAnnotationTree(target = FloatRange::class)
+            ?.let { floatRangeAnnotation ->
+                val range = Annotations.processRangeAnnotation(
+                    annotation = floatRangeAnnotation,
+                    min = Float.MIN_VALUE,
+                    max = Float.MAX_VALUE,
+                )
+
+                return MockupType.Simple.Source.FloatNumber.Range(
+                    from = range.first,
+                    to = range.second,
+                )
+            }
+        return MockupType.Simple.Source.FloatNumber.Random
+    }
+
+
+    /**
+     * @since 1.2.2
+     */
+    private fun getStringSource(
+        propertyDeclaration: KSAnnotated,
+        primaryConstructorDeclaration: KSValueParameter?,
+    ): MockupType.Simple.Source.Text {
+        primaryConstructorDeclaration?.findAnnotationInAnnotationTree(target = StringDef::class)
+            ?.let { stringDefAnnotation ->
+                val possibleValues: List<String> = Annotations.proccessDefAnnotation(
+                    annotation = stringDefAnnotation,
+                )
+                return if (possibleValues.isNotEmpty()) {
+                    MockupType.Simple.Source.Text.Def(
+                        values = possibleValues
+                    )
+                } else {
+                    MockupType.Simple.Source.Text.Random
+                }
+            }
+
+        propertyDeclaration.findAnnotationInAnnotationTree(target = StringDef::class)
+            ?.let { stringDefAnnotation ->
+                val possibleValues: List<String> = Annotations.proccessDefAnnotation(
+                    annotation = stringDefAnnotation,
+                )
+                return if (possibleValues.isNotEmpty()) {
+                    MockupType.Simple.Source.Text.Def(
+                        values = possibleValues
+                    )
+                } else {
+                    MockupType.Simple.Source.Text.Random
+                }
+            }
+
+        return MockupType.Simple.Source.Text.Random
     }
 }

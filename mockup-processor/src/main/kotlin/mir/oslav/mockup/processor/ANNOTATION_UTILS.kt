@@ -2,7 +2,7 @@ package mir.oslav.mockup.processor
 
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSAnnotation
-import com.google.devtools.ksp.symbol.KSDeclaration
+import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import kotlin.reflect.KClass
 
 
@@ -12,38 +12,50 @@ import kotlin.reflect.KClass
  * created on 25.10.2025
  * @since 1.2.2
  */
-fun KSDeclaration.findAnnotationOrAnnotatedAnnotation(
+fun KSAnnotated.findAnnotationInAnnotationTree(
     target: KClass<*>,
 ): KSAnnotation? {
-    if (this.isAnnotatedWith(target = target)) {
-        return findAnnotation(target = target)
+    if (this.annotations.count() == 0) {
+        return null
     }
 
-    val targetAnnotation = this.annotations.find(predicate = { annotation ->
-        annotation.isAnnotatedWith(target = target)
-    })
+    val firstLevelAnnotation = this.annotations
+        .find(predicate = { annotation ->
+            annotation.isInstanceOf(target = target)
+        })
+
+    if (firstLevelAnnotation != null) {
+        //This property is annotated by target itself
+        return firstLevelAnnotation
+    }
+
+    //This is annotation that is annotated by the target
+    val annotated: KSAnnotation = this.annotations
+        .find(
+            predicate = { annotation ->
+                annotation.isAnnotatedWith(target = target)
+            }
+        ) ?: return null
+
+    //Resolved annotation type
+    val annotatedType = annotated.annotationType.resolve()
+    //Actual declaration of the annotation holding the annotations of the found annotation
+    val annotatedDeclaration = annotatedType.declaration
+
+    val targetAnnotation = annotatedDeclaration.findAnnotationInstance(target = target)
     return targetAnnotation
 }
 
 
 /**
+ * Tries to find annotation by [target] in [KSAnnotated.annotations].
  * @since 1.2.2
  */
-fun KSAnnotated.isAnnotatedWith(target: KClass<*>): Boolean {
-    return this.annotations.any(predicate = { annotation ->
-        return annotation.isAnnotatedWith(target = target)
-    })
-}
-
-
-/**
- * @since 1.2.2
- */
-fun KSAnnotated.findAnnotation(
+fun KSAnnotated.findAnnotationInstance(
     target: KClass<*>,
 ): KSAnnotation? {
     return this.annotations.find(predicate = { annotation ->
-        annotation.isAnnotatedWith(target = target)
+        annotation.isInstanceOf(target = target)
     })
 }
 
@@ -58,10 +70,18 @@ fun KSAnnotation.isAnnotatedWith(
     val annotationDeclaration = annotationType.declaration
 
     return annotationDeclaration.annotations.any(
-        predicate = { metaAnnotation ->
-            val qualifiedName = metaAnnotation.annotationType.resolve()
-                .declaration.qualifiedName?.asString()
-            qualifiedName == target.qualifiedName
+        predicate = { annotation ->
+            annotation.isInstanceOf(target = target)
         }
     )
+}
+
+
+/**
+ * @since 1.2.2
+ */
+fun KSAnnotation.isInstanceOf(target: KClass<*>): Boolean {
+    val qualifiedName = this.annotationType.resolve()
+        .declaration.qualifiedName?.asString()
+    return qualifiedName == target.qualifiedName
 }
