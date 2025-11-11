@@ -103,3 +103,10 @@ private fun UserScreen(
 
 ### Used resources
 🏞 Images for previews taken from [Pixabay](https://www.pixabay.com/).
+
+### Debugging
+Run this in terminal
+```
+./gradlew :example-app:build --no-daemon -Dorg.gradle.debug=true -Dkotlin.compiler.execution.strategy=in-process
+```
+Then run **Remote JVM Debug** configuration (attach to remote JVM) on localhost port 5005 with classpath on ksp-mockup.mockup-processor
